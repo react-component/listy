@@ -1,18 +1,29 @@
 import * as React from "react";
+import { ScrollTo } from "rc-virtual-list/lib/List";
 
-export type ListyProps<T> = {
-  items: T[];
-  sticky?: boolean;
-  height: number;
-  rowKey: string | ((item: T) => string);
-  itemRender: (item: T) => React.ReactNode;
-  groupRender: {
+export interface ListyRef {
+  scrollTo: ScrollTo;
+}
 
-  };
-  onScrollEnd: (lastIndex: number) => void;
-};
+export interface ListyGroupRender<T> {
+  groupKey: string | ((item: T) => string | number);
+  renderTitle: (
+    groupKey: string | number,
+    items: T[]
+  ) => React.ReactNode;
+}
 
-export type ListyItemProps<T> = {
+export interface ListyItemProps<T> {
   item: T;
   index: number;
-};
+}
+
+export interface ListyProps<T> {
+  items?: T[];
+  sticky?: boolean;
+  height?: number;
+  rowKey?: string | ((item: T) => string);
+  itemRender: (item: T, index: number) => React.ReactNode;
+  groupRender?: ListyGroupRender<T>;
+  onScrollEnd?: () => void;
+}
