@@ -1,7 +1,7 @@
 ---
 hero:
-  title: rc-trigger
-  description: React Trigger Component
+  title: rc-listy
+  description: React Listy Component
 ---
 
 <embed src="../README.md"></embed>

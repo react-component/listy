@@ -1,6 +1,6 @@
-# @rc-component/trigger
+# @rc-component/Listy
 
-React Trigger Component
+React Listy Component
 
 [![NPM version][npm-image]][npm-url]
 [![npm download][download-image]][download-url]
@@ -9,30 +9,30 @@ React Trigger Component
 [![bundle size][bundlephobia-image]][bundlephobia-url]
 [![dumi][dumi-image]][dumi-url]
 
-[npm-image]: http://img.shields.io/npm/v/@rc-component/trigger.svg?style=flat-square
-[npm-url]: http://npmjs.org/package/@rc-component/trigger
-[github-actions-image]: https://github.com/react-component/trigger/workflows/CI/badge.svg
-[github-actions-url]: https://github.com/react-component/trigger/actions
-[codecov-image]: https://img.shields.io/codecov/c/github/react-component/trigger/master.svg?style=flat-square
-[codecov-url]: https://codecov.io/gh/react-component/trigger/branch/master
-[david-url]: https://david-dm.org/react-component/trigger
-[david-image]: https://david-dm.org/react-component/trigger/status.svg?style=flat-square
-[david-dev-url]: https://david-dm.org/react-component/trigger?type=dev
-[david-dev-image]: https://david-dm.org/react-component/trigger/dev-status.svg?style=flat-square
-[download-image]: https://img.shields.io/npm/dm/@rc-component/trigger.svg?style=flat-square
-[download-url]: https://npmjs.org/package/@rc-component/trigger
-[bundlephobia-url]: https://bundlephobia.com/result?p=@rc-component/trigger
-[bundlephobia-image]: https://badgen.net/bundlephobia/minzip/@rc-component/trigger
+[npm-image]: http://img.shields.io/npm/v/@rc-component/listy.svg?style=flat-square
+[npm-url]: http://npmjs.org/package/@rc-component/listy
+[github-actions-image]: https://github.com/react-component/listy/workflows/CI/badge.svg
+[github-actions-url]: https://github.com/react-component/listy/actions
+[codecov-image]: https://img.shields.io/codecov/c/github/react-component/listy/master.svg?style=flat-square
+[codecov-url]: https://codecov.io/gh/react-component/listy/branch/master
+[david-url]: https://david-dm.org/react-component/listy
+[david-image]: https://david-dm.org/react-component/listy/status.svg?style=flat-square
+[david-dev-url]: https://david-dm.org/react-component/listy?type=dev
+[david-dev-image]: https://david-dm.org/react-component/listy/dev-status.svg?style=flat-square
+[download-image]: https://img.shields.io/npm/dm/@rc-component/listy.svg?style=flat-square
+[download-url]: https://npmjs.org/package/@rc-component/listy
+[bundlephobia-url]: https://bundlephobia.com/result?p=@rc-component/listy
+[bundlephobia-image]: https://badgen.net/bundlephobia/minzip/@rc-component/listy
 [dumi-image]: https://img.shields.io/badge/docs%20by-dumi-blue?style=flat-square
 [dumi-url]: https://github.com/umijs/dumi
 
 ## Install
 
-[![@rc-component/trigger](https://nodei.co/npm/@rc-component/trigger.png)](https://npmjs.org/package/@rc-component/trigger)
+[![@rc-component/listy](https://nodei.co/npm/@rc-component/listy.png)](https://npmjs.org/package/@rc-component/listy)
 
 ## Usage
 
-Include the default [styling](https://github.com/react-component/trigger/blob/master/assets/index.less#L4:L11) and then:
+Include the default [styling](https://github.com/react-component/listy/blob/master/assets/index.less#L4:L11) and then:
 
 ```js
 import React from 'react';
