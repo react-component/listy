@@ -1,4 +1,4 @@
-import classNames from 'classnames';
+import { clsx } from 'clsx';
 import type { CSSMotionProps } from '@rc-component/motion';
 import CSSMotion from '@rc-component/motion';
 import ResizeObserver from '@rc-component/resize-observer';
@@ -270,7 +270,7 @@ const Popup = React.forwardRef<HTMLDivElement, PopupProps>((props, ref) => {
                 { className: motionClassName, style: motionStyle },
                 motionRef,
               ) => {
-                const cls = classNames(prefixCls, motionClassName, className, {
+                const cls = clsx(prefixCls, motionClassName, className, {
                   [`${prefixCls}-mobile`]: isMobile,
                 });
 
