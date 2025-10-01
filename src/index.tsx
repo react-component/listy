@@ -1,5 +1,5 @@
 import Portal from '@rc-component/portal';
-import classNames from 'classnames';
+import { clsx } from 'clsx';
 import type { CSSMotionProps } from '@rc-component/motion';
 import ResizeObserver from '@rc-component/resize-observer';
 import { isDOM } from '@rc-component/util/lib/Dom/findDOMNode';
@@ -198,6 +198,7 @@ export function generateTrigger(
     const subPopupElements = React.useRef<Record<string, HTMLElement>>({});
 
     const parentContext = React.useContext(TriggerContext);
+
     const context = React.useMemo<TriggerContextProps>(() => {
       return {
         registerSubPopup: (id, subPopupEle) => {
@@ -427,7 +428,7 @@ export function generateTrigger(
         alignPoint,
       );
 
-      return classNames(baseClassName, getPopupClassNameFromAlign?.(alignInfo));
+      return clsx(baseClassName, getPopupClassNameFromAlign?.(alignInfo));
     }, [
       alignInfo,
       getPopupClassNameFromAlign,
@@ -727,10 +728,7 @@ export function generateTrigger(
               ref={setPopupRef}
               prefixCls={prefixCls}
               popup={popup}
-              className={classNames(
-                popupClassName,
-                !isMobile && alignedClassName,
-              )}
+              className={clsx(popupClassName, !isMobile && alignedClassName)}
               style={popupStyle}
               target={targetEle}
               onMouseEnter={onPopupMouseEnter}
