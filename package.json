@@ -46,8 +46,8 @@
     "@rc-component/portal": "^2.0.0",
     "@rc-component/resize-observer": "^1.0.0",
     "@rc-component/util": "^1.2.1",
-    "rc-virtual-list": "^3.0.0",
-    "classnames": "^2.3.2"
+    "classnames": "^2.3.2",
+    "rc-virtual-list": "^3.0.0"
   },
   "devDependencies": {
     "@rc-component/father-plugin": "^2.0.0",
@@ -70,7 +70,7 @@
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "regenerator-runtime": "^0.14.0",
-    "typescript": "~5.1.6"
+    "typescript": "^5.9.2"
   },
   "peerDependencies": {
     "react": ">=18.0.0",

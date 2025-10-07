@@ -5,10 +5,10 @@ export interface ListyRef {
   scrollTo: ScrollTo;
 }
 
-export interface ListyGroupRender<T> {
-  groupKey: string | ((item: T) => string | number);
-  renderTitle: (
-    groupKey: string | number,
+export interface Group<T> {
+  key: React.Key | ((item: T) => React.Key);
+  title: (
+    groupKey: React.Key,
     items: T[]
   ) => React.ReactNode;
 }
@@ -21,9 +21,12 @@ export interface ListyItemProps<T> {
 export interface ListyProps<T> {
   items?: T[];
   sticky?: boolean;
+  itemHeight?: number;
   height?: number;
-  rowKey?: string | ((item: T) => string);
+  rowKey?: ((item: T) => React.Key) | Extract<keyof T, React.Key>;
+  group?: Group<T>;
+  virtual?: boolean;
+  onStartReached?: () => void;
+  onEndReached?: () => void;
   itemRender: (item: T, index: number) => React.ReactNode;
-  groupRender?: ListyGroupRender<T>;
-  onScrollEnd?: () => void;
 }
