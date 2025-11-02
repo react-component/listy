@@ -26,7 +26,7 @@ export interface ListyProps<T> {
   rowKey?: ((item: T) => React.Key) | Extract<keyof T, React.Key>;
   group?: Group<T>;
   virtual?: boolean;
-  onStartReached?: () => void;
   onEndReached?: () => void;
+  onEndReachedOffset?: number;
   itemRender: (item: T, index: number) => React.ReactNode;
 }

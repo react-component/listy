@@ -12,6 +12,7 @@
       "@/*": ["src/*"],
       "@@/*": [".dumi/tmp/*"],
       "@rc-component/listy": ["src/index.ts"]
-    }
+    },
+    "types": ["@testing-library/jest-dom"]
   }
 }

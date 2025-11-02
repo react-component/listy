@@ -9,7 +9,7 @@ export default () => {
     return {
       id: index + 1,
       name: `${index} (group ${groupIndex})`,
-      type: `Group ${groupIndex * groupItemsCount} - ${groupIndex * groupItemsCount + groupItemsCount}`,
+      type: `Group ${groupIndex * groupItemsCount}`,
     };
   });
 
@@ -17,7 +17,7 @@ export default () => {
     padding: '0 12px',
     height: 32,
     lineHeight: '32px',
-    borderBottom: '1px solid #f5f5f5',
+    borderBottom: '1px solid rgb(79, 53, 53)',
   };
 
   return (
@@ -27,18 +27,28 @@ export default () => {
         itemHeight={32}
         items={items}
         itemRender={(item, index) => {
-          return (
-            <div>
-              <div style={itemStyle}>{item.name}</div>
-            </div>
-          );
+          return <div style={{ ...itemStyle,height:  30 + (index % 2 ? -3 : 10) }}>{item.name}</div>;
         }}
+        // virtual={false}
         rowKey="id"
         ref={listRef}
         sticky
         group={{
           key: (item) => item.type,
-          title: (groupKey, groupItems) => <div style={{ fontWeight: 600,padding: '0 12px',height: 32,lineHeight: '32px' }}>{groupKey}</div>,
+          title: (groupKey, groupItems) => (
+            <div
+              style={{
+                fontWeight: 600,
+                padding: '0 12px',
+                height: 32,
+                lineHeight: '32px',
+                borderBottom: '1px solid #f5f5f5',
+                backgroundColor: 'gray',
+              }}
+            >
+              {groupKey}------{groupItems.length}
+            </div>
+          ),
         }}
       />
 
