@@ -10,10 +10,11 @@ export interface StickyHeaderParams<T> {
   groupKeyToSeg: Map<React.Key, { startIndex: number; endIndex: number }>;
   items: T[];
   containerRef: React.RefObject<HTMLDivElement>;
+  prefixCls: string;
 }
 
 export function useStickyGroupHeader<T>(params: StickyHeaderParams<T>) {
-  const { enabled, group, headerRows, groupKeyToSeg, items, containerRef } = params;
+  const { enabled, group, headerRows, groupKeyToSeg, items, containerRef, prefixCls } = params;
 
   const extraRender = React.useCallback(
     (info: ExtraRenderInfo) => {
@@ -34,16 +35,7 @@ export function useStickyGroupHeader<T>(params: StickyHeaderParams<T>) {
       const groupItems = seg ? items.slice(seg.startIndex, seg.endIndex + 1) : [];
 
       const headerNode = (
-        <div
-          style={{
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            right: 0,
-            transform: 'translateY(0)',
-            backgroundColor: '#fff',
-          }}
-        >
+        <div className={`${prefixCls}-sticky-header`}>
           {group.title(currHeader.groupKey, groupItems)}
         </div>
       );
@@ -54,7 +46,7 @@ export function useStickyGroupHeader<T>(params: StickyHeaderParams<T>) {
         </Portal>
       );
     },
-    [enabled, group, headerRows, groupKeyToSeg, items, containerRef],
+    [enabled, group, headerRows, groupKeyToSeg, items, containerRef, prefixCls],
   );
 
   return extraRender;

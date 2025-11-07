@@ -27,6 +27,6 @@ export interface ListyProps<T> {
   group?: Group<T>;
   virtual?: boolean;
   onEndReached?: () => void;
-  onEndReachedOffset?: number;
   itemRender: (item: T, index: number) => React.ReactNode;
+  prefixCls?: string;
 }

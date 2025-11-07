@@ -2,9 +2,6 @@
   "name": "@rc-component/listy",
   "version": "1.0.0",
   "description": "React Listy Component",
-  "engines": {
-    "node": ">=8.x"
-  },
   "keywords": [
     "react",
     "react-component",
@@ -12,7 +9,7 @@
     "high performance",
     "headless ui"
   ],
-  "homepage": "https://github.com/react-component/trigger",
+  "homepage": "https://github.com/react-component/listy",
   "author": "",
   "repository": {
     "type": "git",

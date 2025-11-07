@@ -1,5 +1,6 @@
 import React, { useRef } from 'react';
 import Listy, { type ListyRef } from '@rc-component/listy';
+import '../../assets/index.less';
 
 export default () => {
   const listRef = useRef<ListyRef>(null);

@@ -13,12 +13,12 @@ function Listy<T>(props: ListyProps<T>, ref: React.Ref<ListyRef>) {
     itemRender,
     group,
     onEndReached,
-    onEndReachedOffset,
     rowKey,
     height,
     itemHeight,
     sticky,
     virtual = true,
+    prefixCls = 'rc-listy',
   } = props;
 
   const data = items || [];
@@ -34,7 +34,7 @@ function Listy<T>(props: ListyProps<T>, ref: React.Ref<ListyRef>) {
 
   const getItemKey = React.useCallback(
     (item: T): React.Key => {
-      if (!rowKey) return undefined as unknown as React.Key;
+      if (!rowKey) return undefined;
       if (typeof rowKey === 'function') return rowKey(item);
       return (item as any)[rowKey];
     },
@@ -44,12 +44,16 @@ function Listy<T>(props: ListyProps<T>, ref: React.Ref<ListyRef>) {
   const groupSegments = useGroupSegments<T>(data, group);
 
   // ======================= Flatten rows (header + item) =======================
-  const { rows, headerRows, groupKeyToSeg } = useFlattenRows<T>(data, group, groupSegments);
+  const { rows, headerRows, groupKeyToSeg } = useFlattenRows<T>(
+    data,
+    group,
+    groupSegments,
+  );
 
   const getRowKey = React.useCallback(
     (row: Row<T>): React.Key => {
       if (row.type === 'header') {
-        return `${String(row.groupKey)}`;
+        return row.groupKey;
       }
       return getItemKey(row.item);
     },
@@ -64,6 +68,7 @@ function Listy<T>(props: ListyProps<T>, ref: React.Ref<ListyRef>) {
     groupKeyToSeg,
     items: data,
     containerRef,
+    prefixCls,
   });
 
   // Pre-compute each group's items to simplify header rendering
@@ -80,24 +85,22 @@ function Listy<T>(props: ListyProps<T>, ref: React.Ref<ListyRef>) {
     (groupKey: React.Key) => {
       const groupItems = groupKeyToItems.get(groupKey) || [];
       return (
-        <div style={{ backgroundColor: '#fff' }}>
+        <div className={`${prefixCls}-group-header`}>
           {group.title(groupKey, groupItems)}
         </div>
       );
     },
-    [group, groupKeyToItems],
+    [group, groupKeyToItems, prefixCls],
   );
 
-  // onEndReached via native onScroll with px offset
   const handleOnScroll = useOnEndReached({
     enabled: !!onEndReached,
-    offsetPx: onEndReachedOffset ?? 0,
     onEndReached,
     containerRef,
   });
 
   return (
-    <div ref={containerRef} style={{ position: 'relative' }}>
+    <div ref={containerRef} className={prefixCls}>
       <VirtualList
         virtual={virtual}
         ref={listRef}
@@ -107,12 +110,13 @@ function Listy<T>(props: ListyProps<T>, ref: React.Ref<ListyRef>) {
         itemKey={getRowKey}
         height={height}
         extraRender={extraRender}
-        onScroll={handleOnScroll as any}
+        onScroll={handleOnScroll}
       >
         {(row: Row<T>) =>
           row.type === 'header'
             ? renderHeaderRow(row.groupKey)
-            : itemRender(row.item, row.index)}
+            : itemRender(row.item, row.index)
+        }
       </VirtualList>
     </div>
   );

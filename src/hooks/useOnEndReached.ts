@@ -2,20 +2,18 @@ import * as React from 'react';
 
 export interface UseOnEndReachedParams {
   enabled: boolean;
-  offsetPx?: number;
   onEndReached?: () => void;
   containerRef?: React.RefObject<HTMLElement>;
 }
 
 export function useOnEndReached(params: UseOnEndReachedParams) {
-  const { enabled, offsetPx = 0, onEndReached, containerRef } = params;
+  const { enabled, onEndReached, containerRef } = params;
 
   const hasReachedRef = React.useRef(false);
 
   const onScroll = React.useCallback<React.UIEventHandler<HTMLElement>>(
     (e) => {
-      const target = (e?.currentTarget as HTMLElement) || containerRef?.current;
-      if (!target) return;
+      const target = e.currentTarget;
 
       const { scrollTop, clientHeight, scrollHeight } = target;
       const distanceToBottom = scrollHeight - (scrollTop + clientHeight);
@@ -25,7 +23,7 @@ export function useOnEndReached(params: UseOnEndReachedParams) {
         return;
       }
 
-      if (distanceToBottom <= offsetPx) {
+      if (distanceToBottom <= 0) {
         if (!hasReachedRef.current) {
           hasReachedRef.current = true;
           onEndReached();
@@ -34,12 +32,10 @@ export function useOnEndReached(params: UseOnEndReachedParams) {
         hasReachedRef.current = false;
       }
     },
-    [enabled, offsetPx, onEndReached, containerRef],
+    [enabled, onEndReached],
   );
 
   return onScroll;
 }
 
 export default useOnEndReached;
-
-
