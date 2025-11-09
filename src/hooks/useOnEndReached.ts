@@ -4,36 +4,31 @@ import { useEvent } from '@rc-component/util';
 export interface UseOnEndReachedParams {
   enabled: boolean;
   onEndReached?: () => void;
-  containerRef?: React.RefObject<HTMLElement>;
 }
 
 export function useOnEndReached(params: UseOnEndReachedParams) {
   const { enabled, onEndReached } = params;
 
-  const hasReachedRef = React.useRef(false);
+  const lastTriggeredScrollHeightRef = React.useRef<number>(null);
 
-  const onScroll = useEvent<React.UIEventHandler<HTMLElement>>(
-    (e) => {
-      const target = e.currentTarget;
+  const onScroll = useEvent<React.UIEventHandler<HTMLElement>>((e) => {
+    if (!enabled) {
+      lastTriggeredScrollHeightRef.current = null;
+      return;
+    }
 
-      const { scrollTop, clientHeight, scrollHeight } = target;
-      const distanceToBottom = scrollHeight - (scrollTop + clientHeight);
+    const target = e.currentTarget;
 
-      if (!enabled || !onEndReached) {
-        hasReachedRef.current = false;
-        return;
-      }
+    const { scrollTop, clientHeight, scrollHeight } = target;
+    const distanceToBottom = scrollHeight - (scrollTop + clientHeight);
 
-      if (distanceToBottom <= 0) {
-        if (!hasReachedRef.current) {
-          hasReachedRef.current = true;
-          onEndReached();
-        }
-      } else {
-        hasReachedRef.current = false;
+    if (distanceToBottom <= 0) {
+      if (lastTriggeredScrollHeightRef.current !== scrollHeight) {
+        onEndReached();
+        lastTriggeredScrollHeightRef.current = scrollHeight;
       }
     }
-  );
+  });
 
   return onScroll;
 }

@@ -103,7 +103,6 @@ function Listy<T>(props: ListyProps<T>, ref: React.Ref<ListyRef>) {
   const handleOnScroll = useOnEndReached({
     enabled: !!onEndReached,
     onEndReached,
-    containerRef,
   });
 
   return (

@@ -65,7 +65,7 @@ export default () => {
       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
         <button
           onClick={() =>
-            listRef.current?.scrollTo({ key: Math.max(1, items.length - 10), align: 'top' })
+            listRef.current?.scrollTo({ key: Math.max(1, items.length - 1), align: 'top' })
           }
         >
           Scroll To Near End
