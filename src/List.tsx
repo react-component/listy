@@ -34,9 +34,14 @@ function Listy<T>(props: ListyProps<T>, ref: React.Ref<ListyRef>) {
 
   const getItemKey = React.useCallback(
     (item: T): React.Key => {
-      if (!rowKey) return undefined;
-      if (typeof rowKey === 'function') return rowKey(item);
-      return (item as any)[rowKey];
+      if (!rowKey) {
+        return undefined;
+      }
+      if (typeof rowKey === 'function') {
+        return rowKey(item);
+      }
+      // @ts-ignore
+      return item[rowKey];
     },
     [rowKey],
   );
@@ -74,7 +79,9 @@ function Listy<T>(props: ListyProps<T>, ref: React.Ref<ListyRef>) {
   // Pre-compute each group's items to simplify header rendering
   const groupKeyToItems = React.useMemo(() => {
     const map = new Map<React.Key, T[]>();
-    if (!group) return map;
+    if (!group) {
+      return map;
+    }
     groupKeyToSeg.forEach(({ startIndex, endIndex }, key) => {
       map.set(key, data.slice(startIndex, endIndex + 1));
     });

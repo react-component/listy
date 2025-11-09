@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { useEvent } from '@rc-component/util';
 
 export interface UseOnEndReachedParams {
   enabled: boolean;
@@ -11,7 +12,7 @@ export function useOnEndReached(params: UseOnEndReachedParams) {
 
   const hasReachedRef = React.useRef(false);
 
-  const onScroll = React.useCallback<React.UIEventHandler<HTMLElement>>(
+  const onScroll = useEvent<React.UIEventHandler<HTMLElement>>(
     (e) => {
       const target = e.currentTarget;
 
@@ -31,8 +32,7 @@ export function useOnEndReached(params: UseOnEndReachedParams) {
       } else {
         hasReachedRef.current = false;
       }
-    },
-    [enabled, onEndReached],
+    }
   );
 
   return onScroll;
