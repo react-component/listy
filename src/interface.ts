@@ -1,5 +1,5 @@
-import * as React from "react";
-import { ScrollTo } from "rc-virtual-list/lib/List";
+import * as React from 'react';
+import { ScrollTo } from 'rc-virtual-list/lib/List';
 
 export interface ListyRef {
   scrollTo: ScrollTo;
@@ -7,10 +7,7 @@ export interface ListyRef {
 
 export interface Group<T> {
   key: React.Key | ((item: T) => React.Key);
-  title: (
-    groupKey: React.Key,
-    items: T[]
-  ) => React.ReactNode;
+  title: (groupKey: React.Key, items: T[]) => React.ReactNode;
 }
 
 export interface ListyItemProps<T> {

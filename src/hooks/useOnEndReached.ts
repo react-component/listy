@@ -7,7 +7,7 @@ export interface UseOnEndReachedParams {
 }
 
 export function useOnEndReached(params: UseOnEndReachedParams) {
-  const { enabled, onEndReached, containerRef } = params;
+  const { enabled, onEndReached } = params;
 
   const hasReachedRef = React.useRef(false);
 

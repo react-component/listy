@@ -7,9 +7,14 @@ export interface GroupSegment {
   endIndex: number;
 }
 
-export function useGroupSegments<T>(items: T[], group?: Group<T>): GroupSegment[] {
+export function useGroupSegments<T>(
+  items: T[],
+  group?: Group<T>,
+): GroupSegment[] {
   return React.useMemo(() => {
-    if (!group || !items?.length) return [] as GroupSegment[];
+    if (!group || !items?.length) {
+      return [];
+    }
 
     const segments: GroupSegment[] = [];
     let currentKey: React.Key | null = null;
@@ -24,14 +29,22 @@ export function useGroupSegments<T>(items: T[], group?: Group<T>): GroupSegment[
         currentKey = gk;
         currentStart = i;
       } else if (gk !== currentKey) {
-        segments.push({ key: currentKey, startIndex: currentStart, endIndex: i - 1 });
+        segments.push({
+          key: currentKey,
+          startIndex: currentStart,
+          endIndex: i - 1,
+        });
         currentKey = gk;
         currentStart = i;
       }
     }
 
     if (currentKey !== null) {
-      segments.push({ key: currentKey, startIndex: currentStart, endIndex: items.length - 1 });
+      segments.push({
+        key: currentKey,
+        startIndex: currentStart,
+        endIndex: items.length - 1,
+      });
     }
 
     return segments;
@@ -39,5 +52,3 @@ export function useGroupSegments<T>(items: T[], group?: Group<T>): GroupSegment[
 }
 
 export default useGroupSegments;
-
-

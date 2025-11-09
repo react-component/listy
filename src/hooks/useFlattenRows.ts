@@ -20,7 +20,10 @@ export function useFlattenRows<T>(
   return React.useMemo(() => {
     const flatRows: Row<T>[] = [];
     const headerRows: Array<{ groupKey: React.Key; rowIndex: number }> = [];
-    const groupKeyToSeg = new Map<React.Key, { startIndex: number; endIndex: number }>();
+    const groupKeyToSeg = new Map<
+      React.Key,
+      { startIndex: number; endIndex: number }
+    >();
 
     if (!group || !segments.length) {
       for (let i = 0; i < items.length; i += 1) {
@@ -31,7 +34,10 @@ export function useFlattenRows<T>(
 
     for (let s = 0; s < segments.length; s += 1) {
       const seg = segments[s];
-      groupKeyToSeg.set(seg.key, { startIndex: seg.startIndex, endIndex: seg.endIndex });
+      groupKeyToSeg.set(seg.key, {
+        startIndex: seg.startIndex,
+        endIndex: seg.endIndex,
+      });
 
       headerRows.push({ groupKey: seg.key, rowIndex: flatRows.length });
       flatRows.push({ type: 'header', groupKey: seg.key });
@@ -46,5 +52,3 @@ export function useFlattenRows<T>(
 }
 
 export default useFlattenRows;
-
-

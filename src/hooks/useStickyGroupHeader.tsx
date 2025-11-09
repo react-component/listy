@@ -14,7 +14,15 @@ export interface StickyHeaderParams<T> {
 }
 
 export function useStickyGroupHeader<T>(params: StickyHeaderParams<T>) {
-  const { enabled, group, headerRows, groupKeyToSeg, items, containerRef, prefixCls } = params;
+  const {
+    enabled,
+    group,
+    headerRows,
+    groupKeyToSeg,
+    items,
+    containerRef,
+    prefixCls,
+  } = params;
 
   const extraRender = React.useCallback(
     (info: ExtraRenderInfo) => {
@@ -26,13 +34,18 @@ export function useStickyGroupHeader<T>(params: StickyHeaderParams<T>) {
 
       let currHeaderIdx = 0;
       for (let i = 0; i < headerRows.length; i += 1) {
-        if (headerRows[i].rowIndex <= start) currHeaderIdx = i;
-        else break;
+        if (headerRows[i].rowIndex <= start) {
+          currHeaderIdx = i;
+        } else {
+          break;
+        }
       }
 
       const currHeader = headerRows[currHeaderIdx];
       const seg = groupKeyToSeg.get(currHeader.groupKey);
-      const groupItems = seg ? items.slice(seg.startIndex, seg.endIndex + 1) : [];
+      const groupItems = seg
+        ? items.slice(seg.startIndex, seg.endIndex + 1)
+        : [];
 
       const headerNode = (
         <div className={`${prefixCls}-sticky-header`}>
@@ -53,5 +66,3 @@ export function useStickyGroupHeader<T>(params: StickyHeaderParams<T>) {
 }
 
 export default useStickyGroupHeader;
-
-
