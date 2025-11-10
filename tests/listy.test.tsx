@@ -4,7 +4,7 @@ import { render, screen } from "@testing-library/react";
 
 describe("Listy", () => {
   it("should render", () => {
-    render(<Listy items={[{ id: 1 }]} itemRender={(item) => <div>{item.id}</div>} />);
+    render(<Listy items={[{ id: 1 }]} rowKey="id" itemRender={(item) => <div>{item.id}</div>} />);
     expect(screen.getByText("1")).toBeInTheDocument();
   });
 });
