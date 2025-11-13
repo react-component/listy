@@ -2,8 +2,8 @@ import * as React from 'react';
 import VirtualList, { type ListRef } from 'rc-virtual-list';
 import type { ListyProps, ListyRef } from './interface';
 import { useImperativeHandle, forwardRef } from 'react';
-import { useGroupSegments } from './hooks/useGroupSegments';
-import { useFlattenRows, type Row } from './hooks/useFlattenRows';
+import useGroupSegments from './hooks/useGroupSegments';
+import useFlattenRows, { type Row } from './hooks/useFlattenRows';
 import useStickyGroupHeader from './hooks/useStickyGroupHeader';
 import useOnEndReached from './hooks/useOnEndReached';
 

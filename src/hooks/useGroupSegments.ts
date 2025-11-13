@@ -7,7 +7,7 @@ export interface GroupSegment {
   endIndex: number;
 }
 
-export function useGroupSegments<T>(
+export default function useGroupSegments<T>(
   items: T[],
   group?: Group<T>,
 ): GroupSegment[] {
@@ -50,5 +50,3 @@ export function useGroupSegments<T>(
     return segments;
   }, [items, group]);
 }
-
-export default useGroupSegments;

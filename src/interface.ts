@@ -20,10 +20,10 @@ export interface ListyProps<T> {
   sticky?: boolean;
   itemHeight?: number;
   height?: number;
-  rowKey?: ((item: T) => React.Key) | Extract<keyof T, React.Key>;
   group?: Group<T>;
   virtual?: boolean;
+  prefixCls?: string;
+  rowKey: ((item: T) => React.Key) | Extract<keyof T, React.Key>;
   onEndReached?: () => void;
   itemRender: (item: T, index: number) => React.ReactNode;
-  prefixCls?: string;
 }

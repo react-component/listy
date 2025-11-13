@@ -13,7 +13,7 @@ export interface StickyHeaderParams<T> {
   prefixCls: string;
 }
 
-export function useStickyGroupHeader<T>(params: StickyHeaderParams<T>) {
+export default function useStickyGroupHeader<T>(params: StickyHeaderParams<T>) {
   const {
     enabled,
     group,
@@ -64,5 +64,3 @@ export function useStickyGroupHeader<T>(params: StickyHeaderParams<T>) {
 
   return extraRender;
 }
-
-export default useStickyGroupHeader;

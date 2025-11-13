@@ -6,7 +6,7 @@ export interface UseOnEndReachedParams {
   onEndReached?: () => void;
 }
 
-export function useOnEndReached(params: UseOnEndReachedParams) {
+export default function useOnEndReached(params: UseOnEndReachedParams) {
   const { enabled, onEndReached } = params;
 
   const lastTriggeredScrollHeightRef = React.useRef<number>(null);
@@ -32,5 +32,3 @@ export function useOnEndReached(params: UseOnEndReachedParams) {
 
   return onScroll;
 }
-
-export default useOnEndReached;

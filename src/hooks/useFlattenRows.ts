@@ -12,7 +12,7 @@ export interface FlattenRowsResult<T> {
   groupKeyToSeg: Map<React.Key, { startIndex: number; endIndex: number }>;
 }
 
-export function useFlattenRows<T>(
+export default function useFlattenRows<T>(
   items: T[],
   group: Group<T> | undefined,
   segments: GroupSegment[],
@@ -50,5 +50,3 @@ export function useFlattenRows<T>(
     return { rows: flatRows, headerRows, groupKeyToSeg };
   }, [items, group, segments]);
 }
-
-export default useFlattenRows;
