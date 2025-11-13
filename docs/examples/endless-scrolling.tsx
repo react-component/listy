@@ -7,37 +7,45 @@ interface RowItem {
   name: string;
 }
 
+const BATCH_SIZE = 40;
+const LOAD_DELAY = 600;
+
+const createBatch = (startId: number, count: number): RowItem[] =>
+  Array.from({ length: count }, (_, index) => {
+    const id = startId + index;
+    return {
+      id,
+      name: `Row ${id}`,
+    };
+  });
+
 export default () => {
   const listRef = useRef<ListyRef>(null);
+  const nextIdRef = useRef(BATCH_SIZE + 1);
 
-  const TOTAL = 200;
-  const PAGE_SIZE = 40;
-
-  const [items, setItems] = useState<RowItem[]>(() =>
-    Array.from({ length: 60 }, (_, i) => ({ id: i + 1, name: `Row ${i}` })),
-  );
+  const [items, setItems] = useState<RowItem[]>(() => createBatch(1, BATCH_SIZE));
   const [loading, setLoading] = useState(false);
 
-  const hasMore = items.length < TOTAL;
-
   const loadMore = useCallback(() => {
-    if (loading || !hasMore) return;
+    if (loading) {
+      return;
+    }
+
     setLoading(true);
 
-    setTimeout(() => {
-      setItems((prev) => {
-        const start = prev.length;
-        const next = Array.from({ length: Math.min(PAGE_SIZE, TOTAL - prev.length) }, (_, i) => {
-          const id = start + i + 1;
-          return { id, name: `Row ${id - 1}` };
-        });
-        return [...prev, ...next];
-      });
-      setLoading(false);
-    }, 800);
-  }, [loading, hasMore]);
+    window.setTimeout(() => {
+      setItems((prevItems) => {
+        const nextItems = createBatch(nextIdRef.current, BATCH_SIZE);
+        nextIdRef.current += nextItems.length;
 
-  const itemStyle: React.CSSProperties = useMemo(
+        return [...prevItems, ...nextItems];
+      });
+
+      setLoading(false);
+    }, LOAD_DELAY);
+  }, [loading]);
+
+  const itemStyle = useMemo<React.CSSProperties>(
     () => ({
       padding: '0 12px',
       height: 32,
@@ -64,20 +72,19 @@ export default () => {
 
       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
         <button
-          onClick={() =>
-            listRef.current?.scrollTo({ key: Math.max(1, items.length - 1), align: 'top' })
-          }
+          onClick={() => {
+            const lastItem = items[items.length - 1];
+            if (!lastItem) {
+              return;
+            }
+            listRef.current?.scrollTo({ key: lastItem.id, align: 'bottom' });
+          }}
         >
-          Scroll To Near End
+          Scroll To Latest
         </button>
-        <span>
-          Count: {items.length} / {TOTAL}
-        </span>
+        <span>Count: {items.length}</span>
         {loading && <span>Loading…</span>}
-        {!hasMore && <span>· No more</span>}
       </div>
     </div>
   );
 };
-
-

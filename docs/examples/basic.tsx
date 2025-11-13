@@ -30,7 +30,6 @@ export default () => {
         itemRender={(item, index) => {
           return <div style={{ ...itemStyle,height:  30 + (index % 2 ? -3 : 10) }}>{item.name}</div>;
         }}
-        // virtual={false}
         rowKey="id"
         ref={listRef}
         sticky

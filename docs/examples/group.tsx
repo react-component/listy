@@ -52,7 +52,6 @@ export default () => {
         sticky
         virtual
         itemRender={(item, index) => {
-          // 条目高度：30/42/54 交替
           const heights = [30, 42, 54];
           const h = heights[index % heights.length];
           return (
