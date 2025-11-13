@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { ScrollTo } from 'rc-virtual-list/lib/List';
+import type { GetKey } from 'rc-virtual-list/lib/interface';
 
 export interface ListyRef {
   scrollTo: ScrollTo;
@@ -23,7 +24,9 @@ export interface ListyProps<T> {
   group?: Group<T>;
   virtual?: boolean;
   prefixCls?: string;
-  rowKey: ((item: T) => React.Key) | Extract<keyof T, React.Key>;
+  rowKey: React.Key | ((item: T) => React.Key);
   onEndReached?: () => void;
   itemRender: (item: T, index: number) => React.ReactNode;
 }
+
+export type { GetKey };

@@ -1,6 +1,6 @@
 import * as React from 'react';
 import VirtualList, { type ListRef } from 'rc-virtual-list';
-import type { ListyProps, ListyRef } from './interface';
+import type { GetKey, ListyProps, ListyRef } from './interface';
 import { useImperativeHandle, forwardRef } from 'react';
 import useGroupSegments from './hooks/useGroupSegments';
 import useFlattenRows, { type Row } from './hooks/useFlattenRows';
@@ -32,16 +32,12 @@ function Listy<T>(props: ListyProps<T>, ref: React.Ref<ListyRef>) {
     },
   }));
 
-  const getItemKey = React.useCallback(
-    (item: T): React.Key => {
-      if (!rowKey) {
-        return undefined;
-      }
+  const getItemKey = React.useCallback<GetKey<T>>(
+    (item: T) => {
       if (typeof rowKey === 'function') {
         return rowKey(item);
       }
-      // @ts-ignore
-      return item[rowKey];
+      return item?.[rowKey as string];
     },
     [rowKey],
   );
@@ -55,7 +51,7 @@ function Listy<T>(props: ListyProps<T>, ref: React.Ref<ListyRef>) {
     groupSegments,
   );
 
-  const getRowKey = React.useCallback(
+  const getKey = React.useCallback(
     (row: Row<T>): React.Key => {
       if (row.type === 'header') {
         return row.groupKey;
@@ -91,13 +87,13 @@ function Listy<T>(props: ListyProps<T>, ref: React.Ref<ListyRef>) {
   const renderHeaderRow = React.useCallback(
     (groupKey: React.Key) => {
       const groupItems = groupKeyToItems.get(groupKey) || [];
-      return (
-        <div className={`${prefixCls}-group-header`}>
-          {group.title(groupKey, groupItems)}
-        </div>
-      );
+      const headerClassName = `${prefixCls}-group-header${
+        virtual ? '' : ` ${prefixCls}-group-header-sticky`
+      }`;
+
+      return <div className={headerClassName}>{group.title(groupKey, groupItems)}</div>;
     },
-    [group, groupKeyToItems, prefixCls],
+    [group, groupKeyToItems, prefixCls, virtual],
   );
 
   const handleOnScroll = useOnEndReached({
@@ -113,7 +109,7 @@ function Listy<T>(props: ListyProps<T>, ref: React.Ref<ListyRef>) {
         data={rows}
         fullHeight={false}
         itemHeight={itemHeight}
-        itemKey={getRowKey}
+        itemKey={getKey}
         height={height}
         extraRender={extraRender}
         onScroll={handleOnScroll}
