@@ -13,6 +13,6 @@
       "@@/*": [".dumi/tmp/*"],
       "@rc-component/listy": ["src/index.ts"]
     },
-    "types": ["@testing-library/jest-dom"]
+    "types": ["@testing-library/jest-dom", "node"]
   }
 }
