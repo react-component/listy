@@ -91,7 +91,7 @@ function Listy<T, K extends React.Key = React.Key>(
     (groupKey: K) => {
       const groupItems = groupKeyToItems.get(groupKey) || [];
       const headerClassName = `${prefixCls}-group-header${
-        virtual ? '' : ` ${prefixCls}-group-header-sticky`
+        sticky && !virtual ? ` ${prefixCls}-group-header-sticky` : ''
       }`;
 
       return (
