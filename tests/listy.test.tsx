@@ -1,17 +1,18 @@
 import React from 'react';
 import Listy from '@rc-component/listy';
 import { render, screen } from '@testing-library/react';
+import ListyEntry from '../src/index';
+
+const renderListy = () =>
+  render(
+    <Listy
+      items={[{ id: 1 }]}
+      rowKey="id"
+      itemRender={(item) => <div>{item.id}</div>}
+    />,
+  );
 
 describe('Listy', () => {
-  const renderListy = () =>
-    render(
-      <Listy
-        items={[{ id: 1 }]}
-        rowKey="id"
-        itemRender={(item) => <div>{item.id}</div>}
-      />,
-    );
-
   it('should render', () => {
     renderListy();
     expect(screen.getByText('1')).toBeInTheDocument();
@@ -76,5 +77,11 @@ describe('Listy', () => {
 
     expect(screen.getByTestId('group-A')).toHaveTextContent('Group A (2)');
     expect(screen.getByTestId('group-B')).toHaveTextContent('Group B (1)');
+  });
+});
+
+describe('package entry point', () => {
+  it('re-exports the Listy implementation', () => {
+    expect(ListyEntry).toBe(Listy);
   });
 });

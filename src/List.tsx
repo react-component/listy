@@ -62,17 +62,6 @@ function Listy<T>(props: ListyProps<T>, ref: React.Ref<ListyRef>) {
     [getItemKey],
   );
 
-  // Sticky header overlay via Portal (anchored on header rows)
-  const extraRender = useStickyGroupHeader<T>({
-    enabled: !!(sticky && group),
-    group,
-    headerRows,
-    groupKeyToSeg,
-    items: data,
-    containerRef,
-    prefixCls,
-  });
-
   // Pre-compute each group's items to simplify header rendering
   const groupKeyToItems = React.useMemo(() => {
     const map = new Map<React.Key, T[]>();
@@ -84,6 +73,16 @@ function Listy<T>(props: ListyProps<T>, ref: React.Ref<ListyRef>) {
     });
     return map;
   }, [group, groupKeyToSeg, data]);
+
+  // Sticky header overlay via Portal (anchored on header rows)
+  const extraRender = useStickyGroupHeader<T>({
+    enabled: !!(sticky && group),
+    group,
+    headerRows,
+    groupKeyToItems,
+    containerRef,
+    prefixCls,
+  });
 
   const renderHeaderRow = React.useCallback(
     (groupKey: React.Key) => {
