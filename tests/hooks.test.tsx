@@ -157,4 +157,31 @@ describe('useStickyGroupHeader', () => {
     unmount();
     document.body.removeChild(container);
   });
+
+  it('skips portal rendering when virtual list is disabled', () => {
+    const container = document.createElement('div');
+    document.body.appendChild(container);
+    const containerRef = { current: container };
+
+    const params: StickyHeaderParams<GroupedItem> = {
+      enabled: true,
+      group: {
+        key: (item) => item.group,
+        title: () => <span>noop</span>,
+      },
+      headerRows,
+      groupKeyToItems: baseItemsMap,
+      containerRef,
+      prefixCls: 'rc-listy',
+    };
+
+    const info = createRenderInfo({ virtual: false });
+    const { unmount } = render(<StickyHeaderTester params={params} info={info} />);
+
+    const stickyHeader = container.querySelector('.rc-listy-sticky-header');
+    expect(stickyHeader).toBeNull();
+
+    unmount();
+    document.body.removeChild(container);
+  });
 });

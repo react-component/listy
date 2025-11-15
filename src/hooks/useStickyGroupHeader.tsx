@@ -26,9 +26,9 @@ export default function useStickyGroupHeader<T>(params: StickyHeaderParams<T>) {
 
   const extraRender = React.useCallback(
     (info: ExtraRenderInfo) => {
-      const { start } = info;
+      const { start, virtual } = info;
 
-      if (!enabled || !headerRows.length) {
+      if (!enabled || !headerRows.length || !virtual) {
         lastHeaderIdxRef.current = 0;
         return null;
       }
