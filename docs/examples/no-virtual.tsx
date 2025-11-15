@@ -22,7 +22,13 @@ const GROUP_META = {
 
 type GroupId = keyof typeof GROUP_META;
 
-const items = [
+interface ProduceItem {
+  id: string;
+  name: string;
+  groupId: GroupId;
+}
+
+const items: ProduceItem[] = [
   { id: 'fruits-1', name: 'Mango', groupId: 'fruits' },
   { id: 'fruits-2', name: 'Pineapple', groupId: 'fruits' },
   { id: 'fruits-3', name: 'Banana', groupId: 'fruits' },
@@ -118,7 +124,7 @@ export default () => {
         group={{
           key: (item) => item.groupId,
           title: (groupKey, groupItems) => {
-            const metadata = getGroupMeta(groupKey as GroupId);
+            const metadata = getGroupMeta(groupKey);
             const accent = metadata?.accent ?? '#fafafa';
             return (
               <div

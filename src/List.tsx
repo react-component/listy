@@ -8,7 +8,10 @@ import type { Row } from './hooks/useFlattenRows';
 import useStickyGroupHeader from './hooks/useStickyGroupHeader';
 import useOnEndReached from './hooks/useOnEndReached';
 
-function Listy<T>(props: ListyProps<T>, ref: React.Ref<ListyRef>) {
+function Listy<T, K extends React.Key = React.Key>(
+  props: ListyProps<T, K>,
+  ref: React.Ref<ListyRef>,
+) {
   const {
     items,
     itemRender,
@@ -43,17 +46,17 @@ function Listy<T>(props: ListyProps<T>, ref: React.Ref<ListyRef>) {
     [rowKey],
   );
 
-  const groupSegments = useGroupSegments<T>(data, group);
+  const groupSegments = useGroupSegments<T, K>(data, group);
 
   // ======================= Flatten rows (header + item) =======================
-  const { rows, headerRows, groupKeyToSeg } = useFlattenRows<T>(
+  const { rows, headerRows, groupKeyToSeg } = useFlattenRows<T, K>(
     data,
     group,
     groupSegments,
   );
 
   const getKey = React.useCallback(
-    (row: Row<T>): React.Key => {
+    (row: Row<T, K>): React.Key => {
       if (row.type === 'header') {
         return row.groupKey;
       }
@@ -64,7 +67,7 @@ function Listy<T>(props: ListyProps<T>, ref: React.Ref<ListyRef>) {
 
   // Pre-compute each group's items to simplify header rendering
   const groupKeyToItems = React.useMemo(() => {
-    const map = new Map<React.Key, T[]>();
+    const map = new Map<K, T[]>();
     if (!group) {
       return map;
     }
@@ -75,7 +78,7 @@ function Listy<T>(props: ListyProps<T>, ref: React.Ref<ListyRef>) {
   }, [group, groupKeyToSeg, data]);
 
   // Sticky header overlay via Portal (anchored on header rows)
-  const extraRender = useStickyGroupHeader<T>({
+  const extraRender = useStickyGroupHeader<T, K>({
     enabled: !!(sticky && group),
     group,
     headerRows,
@@ -85,13 +88,17 @@ function Listy<T>(props: ListyProps<T>, ref: React.Ref<ListyRef>) {
   });
 
   const renderHeaderRow = React.useCallback(
-    (groupKey: React.Key) => {
+    (groupKey: K) => {
       const groupItems = groupKeyToItems.get(groupKey) || [];
       const headerClassName = `${prefixCls}-group-header${
         virtual ? '' : ` ${prefixCls}-group-header-sticky`
       }`;
 
-      return <div className={headerClassName}>{group.title(groupKey, groupItems)}</div>;
+      return (
+        <div className={headerClassName}>
+          {group.title(groupKey, groupItems)}
+        </div>
+      );
     },
     [group, groupKeyToItems, prefixCls, virtual],
   );
@@ -114,7 +121,7 @@ function Listy<T>(props: ListyProps<T>, ref: React.Ref<ListyRef>) {
         extraRender={extraRender}
         onScroll={handleOnScroll}
       >
-        {(row: Row<T>) =>
+        {(row: Row<T, K>) =>
           row.type === 'header'
             ? renderHeaderRow(row.groupKey)
             : itemRender(row.item, row.index)
@@ -124,8 +131,11 @@ function Listy<T>(props: ListyProps<T>, ref: React.Ref<ListyRef>) {
   );
 }
 
-const ListyWithForwardRef = forwardRef(Listy) as <T>(
-  props: ListyProps<T> & { ref?: React.Ref<ListyRef> },
+const ListyWithForwardRef = forwardRef(Listy) as <
+  T,
+  K extends React.Key = React.Key,
+>(
+  props: ListyProps<T, K> & { ref?: React.Ref<ListyRef> },
 ) => React.ReactElement;
 
 export default ListyWithForwardRef;

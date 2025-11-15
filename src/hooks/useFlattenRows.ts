@@ -2,26 +2,26 @@ import * as React from 'react';
 import type { Group } from '../interface';
 import type { GroupSegment } from './useGroupSegments';
 
-export type Row<T> =
-  | { type: 'header'; groupKey: React.Key }
+export type Row<T, K extends React.Key = React.Key> =
+  | { type: 'header'; groupKey: K }
   | { type: 'item'; item: T; index: number };
 
-export interface FlattenRowsResult<T> {
-  rows: Array<Row<T>>;
-  headerRows: Array<{ groupKey: React.Key; rowIndex: number }>;
-  groupKeyToSeg: Map<React.Key, { startIndex: number; endIndex: number }>;
+export interface FlattenRowsResult<T, K extends React.Key = React.Key> {
+  rows: Row<T, K>[];
+  headerRows: { groupKey: K; rowIndex: number }[];
+  groupKeyToSeg: Map<K, { startIndex: number; endIndex: number }>;
 }
 
-export default function useFlattenRows<T>(
+export default function useFlattenRows<T, K extends React.Key = React.Key>(
   items: T[],
-  group: Group<T> | undefined,
-  segments: GroupSegment[],
-): FlattenRowsResult<T> {
+  group: Group<T, K> | undefined,
+  segments: GroupSegment<K>[],
+): FlattenRowsResult<T, K> {
   return React.useMemo(() => {
-    const flatRows: Row<T>[] = [];
-    const headerRows: Array<{ groupKey: React.Key; rowIndex: number }> = [];
+    const flatRows: Row<T, K>[] = [];
+    const headerRows: { groupKey: K; rowIndex: number }[] = [];
     const groupKeyToSeg = new Map<
-      React.Key,
+      K,
       { startIndex: number; endIndex: number }
     >();
 

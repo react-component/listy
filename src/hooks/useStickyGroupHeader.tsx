@@ -3,16 +3,19 @@ import Portal from '@rc-component/portal';
 import type { ExtraRenderInfo } from 'rc-virtual-list/lib/interface';
 import type { Group } from '../interface';
 
-export interface StickyHeaderParams<T> {
+export interface StickyHeaderParams<T, K extends React.Key = React.Key> {
   enabled: boolean;
-  group: Group<T> | undefined;
-  headerRows: Array<{ groupKey: React.Key; rowIndex: number }>;
-  groupKeyToItems: Map<React.Key, T[]>;
+  group: Group<T, K> | undefined;
+  headerRows: { groupKey: K; rowIndex: number }[];
+  groupKeyToItems: Map<K, T[]>;
   containerRef: React.RefObject<HTMLDivElement>;
   prefixCls: string;
 }
 
-export default function useStickyGroupHeader<T>(params: StickyHeaderParams<T>) {
+export default function useStickyGroupHeader<
+  T,
+  K extends React.Key = React.Key,
+>(params: StickyHeaderParams<T, K>) {
   const {
     enabled,
     group,
@@ -82,14 +85,7 @@ export default function useStickyGroupHeader<T>(params: StickyHeaderParams<T>) {
         </Portal>
       );
     },
-    [
-      enabled,
-      group,
-      headerRows,
-      groupKeyToItems,
-      containerRef,
-      prefixCls,
-    ],
+    [enabled, group, headerRows, groupKeyToItems, containerRef, prefixCls],
   );
 
   return extraRender;

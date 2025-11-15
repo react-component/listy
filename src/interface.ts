@@ -1,30 +1,27 @@
-import * as React from 'react';
-import { ScrollTo } from 'rc-virtual-list/lib/List';
+import type * as React from 'react';
+import type { ScrollTo } from 'rc-virtual-list/lib/List';
 import type { GetKey } from 'rc-virtual-list/lib/interface';
 
 export interface ListyRef {
   scrollTo: ScrollTo;
 }
 
-export interface Group<T> {
-  key: React.Key | ((item: T) => React.Key);
-  title: (groupKey: React.Key, items: T[]) => React.ReactNode;
+export type RowKey<T> = keyof T | ((item: T) => React.Key);
+
+export interface Group<T, K extends React.Key = React.Key> {
+  key: ((item: T) => K) | K;
+  title: (groupKey: K, items: T[]) => React.ReactNode;
 }
 
-export interface ListyItemProps<T> {
-  item: T;
-  index: number;
-}
-
-export interface ListyProps<T> {
+export interface ListyProps<T, K extends React.Key = React.Key> {
   items?: T[];
   sticky?: boolean;
   itemHeight?: number;
   height?: number;
-  group?: Group<T>;
+  group?: Group<T, K>;
   virtual?: boolean;
   prefixCls?: string;
-  rowKey: React.Key | ((item: T) => React.Key);
+  rowKey: RowKey<T>;
   onEndReached?: () => void;
   itemRender: (item: T, index: number) => React.ReactNode;
 }

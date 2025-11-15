@@ -62,7 +62,7 @@ export default () => {
         }}
         group={{
           key: (item) => item.groupId,
-          title: (groupKey, groupItems) => renderHeader(groupKey as string, groupItems as any),
+          title: (groupKey, groupItems) => renderHeader(groupKey, groupItems),
         }}
         ref={listRef}
       />

@@ -1,26 +1,26 @@
 import * as React from 'react';
 import type { Group } from '../interface';
 
-export interface GroupSegment {
-  key: React.Key;
+export interface GroupSegment<K extends React.Key> {
+  key: K;
   startIndex: number;
   endIndex: number;
 }
 
-export default function useGroupSegments<T>(
+export default function useGroupSegments<T, K extends React.Key = React.Key>(
   items: T[],
-  group?: Group<T>,
-): GroupSegment[] {
+  group?: Group<T, K>,
+): GroupSegment<K>[] {
   return React.useMemo(() => {
     if (!group || !items?.length) {
       return [];
     }
 
-    const segments: GroupSegment[] = [];
-    let currentKey: React.Key | null = null;
+    const segments: GroupSegment<K>[] = [];
+    let currentKey: K | null = null;
     let currentStart = -1;
 
-    const getGroupKey = (item: T): React.Key =>
+    const getGroupKey = (item: T): K =>
       typeof group.key === 'function' ? group.key(item) : group.key;
 
     for (let i = 0; i < items.length; i += 1) {
