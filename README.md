@@ -36,22 +36,25 @@ Include the default [styling](https://github.com/react-component/listy/blob/mast
 
 ```js
 import React from 'react';
-import ReactDOM from 'react-dom';
-import Trigger from '@rc-component/trigger';
+import ReactDOM from 'react-dom/client';
+import Listy from '@rc-component/listy';
 
-ReactDOM.render(
-  <Trigger
-    action={['click']}
-    popup={<span>popup</span>}
-    popupAlign={{
-      points: ['tl', 'bl'],
-      offset: [0, 3],
-    }}
-  >
-    <a href="#">hover</a>
-  </Trigger>,
-  container,
+const items = Array.from({ length: 100 }, (_, index) => ({
+  id: index,
+  name: `Item ${index}`,
+}));
+
+const App = () => (
+  <Listy
+    items={items}
+    height={240}
+    itemHeight={32}
+    rowKey="id"
+    itemRender={(item) => <div>{item.name}</div>}
+  />
 );
+
+ReactDOM.createRoot(container).render(<App />);
 ```
 
 ## Compatibility
@@ -86,163 +89,71 @@ npm start
     </thead>
     <tbody>
         <tr>
-          <td>alignPoint</td>
-          <td>bool</td>
-          <td>false</td>
-          <td>Popup will align with mouse position (support action of 'click', 'hover' and 'contextMenu')</td>
+          <td>items</td>
+          <td>T[]</td>
+          <td>[]</td>
+          <td>列表数据源，虚拟滚动会基于此计算高度。</td>
         </tr>
         <tr>
-          <td>popupClassName</td>
-          <td>string</td>
+          <td>rowKey</td>
+          <td>React.Key | (item: T) => React.Key</td>
+          <td>required</td>
+          <td>返回每一项的唯一标识，用于缓存高度与滚动定位。</td>
+        </tr>
+        <tr>
+          <td>itemRender</td>
+          <td>(item: T, index: number) => React.ReactNode</td>
+          <td>required</td>
+          <td>渲染单行内容的函数。</td>
+        </tr>
+        <tr>
+          <td>height</td>
+          <td>number</td>
+          <td>required</td>
+          <td>列表可视区域高度。</td>
+        </tr>
+        <tr>
+          <td>itemHeight</td>
+          <td>number</td>
+          <td>required</td>
+          <td>每行的基础高度，虚拟滚动会以此做初始估算。</td>
+        </tr>
+        <tr>
+          <td>group</td>
+          <td>Group&lt;T&gt;</td>
           <td></td>
-          <td>additional className added to popup</td>
+          <td>提供分组 key 与标题渲染，开启后会生成组头。</td>
         </tr>
         <tr>
-          <td>forceRender</td>
+          <td>sticky</td>
           <td>boolean</td>
           <td>false</td>
-          <td>whether render popup before first show</td>
+          <td>为分组头启用粘性悬停效果。</td>
         </tr>
         <tr>
-          <td>destroyPopupOnHide</td>
+          <td>virtual</td>
           <td>boolean</td>
-          <td>false</td>
-          <td>whether destroy popup when hide</td>
+          <td>true</td>
+          <td>是否启用虚拟列表模式，可根据需要关闭。</td>
         </tr>
         <tr>
-          <td>getPopupClassNameFromAlign</td>
-          <td>getPopupClassNameFromAlign(align: Object):String</td>
+          <td>onEndReached</td>
+          <td>() => void</td>
           <td></td>
-          <td>additional className added to popup according to align</td>
-        </tr>
-        <tr>
-          <td>action</td>
-          <td>string[]</td>
-          <td>['hover']</td>
-          <td>which actions cause popup shown. enum of 'hover','click','focus','contextMenu'</td>
-        </tr>
-        <tr>
-          <td>mouseEnterDelay</td>
-          <td>number</td>
-          <td>0</td>
-          <td>delay time to show when mouse enter. unit: s.</td>
-        </tr>
-        <tr>
-          <td>mouseLeaveDelay</td>
-          <td>number</td>
-          <td>0.1</td>
-          <td>delay time to hide when mouse leave. unit: s.</td>
-        </tr>
-        <tr>
-          <td>popupStyle</td>
-          <td>Object</td>
-          <td></td>
-          <td>additional style of popup</td>
+          <td>滚动触达底部时触发，常用于触发下一页加载。</td>
         </tr>
         <tr>
           <td>prefixCls</td>
-          <td>String</td>
-          <td>rc-trigger-popup</td>
-          <td>prefix class name</td>
-        </tr>
-        <tr>
-          <td>popupTransitionName</td>
-          <td>String|Object</td>
-          <td></td>
-          <td>https://github.com/react-component/animate</td>
-        </tr>
-        <tr>
-          <td>maskTransitionName</td>
-          <td>String|Object</td>
-          <td></td>
-          <td>https://github.com/react-component/animate</td>
-        </tr>
-        <tr>
-          <td>onPopupVisibleChange</td>
-          <td>Function</td>
-          <td></td>
-          <td>call when popup visible is changed</td>
-        </tr>
-        <tr>
-          <td>mask</td>
-          <td>boolean</td>
-          <td>false</td>
-          <td>whether to support mask</td>
-        </tr>
-        <tr>
-          <td>maskClosable</td>
-          <td>boolean</td>
-          <td>true</td>
-          <td>whether to support click mask to hide</td>
-        </tr>
-        <tr>
-          <td>popupVisible</td>
-          <td>boolean</td>
-          <td></td>
-          <td>whether popup is visible</td>
-        </tr>
-        <tr>
-          <td>zIndex</td>
-          <td>number</td>
-          <td></td>
-          <td>popup's zIndex</td>
-        </tr>
-        <tr>
-          <td>defaultPopupVisible</td>
-          <td>boolean</td>
-          <td></td>
-          <td>whether popup is visible initially</td>
-        </tr>
-        <tr>
-          <td>popupAlign</td>
-          <td>Object: alignConfig of [dom-align](https://github.com/yiminghe/dom-align)</td>
-          <td></td>
-          <td>popup 's align config</td>
-        </tr>
-        <tr>
-          <td>onPopupAlign</td>
-          <td>function(popupDomNode, align)</td>
-          <td></td>
-          <td>callback when popup node is aligned</td>
-        </tr>
-        <tr>
-          <td>popup</td>
-          <td>React.Element | function() => React.Element</td>
-          <td></td>
-          <td>popup content</td>
-        </tr>
-        <tr>
-          <td>getPopupContainer</td>
-          <td>getPopupContainer(): HTMLElement</td>
-          <td></td>
-          <td>function returning html node which will act as popup container</td>
-        </tr>
-        <tr>
-          <td>getDocument</td>
-          <td>getDocument(): HTMLElement</td>
-          <td></td>
-          <td>function returning document node which will be attached click event to close trigger</td>
-        </tr>
-        <tr>
-          <td>popupPlacement</td>
           <td>string</td>
-          <td></td>
-          <td>use preset popup align config from builtinPlacements, can be merged by popupAlign prop</td>
-        </tr>
-        <tr>
-          <td>builtinPlacements</td>
-          <td>object</td>
-          <td></td>
-          <td>builtin placement align map. used by placement prop</td>
-        </tr>
-        <tr>
-          <td>stretch</td>
-          <td>string</td>
-          <td></td>
-          <td>Let popup div stretch with trigger element. enums of 'width', 'minWidth', 'height', 'minHeight'. (You can also mixed with 'height minWidth')</td>
+          <td>rc-listy</td>
+          <td>组件样式前缀，方便自定义样式隔离。</td>
         </tr>
     </tbody>
 </table>
+
+### ListyRef
+
+- `scrollTo(config: number | { key?: React.Key; index?: number; align?: 'top' | 'bottom' | 'auto'; offset?: number; })`
 
 ## Test Case
 
@@ -255,4 +166,4 @@ open coverage/ dir
 
 ## License
 
-rc-trigger is released under the MIT license.
+@rc-component/listy is released under the MIT license.
