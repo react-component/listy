@@ -1,5 +1,6 @@
 import * as React from 'react';
 import Portal from '@rc-component/portal';
+import type { ListRef } from 'rc-virtual-list';
 import type { ExtraRenderInfo } from 'rc-virtual-list/lib/interface';
 import type { Group } from '../interface';
 
@@ -9,6 +10,7 @@ export interface StickyHeaderParams<T, K extends React.Key = React.Key> {
   headerRows: { groupKey: K; rowIndex: number }[];
   groupKeyToItems: Map<K, T[]>;
   containerRef: React.RefObject<HTMLDivElement>;
+  listRef: React.RefObject<ListRef>;
   prefixCls: string;
 }
 
@@ -22,6 +24,7 @@ export default function useStickyGroupHeader<
     headerRows,
     groupKeyToItems,
     containerRef,
+    listRef,
     prefixCls,
   } = params;
 
@@ -29,35 +32,53 @@ export default function useStickyGroupHeader<
 
   const extraRender = React.useCallback(
     (info: ExtraRenderInfo) => {
-      const { start, virtual } = info;
+      const { virtual } = info;
 
       if (!enabled || !headerRows.length || !virtual) {
         lastHeaderIdxRef.current = 0;
         return null;
       }
 
-      const activeHeaderIdx = (() => {
-        // Fast path: reuse previously resolved header index if start still
-        // points within the same header block.
+      const getHolderScrollTop = () => {
+        const container = containerRef.current;
+        const holder =
+          container?.querySelector<HTMLDivElement>('.rc-virtual-list-holder') ||
+          listRef.current?.nativeElement?.querySelector?.(
+            '.rc-virtual-list-holder',
+          );
+        if (holder) {
+          return holder.scrollTop;
+        }
+        const infoScrollTop = listRef.current?.getScrollInfo?.().y;
+        return infoScrollTop;
+      };
+
+      const resolveByScrollTop = (scrollTop: number) => {
         const cachedIdx = lastHeaderIdxRef.current;
         const cachedRow = headerRows[cachedIdx];
+        const cachedTop = cachedRow
+          ? info.getSize(cachedRow.groupKey).top
+          : null;
         const nextRow = headerRows[cachedIdx + 1];
+        const nextTop = nextRow ? info.getSize(nextRow.groupKey).top : null;
+
         if (
           cachedRow &&
-          cachedRow.rowIndex <= start &&
-          (!nextRow || nextRow.rowIndex > start)
+          cachedTop !== null &&
+          scrollTop >= cachedTop &&
+          (nextTop === null || scrollTop < nextTop)
         ) {
           return cachedIdx;
         }
 
-        // Binary search to find the closest header whose rowIndex <= start.
         let lo = 0;
         let hi = headerRows.length - 1;
         let candidate = 0;
 
         while (lo <= hi) {
           const mid = Math.floor((lo + hi) / 2);
-          if (headerRows[mid].rowIndex <= start) {
+          const { top } = info.getSize(headerRows[mid].groupKey);
+          if (top <= scrollTop) {
             candidate = mid;
             lo = mid + 1;
           } else {
@@ -66,7 +87,10 @@ export default function useStickyGroupHeader<
         }
 
         return candidate;
-      })();
+      };
+
+      const scrollTop = getHolderScrollTop();
+      const activeHeaderIdx = resolveByScrollTop(scrollTop)
 
       lastHeaderIdxRef.current = activeHeaderIdx;
 
@@ -85,7 +109,15 @@ export default function useStickyGroupHeader<
         </Portal>
       );
     },
-    [enabled, group, headerRows, groupKeyToItems, containerRef, prefixCls],
+    [
+      enabled,
+      group,
+      headerRows,
+      groupKeyToItems,
+      containerRef,
+      listRef,
+      prefixCls,
+    ],
   );
 
   return extraRender;

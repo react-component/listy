@@ -2,7 +2,7 @@ import React from 'react';
 import { act, render } from '@testing-library/react';
 import type { ExtraRenderInfo } from 'rc-virtual-list/lib/interface';
 import Listy, { type ListyRef, type ListyProps } from '@rc-component/listy';
-import type { FlattenRowsResult, Row } from '../src/hooks/useFlattenRows';
+import type { FlattenRowsResult } from '../src/hooks/useFlattenRows';
 
 jest.mock('rc-virtual-list', () => {
   const React = require('react');
