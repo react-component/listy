@@ -87,13 +87,9 @@ export default () => {
 
   const handleScrollToGroup = useCallback(
     (groupId: GroupId) => {
-      const targetItem = items.find((item) => item.groupId === groupId);
-      if (!targetItem) {
-        return;
-      }
-      listRef.current?.scrollTo({ key: targetItem.id, align: 'top' });
+      listRef.current?.scrollTo({ groupKey: groupId, align: 'top' });
     },
-    [items],
+    [],
   );
 
   return (

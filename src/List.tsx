@@ -1,12 +1,17 @@
 import * as React from 'react';
 import VirtualList, { type ListRef } from 'rc-virtual-list';
-import type { GetKey, ListyProps, ListyRef } from './interface';
+import type {
+  GetKey,
+  ListyProps,
+  ListyRef,
+} from './interface';
 import { useImperativeHandle, forwardRef } from 'react';
 import useGroupSegments from './hooks/useGroupSegments';
 import useFlattenRows from './hooks/useFlattenRows';
 import type { Row } from './hooks/useFlattenRows';
 import useStickyGroupHeader from './hooks/useStickyGroupHeader';
 import useOnEndReached from './hooks/useOnEndReached';
+import { isGroupScrollConfig } from './util';
 
 function Listy<T, K extends React.Key = React.Key>(
   props: ListyProps<T, K>,
@@ -32,6 +37,15 @@ function Listy<T, K extends React.Key = React.Key>(
 
   useImperativeHandle(ref, () => ({
     scrollTo: (config) => {
+      if (isGroupScrollConfig(config)) {
+        const { groupKey, align, offset } = config;
+        listRef.current?.scrollTo({
+          key: groupKey,
+          align,
+          offset,
+        });
+        return;
+      }
       listRef.current?.scrollTo(config);
     },
   }));

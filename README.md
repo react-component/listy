@@ -153,7 +153,8 @@ npm start
 
 ### ListyRef
 
-- `scrollTo(config: number | { key?: React.Key; index?: number; align?: 'top' | 'bottom' | 'auto'; offset?: number; })`
+- `scrollTo(config: number | { key?: React.Key; index?: number; align?: 'top' | 'bottom' | 'auto'; offset?: number; } | { groupKey: React.Key; align?: 'top' | 'bottom' | 'auto'; offset?: number; })`
+  - 传入 `groupKey` 时会直接滚动到对应组头（需启用 `group`）
 
 ## Test Case
 

@@ -7,6 +7,11 @@ export default () => {
 
   const groupSize = 12;
   const total = 240;
+  const groupCount = Math.ceil(total / groupSize);
+  const groupKeys = React.useMemo(
+    () => Array.from({ length: groupCount }, (_, index) => `G${index}`),
+    [groupCount],
+  );
 
   const items = Array.from({ length: total }, (_, index) => {
     const groupIndex = Math.floor(index / groupSize);
@@ -42,8 +47,42 @@ export default () => {
     );
   }
 
+  const scrollToGroup = (groupKey: string) => {
+    listRef.current?.scrollTo({ groupKey, align: 'top' });
+  };
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+        <button type="button" onClick={() => scrollToGroup('G0')}>
+          Scroll to first group
+        </button>
+        <button
+          type="button"
+          onClick={() => scrollToGroup(`G${groupCount - 1}`)}
+        >
+          Scroll to last group
+        </button>
+      </div>
+      <div
+        style={{
+          display: 'flex',
+          flexWrap: 'wrap',
+          gap: 8,
+          maxHeight: 120,
+          overflow: 'auto',
+        }}
+      >
+        {groupKeys.map((groupKey) => (
+          <button
+            type="button"
+            key={groupKey}
+            onClick={() => scrollToGroup(groupKey)}
+          >
+            Scroll to {groupKey}
+          </button>
+        ))}
+      </div>
       <Listy
         height={360}
         itemHeight={32}
@@ -69,5 +108,3 @@ export default () => {
     </div>
   );
 };
-
-
