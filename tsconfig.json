@@ -11,7 +11,8 @@
     "paths": {
       "@/*": ["src/*"],
       "@@/*": [".dumi/tmp/*"],
-      "@rc-component/trigger": ["src/index.tsx"]
-    }
+      "@rc-component/listy": ["src/index.ts"]
+    },
+    "types": ["@testing-library/jest-dom", "node"]
   }
 }

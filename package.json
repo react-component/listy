@@ -1,24 +1,22 @@
 {
   "name": "@rc-component/listy",
   "version": "1.0.0",
-  "description": "base abstract listy component for react",
-  "engines": {
-    "node": ">=8.x"
-  },
+  "description": "React Listy Component",
   "keywords": [
     "react",
     "react-component",
-    "react-trigger",
-    "trigger"
+    "list",
+    "high performance",
+    "headless ui"
   ],
-  "homepage": "https://github.com/react-component/trigger",
+  "homepage": "https://github.com/react-component/listy",
   "author": "",
   "repository": {
     "type": "git",
-    "url": "https://github.com/react-component/trigger.git"
+    "url": "https://github.com/react-component/listy.git"
   },
   "bugs": {
-    "url": "https://github.com/react-component/trigger/issues"
+    "url": "https://github.com/react-component/listy/issues"
   },
   "files": [
     "es",
@@ -44,28 +42,32 @@
     "@rc-component/motion": "^1.1.4",
     "@rc-component/portal": "^2.0.0",
     "@rc-component/resize-observer": "^1.0.0",
-    "@rc-component/util": "^1.3.0",
-    "clsx": "^2.1.1"
+    "@rc-component/util": "^1.3.1",
+    "classnames": "^2.5.1",
+    "rc-virtual-list": "^3.19.2"
   },
   "devDependencies": {
-    "@rc-component/father-plugin": "^2.0.0",
-    "@rc-component/np": "^1.0.3",
-    "@testing-library/jest-dom": "^6.1.4",
-    "@testing-library/react": "^16.0.0",
-    "@types/jest": "^30.0.0",
-    "@types/node": "^24.0.3",
-    "@types/react": "^19.1.2",
-    "@types/react-dom": "^19.1.2",
+    "@rc-component/father-plugin": "^2.1.3",
+    "@rc-component/np": "^1.0.4",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.0",
+    "@types/classnames": "^2.3.4",
+    "@types/jest": "^29.5.14",
+    "@types/node": "^24.10.0",
+    "@types/react": "^19.2.2",
+    "@types/react-dom": "^19.2.2",
     "@umijs/fabric": "^4.0.1",
-    "dumi": "^2.1.0",
-    "eslint": "^8.51.0",
-    "father": "^4.0.0",
-    "less": "^4.2.0",
-    "prettier": "^3.3.3",
-    "rc-test": "^7.0.13",
-    "react": "^19.1.0",
-    "react-dom": "^19.1.0",
-    "typescript": "~5.9.3"
+    "cross-env": "^7.0.3",
+    "dumi": "^2.4.21",
+    "eslint": "^8.57.1",
+    "father": "^4.6.7",
+    "less": "^4.4.2",
+    "prettier": "^3.6.2",
+    "rc-test": "^7.1.2",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "regenerator-runtime": "^0.14.1",
+    "typescript": "^5.9.3"
   },
   "peerDependencies": {
     "react": ">=18.0.0",
