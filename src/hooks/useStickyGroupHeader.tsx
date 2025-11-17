@@ -43,9 +43,9 @@ export default function useStickyGroupHeader<
       const getHolderScrollTop = () => {
         const container = containerRef.current;
         const holder =
-          container?.querySelector<HTMLDivElement>('.rc-virtual-list-holder') ||
+          container?.querySelector<HTMLDivElement>(`.${prefixCls}-holder`) ||
           listRef.current?.nativeElement?.querySelector?.(
-            '.rc-virtual-list-holder',
+            `.${prefixCls}-holder`,
           );
         if (holder) {
           return holder.scrollTop;
