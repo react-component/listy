@@ -39,6 +39,7 @@ export default function useStickyGroupHeader<
         return null;
       }
 
+      // maybe rc-virtual-list will expose scrollTop in the future
       const getHolderScrollTop = () => {
         const container = containerRef.current;
         const holder =
@@ -90,7 +91,7 @@ export default function useStickyGroupHeader<
       };
 
       const scrollTop = getHolderScrollTop();
-      const activeHeaderIdx = resolveByScrollTop(scrollTop)
+      const activeHeaderIdx = resolveByScrollTop(scrollTop);
 
       lastHeaderIdxRef.current = activeHeaderIdx;
 
