@@ -12,6 +12,7 @@ import type { Row } from './hooks/useFlattenRows';
 import useStickyGroupHeader from './hooks/useStickyGroupHeader';
 import useOnEndReached from './hooks/useOnEndReached';
 import { isGroupScrollConfig } from './util';
+import clsx from 'clsx';
 
 function Listy<T, K extends React.Key = React.Key>(
   props: ListyProps<T, K>,
@@ -105,9 +106,9 @@ function Listy<T, K extends React.Key = React.Key>(
   const renderHeaderRow = React.useCallback(
     (groupKey: K) => {
       const groupItems = groupKeyToItems.get(groupKey) || [];
-      const headerClassName = `${prefixCls}-group-header${
-        sticky && !virtual ? ` ${prefixCls}-group-header-sticky` : ''
-      }`;
+      const headerClassName = clsx(`${prefixCls}-group-header`, {
+        [`${prefixCls}-group-header-sticky`]: sticky && !virtual,
+      });
 
       return (
         <div className={headerClassName}>
@@ -135,6 +136,7 @@ function Listy<T, K extends React.Key = React.Key>(
         height={height}
         extraRender={extraRender}
         onScroll={handleOnScroll}
+        prefixCls={prefixCls}
       >
         {(row: Row<T, K>) =>
           row.type === 'header'
