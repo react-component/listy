@@ -6,6 +6,8 @@ import type { ExtraRenderInfo } from 'rc-virtual-list/lib/interface';
 import { useGroupSegments, useStickyGroupHeader } from '../src/hooks';
 import type { StickyHeaderParams } from '../src/hooks/useStickyGroupHeader';
 
+const PREFIX_CLS = 'rc-listy';
+
 interface GroupedItem {
   id: number;
   group: string;
@@ -173,14 +175,14 @@ describe('useStickyGroupHeader', () => {
         nativeElement: container,
         getScrollInfo: () => ({ x: 0, y: info.start }),
       }),
-      prefixCls: 'rc-listy',
+      prefixCls: PREFIX_CLS,
     };
 
     const { unmount } = render(
       <StickyHeaderTester params={params} info={info} />,
     );
 
-    const stickyHeader = container.querySelector('.rc-listy-sticky-header');
+    const stickyHeader = container.querySelector(`.${PREFIX_CLS}-sticky-header`);
     expect(stickyHeader).not.toBeNull();
     expect(stickyHeader).toHaveTextContent('Group 2-3');
     expect(title).toHaveBeenCalledWith('Group 2', baseItems.slice(3, 6));
@@ -205,12 +207,12 @@ describe('useStickyGroupHeader', () => {
       groupKeyToItems: baseItemsMap,
       containerRef,
       listRef: createListRef({ nativeElement: container }),
-      prefixCls: 'rc-listy',
+      prefixCls: PREFIX_CLS,
     };
 
     const { unmount } = render(<StickyHeaderTester params={params} info={info} />);
 
-    const stickyHeader = container.querySelector('.rc-listy-sticky-header');
+    const stickyHeader = container.querySelector(`.${PREFIX_CLS}-sticky-header`);
     expect(stickyHeader).toBeNull();
 
     unmount();
@@ -250,14 +252,14 @@ describe('useStickyGroupHeader', () => {
       groupKeyToItems: baseItemsMap,
       containerRef,
       listRef,
-      prefixCls: 'rc-listy',
+      prefixCls: PREFIX_CLS,
     };
 
     const { unmount } = render(
       <StickyHeaderTester params={params} info={info} />,
     );
 
-    const stickyHeader = container.querySelector('.rc-listy-sticky-header');
+    const stickyHeader = container.querySelector(`.${PREFIX_CLS}-sticky-header`);
     expect(stickyHeader).not.toBeNull();
     expect(stickyHeader).toHaveTextContent('Group 2');
     expect(title).toHaveBeenCalledWith('Group 2', baseItems.slice(3, 6));
@@ -268,7 +270,7 @@ describe('useStickyGroupHeader', () => {
 
   it('prefers holder scrollTop over virtual start', () => {
     const holder = document.createElement('div');
-    holder.className = 'rc-virtual-list-holder';
+    holder.className = `${PREFIX_CLS}-holder`;
     holder.scrollTop = 80;
 
     const container = document.createElement('div');
@@ -308,14 +310,14 @@ describe('useStickyGroupHeader', () => {
       groupKeyToItems: baseItemsMap,
       containerRef,
       listRef,
-      prefixCls: 'rc-listy',
+      prefixCls: PREFIX_CLS,
     };
 
     const { unmount } = render(
       <StickyHeaderTester params={params} info={info} />,
     );
 
-    const stickyHeader = container.querySelector('.rc-listy-sticky-header');
+    const stickyHeader = container.querySelector(`.${PREFIX_CLS}-sticky-header`);
     expect(stickyHeader).not.toBeNull();
     expect(stickyHeader).toHaveTextContent('Group 2');
 

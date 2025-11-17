@@ -4,6 +4,7 @@ import Listy, { type ListyRef } from '@rc-component/listy';
 
 const DEFAULT_HEIGHT = 200;
 const DEFAULT_ITEM_HEIGHT = 30;
+const PREFIX_CLS = 'rc-listy';
 
 const createItems = (count: number) =>
   Array.from({ length: count }, (_, i) => ({ id: i }));
@@ -62,7 +63,7 @@ describe('Listy - onEndReached', () => {
       );
 
       const scrollContainer = container.querySelector(
-        '.rc-virtual-list-holder',
+        `.${PREFIX_CLS}-holder`,
       )!;
 
       scrollToBottom(scrollContainer, items.length);
@@ -86,7 +87,7 @@ describe('Listy - onEndReached', () => {
       );
 
       const scrollContainer = container.querySelector(
-        '.rc-virtual-list-holder',
+        `.${PREFIX_CLS}-holder`,
       )!;
 
       // Not at bottom: scrollTop + clientHeight < scrollHeight
@@ -115,7 +116,7 @@ describe('Listy - onEndReached', () => {
       );
 
       const scrollContainer = container.querySelector(
-        '.rc-virtual-list-holder',
+        `.${PREFIX_CLS}-holder`,
       )!;
 
       // Should not throw error
@@ -148,7 +149,7 @@ describe('Listy - onEndReached', () => {
       );
 
       const scrollContainer = container.querySelector(
-        '.rc-virtual-list-holder',
+        `.${PREFIX_CLS}-holder`,
       )!;
 
       // Scroll to bottom
@@ -183,7 +184,7 @@ describe('Listy - onEndReached', () => {
 
       const { container, rerender } = render(renderList(itemCount));
       const scrollContainer = container.querySelector(
-        '.rc-virtual-list-holder',
+        `.${PREFIX_CLS}-holder`,
       )!;
 
       const scrollToBottomWithCount = () => {
@@ -229,7 +230,7 @@ describe('Listy - onEndReached', () => {
 
       const { container, rerender } = render(renderList(itemCount));
       const scrollContainer = container.querySelector(
-        '.rc-virtual-list-holder',
+        `.${PREFIX_CLS}-holder`,
       )!;
 
       const scrollToBottomWithCount = () => {
@@ -284,7 +285,7 @@ describe('Listy - onEndReached', () => {
 
       const { container, getByTestId } = render(<LoadMoreComponent />);
       const scrollContainer = container.querySelector(
-        '.rc-virtual-list-holder',
+        `.${PREFIX_CLS}-holder`,
       )!;
 
       // Initial state
@@ -352,7 +353,7 @@ describe('Listy - onEndReached', () => {
         <ScrollToEndComponent />,
       );
       const scrollContainer = container.querySelector(
-        '.rc-virtual-list-holder',
+        `.${PREFIX_CLS}-holder`,
       )!;
       const scrollButton = getByRole('button', { name: /scroll to end/i });
 
@@ -402,7 +403,7 @@ describe('Listy - onEndReached', () => {
       );
 
       const scrollContainer = container.querySelector(
-        '.rc-virtual-list-holder',
+        `.${PREFIX_CLS}-holder`,
       )!;
 
       // Content height equals container height (already at bottom)
@@ -432,7 +433,7 @@ describe('Listy - onEndReached', () => {
       );
 
       const scrollContainer = container.querySelector(
-        '.rc-virtual-list-holder',
+        `.${PREFIX_CLS}-holder`,
       )!;
 
       mockScroll(scrollContainer, 0, 0, DEFAULT_HEIGHT);
@@ -458,7 +459,7 @@ describe('Listy - onEndReached', () => {
       );
 
       const scrollContainer = container.querySelector(
-        '.rc-virtual-list-holder',
+        `.${PREFIX_CLS}-holder`,
       )!;
 
       // Slightly past bottom (can happen during animation)
@@ -494,7 +495,7 @@ describe('Listy - onEndReached', () => {
 
       const { container, rerender } = render(renderList(itemCount));
       const scrollContainer = container.querySelector(
-        '.rc-virtual-list-holder',
+        `.${PREFIX_CLS}-holder`,
       )!;
 
       const scrollTo = (scrollTop: number) => {
@@ -556,7 +557,7 @@ describe('Listy - onEndReached', () => {
       );
 
       const scrollContainer = container.querySelector(
-        '.rc-virtual-list-holder',
+        `.${PREFIX_CLS}-holder`,
       )!;
 
       // Scroll to bottom with groups (items + headers)

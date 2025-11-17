@@ -6,15 +6,15 @@ exports[`Listy should match snapshot 1`] = `
     class="rc-listy"
   >
     <div
-      class="rc-virtual-list"
+      class="rc-listy"
       style="position: relative;"
     >
       <div
-        class="rc-virtual-list-holder"
+        class="rc-listy-holder"
       >
         <div>
           <div
-            class="rc-virtual-list-holder-inner"
+            class="rc-listy-holder-inner"
             style="display: flex; flex-direction: column;"
           >
             <div>
