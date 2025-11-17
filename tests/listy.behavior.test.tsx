@@ -155,4 +155,28 @@ describe('Listy behaviors', () => {
     expect(stickyHeader).toHaveTextContent('Group Group A');
     expect(title).toHaveBeenCalled();
   });
+
+  it('scroll to group', () => {
+    const scrollHandler = jest.fn();
+    MockedVirtualList.__setScrollHandler(scrollHandler);
+  
+    const ref = React.createRef<ListyRef>();
+    renderList({
+      ref,
+      group: {
+        key: (item) => item.group,
+        title: () => null,
+      },
+    });
+  
+    act(() => {
+      ref.current?.scrollTo({ groupKey: 'Group A', align: 'bottom', offset: 12 });
+    });
+  
+    expect(scrollHandler).toHaveBeenCalledWith({
+      key: 'Group A',
+      align: 'bottom',
+      offset: 12,
+    });
+  });  
 });
