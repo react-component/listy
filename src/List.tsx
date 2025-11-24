@@ -1,10 +1,6 @@
 import * as React from 'react';
 import VirtualList, { type ListRef } from 'rc-virtual-list';
-import type {
-  GetKey,
-  ListyProps,
-  ListyRef,
-} from './interface';
+import type { GetKey, ListyProps, ListyRef } from './interface';
 import { useImperativeHandle, forwardRef } from 'react';
 import useGroupSegments from './hooks/useGroupSegments';
 import useFlattenRows from './hooks/useFlattenRows';
@@ -13,6 +9,7 @@ import useStickyGroupHeader from './hooks/useStickyGroupHeader';
 import useOnEndReached from './hooks/useOnEndReached';
 import { isGroupScrollConfig } from './util';
 import clsx from 'clsx';
+import { useEvent } from '@rc-component/util';
 
 function Listy<T, K extends React.Key = React.Key>(
   props: ListyProps<T, K>,
@@ -31,7 +28,7 @@ function Listy<T, K extends React.Key = React.Key>(
     prefixCls = 'rc-listy',
   } = props;
 
-  const data = items || [];
+  const data = React.useMemo(() => items || [], [items]);
 
   const listRef = React.useRef<ListRef>(null);
   const containerRef = React.useRef<HTMLDivElement>(null);
@@ -51,33 +48,25 @@ function Listy<T, K extends React.Key = React.Key>(
     },
   }));
 
-  const getItemKey = React.useCallback<GetKey<T>>(
-    (item: T) => {
-      if (typeof rowKey === 'function') {
-        return rowKey(item);
-      }
-      return item?.[rowKey as string];
-    },
-    [rowKey],
-  );
-
   const groupSegments = useGroupSegments<T, K>(data, group);
+
+  // =================================== Keys ===================================
+  const getKey = useEvent((row: Row<T, K>): React.Key => {
+    if (row.type === 'header') {
+      return row.groupKey;
+    }
+
+    if (typeof rowKey === 'function') {
+      return rowKey(row.item);
+    }
+    return row.item?.[rowKey as string];
+  });
 
   // ======================= Flatten rows (header + item) =======================
   const { rows, headerRows, groupKeyToSeg } = useFlattenRows<T, K>(
     data,
     group,
     groupSegments,
-  );
-
-  const getKey = React.useCallback(
-    (row: Row<T, K>): React.Key => {
-      if (row.type === 'header') {
-        return row.groupKey;
-      }
-      return getItemKey(row.item);
-    },
-    [getItemKey],
   );
 
   // Pre-compute each group's items to simplify header rendering

@@ -7,6 +7,9 @@ export interface GroupSegment<K extends React.Key> {
   endIndex: number;
 }
 
+/**
+ * segments representing consecutive runs of items that share the same group key.
+ */
 export default function useGroupSegments<T, K extends React.Key = React.Key>(
   items: T[],
   group?: Group<T, K>,
