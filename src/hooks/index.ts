@@ -1,5 +1,5 @@
-import useGroupSegments from './useGroupSegments';
+import useGroupData from './useGroupData';
+import useFlattenData from './useFlattenData';
 import useStickyGroupHeader from './useStickyGroupHeader';
-import useFlattenRows from './useFlattenRows';
 
-export { useGroupSegments, useStickyGroupHeader, useFlattenRows };
+export { useGroupData, useFlattenData, useStickyGroupHeader };

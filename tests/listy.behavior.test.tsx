@@ -2,7 +2,6 @@ import React from 'react';
 import { act, render } from '@testing-library/react';
 import type { ExtraRenderInfo } from 'rc-virtual-list/lib/interface';
 import Listy, { type ListyRef, type ListyProps } from '@rc-component/listy';
-import type { FlattenRowsResult } from '../src/hooks/useFlattenRows';
 
 jest.mock('rc-virtual-list', () => {
   const React = require('react');
@@ -66,17 +65,6 @@ type MockedVirtualListComponent = React.ForwardRefExoticComponent<any> & {
 const MockedVirtualList = require('rc-virtual-list')
   .default as MockedVirtualListComponent;
 
-let mockFlattenRows: FlattenRowsResult<any> | null = null;
-
-jest.mock('../src/hooks/useFlattenRows', () => {
-  const actual = jest.requireActual('../src/hooks/useFlattenRows');
-  return {
-    __esModule: true,
-    default: (items: any[], group: any, segments: any) =>
-      mockFlattenRows ?? actual.default(items, group, segments),
-  };
-});
-
 describe('Listy behaviors', () => {
   beforeEach(() => {
     MockedVirtualList.__setExtraInfo({
@@ -85,7 +73,6 @@ describe('Listy behaviors', () => {
       virtual: true,
     });
     MockedVirtualList.__setScrollHandler(() => {});
-    mockFlattenRows = null;
   });
 
   const renderList = (

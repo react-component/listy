@@ -1,14 +1,45 @@
 import * as React from 'react';
 import VirtualList, { type ListRef } from 'rc-virtual-list';
-import type { ListyProps, ListyRef } from './interface';
+import type { ScrollTo } from 'rc-virtual-list/lib/List';
 import { useImperativeHandle, forwardRef } from 'react';
-import useGroupSegments from './hooks/useGroupSegments';
-import useFlattenRows from './hooks/useFlattenRows';
-import type { Row } from './hooks/useFlattenRows';
+import useGroupData from './hooks/useGroupData';
+import type { Group } from './hooks/useGroupData';
+import useFlattenData from './hooks/useFlattenData';
+import type { Row } from './hooks/useFlattenData';
 import useStickyGroupHeader from './hooks/useStickyGroupHeader';
-import { isGroupScrollConfig } from './util';
 import clsx from 'clsx';
 import { useEvent } from '@rc-component/util';
+
+type RowKey<T> = keyof T | ((item: T) => React.Key);
+
+export type ScrollAlign = 'top' | 'bottom' | 'auto';
+
+export interface GroupScrollToConfig {
+  groupKey: string;
+  align?: ScrollAlign;
+  offset?: number;
+}
+
+export type ListyScrollToConfig =
+  | Parameters<ScrollTo>[0]
+  | GroupScrollToConfig;
+
+export interface ListyRef {
+  scrollTo: (config?: ListyScrollToConfig) => void;
+}
+
+export interface ListyProps<T, K extends React.Key = React.Key> {
+  items?: T[];
+  sticky?: boolean;
+  itemHeight?: number;
+  height?: number;
+  group?: Group<T, K>;
+  virtual?: boolean;
+  prefixCls?: string;
+  rowKey: RowKey<T>;
+  onScroll?: React.UIEventHandler<HTMLElement>;
+  itemRender: (item: T, index: number) => React.ReactNode;
+}
 
 function Listy<T, K extends React.Key = React.Key>(
   props: ListyProps<T, K>,
@@ -38,7 +69,7 @@ function Listy<T, K extends React.Key = React.Key>(
   // ========================== Imperative API ==========================
   useImperativeHandle(ref, () => ({
     scrollTo: (config) => {
-      if (isGroupScrollConfig(config)) {
+      if (config && typeof config === 'object' && 'groupKey' in config) {
         const { groupKey, align, offset } = config;
         listRef.current?.scrollTo({
           key: groupKey,
@@ -47,12 +78,12 @@ function Listy<T, K extends React.Key = React.Key>(
         });
         return;
       }
-      listRef.current?.scrollTo(config);
+      listRef.current?.scrollTo(config as Parameters<ScrollTo>[0]);
     },
   }));
 
   // ============================= Grouping =============================
-  const groupSegments = useGroupSegments<T, K>(data, group);
+  const groupData = useGroupData<T, K>(data, group);
 
   // ============================= Row Keys =============================
   const getKey = useEvent((row: Row<T, K>): React.Key => {
@@ -67,23 +98,11 @@ function Listy<T, K extends React.Key = React.Key>(
   });
 
   // ============================= Flat Rows =============================
-  const { rows, headerRows, groupKeyToSeg } = useFlattenRows<T, K>(
+  const { rows, headerRows, groupKeyToItems } = useFlattenData<T, K>(
     data,
+    groupData,
     group,
-    groupSegments,
   );
-
-  // ============================ Group Items ============================
-  const groupKeyToItems = React.useMemo(() => {
-    const map = new Map<K, T[]>();
-    if (!group) {
-      return map;
-    }
-    groupKeyToSeg.forEach(({ startIndex, endIndex }, key) => {
-      map.set(key, data.slice(startIndex, endIndex + 1));
-    });
-    return map;
-  }, [group, groupKeyToSeg, data]);
 
   // =========================== Sticky Header ===========================
   const extraRender = useStickyGroupHeader<T, K>({

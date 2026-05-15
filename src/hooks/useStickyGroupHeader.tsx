@@ -2,7 +2,7 @@ import * as React from 'react';
 import Portal from '@rc-component/portal';
 import type { ListRef } from 'rc-virtual-list';
 import type { ExtraRenderInfo } from 'rc-virtual-list/lib/interface';
-import type { Group } from '../interface';
+import type { Group } from './useGroupData';
 
 export interface StickyHeaderParams<T, K extends React.Key = React.Key> {
   enabled: boolean;
