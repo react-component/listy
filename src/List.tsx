@@ -4,8 +4,8 @@ import type { ScrollTo } from 'rc-virtual-list/lib/List';
 import { useImperativeHandle, forwardRef } from 'react';
 import useGroupData from './hooks/useGroupData';
 import type { Group } from './hooks/useGroupData';
-import useFlattenData from './hooks/useFlattenData';
-import type { Row } from './hooks/useFlattenData';
+import useFlattenRows from './hooks/useFlattenRows';
+import type { Row } from './hooks/useFlattenRows';
 import useStickyGroupHeader from './hooks/useStickyGroupHeader';
 import clsx from 'clsx';
 import { useEvent } from '@rc-component/util';
@@ -98,7 +98,7 @@ function Listy<T, K extends React.Key = React.Key>(
   });
 
   // ============================= Flat Rows =============================
-  const { rows, headerRows, groupKeyToItems } = useFlattenData<T, K>(
+  const { rows, headerRows, groupKeyToItems } = useFlattenRows<T, K>(
     data,
     groupData,
     group,

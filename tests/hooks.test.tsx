@@ -3,7 +3,7 @@ import { render, renderHook } from '@testing-library/react';
 import type { ListRef } from 'rc-virtual-list';
 import type { ExtraRenderInfo } from 'rc-virtual-list/lib/interface';
 
-import useFlattenData from '../src/hooks/useFlattenData';
+import useFlattenRows from '../src/hooks/useFlattenRows';
 import useGroupData from '../src/hooks/useGroupData';
 import useStickyGroupHeader from '../src/hooks/useStickyGroupHeader';
 import type { StickyHeaderParams } from '../src/hooks/useStickyGroupHeader';
@@ -128,7 +128,7 @@ describe('useGroupData', () => {
   });
 });
 
-describe('useFlattenData', () => {
+describe('useFlattenRows', () => {
   it('flattens grouped data into header and item rows', () => {
     const items: GroupedItem[] = [
       { id: 0, group: 'A' },
@@ -142,7 +142,7 @@ describe('useFlattenData', () => {
 
     const { result } = renderHook(() => {
       const groupData = useGroupData(items, group);
-      return useFlattenData(items, groupData, group);
+      return useFlattenRows(items, groupData, group);
     });
 
     expect(result.current.rows).toEqual([
@@ -172,7 +172,7 @@ describe('useFlattenData', () => {
 
     const { result } = renderHook(() => {
       const groupData = useGroupData(items);
-      return useFlattenData(items, groupData);
+      return useFlattenRows(items, groupData);
     });
 
     expect(result.current).toEqual({

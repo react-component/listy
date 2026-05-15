@@ -5,7 +5,7 @@ export type Row<T, K extends React.Key = React.Key> =
   | { type: 'header'; groupKey: K }
   | { type: 'item'; item: T; index: number };
 
-export interface FlattenDataResult<T, K extends React.Key = React.Key> {
+export interface FlattenRowsResult<T, K extends React.Key = React.Key> {
   rows: Row<T, K>[];
   headerRows: { groupKey: K; rowIndex: number }[];
   groupKeyToItems: Map<K, T[]>;
@@ -16,11 +16,11 @@ export interface FlattenDataResult<T, K extends React.Key = React.Key> {
  * When grouping is enabled, items follow the insertion order of the group map
  * while preserving their original indexes.
  */
-export default function useFlattenData<T, K extends React.Key = React.Key>(
+export default function useFlattenRows<T, K extends React.Key = React.Key>(
   data: T[],
   groupData: Map<K, GroupDataItem<T>[]>,
   group?: Group<T, K>,
-): FlattenDataResult<T, K> {
+): FlattenRowsResult<T, K> {
   return React.useMemo(() => {
     const flatRows: Row<T, K>[] = [];
     const headerRows: { groupKey: K; rowIndex: number }[] = [];
