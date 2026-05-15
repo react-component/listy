@@ -3,11 +3,9 @@ import { render, renderHook } from '@testing-library/react';
 import type { ListRef } from 'rc-virtual-list';
 import type { ExtraRenderInfo } from 'rc-virtual-list/lib/interface';
 
-import {
-  useFlattenData,
-  useGroupData,
-  useStickyGroupHeader,
-} from '../src/hooks';
+import useFlattenData from '../src/hooks/useFlattenData';
+import useGroupData from '../src/hooks/useGroupData';
+import useStickyGroupHeader from '../src/hooks/useStickyGroupHeader';
 import type { StickyHeaderParams } from '../src/hooks/useStickyGroupHeader';
 
 const PREFIX_CLS = 'rc-listy';
