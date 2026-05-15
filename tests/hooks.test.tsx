@@ -3,7 +3,9 @@ import { render, renderHook } from '@testing-library/react';
 import type { ListRef } from 'rc-virtual-list';
 import type { ExtraRenderInfo } from 'rc-virtual-list/lib/interface';
 
-import { useGroupSegments, useStickyGroupHeader } from '../src/hooks';
+import useFlattenRows from '../src/hooks/useFlattenRows';
+import useGroupSegments from '../src/hooks/useGroupSegments';
+import useStickyGroupHeader from '../src/hooks/useStickyGroupHeader';
 import type { StickyHeaderParams } from '../src/hooks/useStickyGroupHeader';
 
 const PREFIX_CLS = 'rc-listy';
@@ -64,13 +66,13 @@ const createListRef = (
 };
 
 describe('useGroupSegments', () => {
-  it('creates segments for contiguous group keys', () => {
+  it('groups items by key across the full data set', () => {
     const items: GroupedItem[] = [
       { id: 0, group: 'A' },
       { id: 1, group: 'A' },
       { id: 2, group: 'B' },
       { id: 3, group: 'B' },
-      { id: 4, group: 'C' },
+      { id: 4, group: 'A' },
     ];
 
     const { result } = renderHook(() =>
@@ -80,27 +82,41 @@ describe('useGroupSegments', () => {
       }),
     );
 
-    expect(result.current).toEqual([
-      { key: 'A', startIndex: 0, endIndex: 1 },
-      { key: 'B', startIndex: 2, endIndex: 3 },
-      { key: 'C', startIndex: 4, endIndex: 4 },
-    ]);
+    expect(result.current).toEqual(
+      new Map([
+        [
+          'A',
+          [
+            { item: items[0], index: 0 },
+            { item: items[1], index: 1 },
+            { item: items[4], index: 4 },
+          ],
+        ],
+        [
+          'B',
+          [
+            { item: items[2], index: 2 },
+            { item: items[3], index: 3 },
+          ],
+        ],
+      ]),
+    );
   });
 
-  it('supports static group keys and empty states', () => {
-    const staticGroup = { key: 'static', title: () => null };
+  it('supports empty states', () => {
+    const staticGroup = { key: () => 'static', title: () => null };
     const { result: staticResult } = renderHook(() =>
       useGroupSegments([{ id: 1, group: 'unused' }], staticGroup),
     );
 
-    expect(staticResult.current).toEqual([
-      { key: 'static', startIndex: 0, endIndex: 0 },
-    ]);
+    expect(staticResult.current).toEqual(
+      new Map([['static', [{ item: { id: 1, group: 'unused' }, index: 0 }]]]),
+    );
 
     const { result: noGroup } = renderHook(() =>
       useGroupSegments([{ id: 1, group: 'A' }], undefined),
     );
-    expect(noGroup.current).toEqual([]);
+    expect(noGroup.current).toEqual(new Map());
 
     const { result: noItems } = renderHook(() =>
       useGroupSegments<GroupedItem>([], {
@@ -108,26 +124,65 @@ describe('useGroupSegments', () => {
         title: () => null,
       }),
     );
-    expect(noItems.current).toEqual([]);
+    expect(noItems.current).toEqual(new Map());
   });
+});
 
-  it('handles inconsistent length lookups', () => {
-    const trickyItems: any = { 0: { id: 9, group: 'Z' }, __calls: 0 };
-    Object.defineProperty(trickyItems, 'length', {
-      get() {
-        this.__calls += 1;
-        return this.__calls === 1 ? 1 : 0;
-      },
+describe('useFlattenRows', () => {
+  it('flattens grouped data into header and item rows', () => {
+    const items: GroupedItem[] = [
+      { id: 0, group: 'A' },
+      { id: 1, group: 'B' },
+      { id: 2, group: 'A' },
+    ];
+    const group = {
+      key: (item: GroupedItem) => item.group,
+      title: () => null,
+    };
+
+    const { result } = renderHook(() => {
+      const groupData = useGroupSegments(items, group);
+      return useFlattenRows(items, groupData, group);
     });
 
-    const { result } = renderHook(() =>
-      useGroupSegments(trickyItems as GroupedItem[], {
-        key: (item) => item?.group ?? 'fallback',
-        title: () => null,
-      }),
+    expect(result.current.rows).toEqual([
+      { type: 'header', groupKey: 'A' },
+      { type: 'item', item: items[0], index: 0 },
+      { type: 'item', item: items[2], index: 2 },
+      { type: 'header', groupKey: 'B' },
+      { type: 'item', item: items[1], index: 1 },
+    ]);
+    expect(result.current.headerRows).toEqual([
+      { groupKey: 'A', rowIndex: 0 },
+      { groupKey: 'B', rowIndex: 3 },
+    ]);
+    expect(result.current.groupKeyToItems).toEqual(
+      new Map([
+        ['A', [items[0], items[2]]],
+        ['B', [items[1]]],
+      ]),
     );
+  });
 
-    expect(result.current).toEqual([]);
+  it('flattens ungrouped data without headers', () => {
+    const items: GroupedItem[] = [
+      { id: 0, group: 'A' },
+      { id: 1, group: 'B' },
+    ];
+
+    const { result } = renderHook(() => {
+      const groupData = useGroupSegments(items);
+      return useFlattenRows(items, groupData);
+    });
+
+    expect(result.current).toEqual({
+      rows: [
+        { type: 'item', item: items[0], index: 0 },
+        { type: 'item', item: items[1], index: 1 },
+      ],
+      headerRows: [],
+      groupKeyToItems: new Map(),
+    });
   });
 });
 

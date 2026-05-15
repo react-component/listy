@@ -1,6 +1,5 @@
 import * as React from 'react';
-import type { Group } from '../interface';
-import type { GroupSegment } from './useGroupSegments';
+import type { Group, GroupSegmentItem } from './useGroupSegments';
 
 export type Row<T, K extends React.Key = React.Key> =
   | { type: 'header'; groupKey: K }
@@ -9,44 +8,46 @@ export type Row<T, K extends React.Key = React.Key> =
 export interface FlattenRowsResult<T, K extends React.Key = React.Key> {
   rows: Row<T, K>[];
   headerRows: { groupKey: K; rowIndex: number }[];
-  groupKeyToSeg: Map<K, { startIndex: number; endIndex: number }>;
+  groupKeyToItems: Map<K, T[]>;
 }
 
+/**
+ * Flatten grouped data into header and item rows.
+ * When grouping is enabled, items follow the insertion order of the group map
+ * while preserving their original indexes.
+ */
 export default function useFlattenRows<T, K extends React.Key = React.Key>(
-  items: T[],
-  group: Group<T, K> | undefined,
-  segments: GroupSegment<K>[],
+  data: T[],
+  groupData: Map<K, GroupSegmentItem<T>[]>,
+  group?: Group<T, K>,
 ): FlattenRowsResult<T, K> {
   return React.useMemo(() => {
     const flatRows: Row<T, K>[] = [];
     const headerRows: { groupKey: K; rowIndex: number }[] = [];
-    const groupKeyToSeg = new Map<
-      K,
-      { startIndex: number; endIndex: number }
-    >();
+    const groupKeyToItems = new Map<K, T[]>();
 
-    if (!group || !segments.length) {
-      for (let i = 0; i < items.length; i += 1) {
-        flatRows.push({ type: 'item', item: items[i], index: i });
-      }
-      return { rows: flatRows, headerRows, groupKeyToSeg };
-    }
-
-    for (let s = 0; s < segments.length; s += 1) {
-      const seg = segments[s];
-      groupKeyToSeg.set(seg.key, {
-        startIndex: seg.startIndex,
-        endIndex: seg.endIndex,
+    if (!group) {
+      data.forEach((item, index) => {
+        flatRows.push({ type: 'item', item, index });
       });
 
-      headerRows.push({ groupKey: seg.key, rowIndex: flatRows.length });
-      flatRows.push({ type: 'header', groupKey: seg.key });
-
-      for (let i = seg.startIndex; i <= seg.endIndex; i += 1) {
-        flatRows.push({ type: 'item', item: items[i], index: i });
-      }
+      return { rows: flatRows, headerRows, groupKeyToItems };
     }
 
-    return { rows: flatRows, headerRows, groupKeyToSeg };
-  }, [items, group, segments]);
+    groupData.forEach((groupItems, groupKey) => {
+      groupKeyToItems.set(
+        groupKey,
+        groupItems.map(({ item }) => item),
+      );
+
+      headerRows.push({ groupKey, rowIndex: flatRows.length });
+      flatRows.push({ type: 'header', groupKey });
+
+      groupItems.forEach(({ item, index }) => {
+        flatRows.push({ type: 'item', item, index });
+      });
+    });
+
+    return { rows: flatRows, headerRows, groupKeyToItems };
+  }, [data, group, groupData]);
 }

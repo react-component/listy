@@ -1,55 +1,44 @@
 import * as React from 'react';
-import type { Group } from '../interface';
 
-export interface GroupSegment<K extends React.Key> {
-  key: K;
-  startIndex: number;
-  endIndex: number;
+export interface Group<T, K extends React.Key = React.Key> {
+  key: (item: T) => K;
+  title: (groupKey: K, items: T[]) => React.ReactNode;
+}
+
+export interface GroupSegmentItem<T> {
+  item: T;
+  index: number;
 }
 
 /**
- * segments representing consecutive runs of items that share the same group key.
+ * Build a lookup map from group key to all matching data items and their
+ * original indexes.
+ * This groups by key across the full data set and does not require items with
+ * the same key to be contiguous.
  */
 export default function useGroupSegments<T, K extends React.Key = React.Key>(
-  items: T[],
+  data: T[],
   group?: Group<T, K>,
-): GroupSegment<K>[] {
+): Map<K, GroupSegmentItem<T>[]> {
   return React.useMemo(() => {
-    if (!group || !items?.length) {
-      return [];
+    const map = new Map<K, GroupSegmentItem<T>[]>();
+
+    if (!group) {
+      return map;
     }
 
-    const segments: GroupSegment<K>[] = [];
-    let currentKey: K | null = null;
-    let currentStart = -1;
+    data.forEach((item, index) => {
+      const groupKey = group.key(item);
+      const groupItems = map.get(groupKey);
+      const groupSegmentItem = { item, index };
 
-    const getGroupKey = (item: T): K =>
-      typeof group.key === 'function' ? group.key(item) : group.key;
-
-    for (let i = 0; i < items.length; i += 1) {
-      const gk = getGroupKey(items[i]);
-      if (currentKey === null) {
-        currentKey = gk;
-        currentStart = i;
-      } else if (gk !== currentKey) {
-        segments.push({
-          key: currentKey,
-          startIndex: currentStart,
-          endIndex: i - 1,
-        });
-        currentKey = gk;
-        currentStart = i;
+      if (groupItems) {
+        groupItems.push(groupSegmentItem);
+      } else {
+        map.set(groupKey, [groupSegmentItem]);
       }
-    }
+    });
 
-    if (currentKey !== null) {
-      segments.push({
-        key: currentKey,
-        startIndex: currentStart,
-        endIndex: items.length - 1,
-      });
-    }
-
-    return segments;
-  }, [items, group]);
+    return map;
+  }, [data, group]);
 }
