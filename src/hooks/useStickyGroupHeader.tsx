@@ -9,8 +9,8 @@ export interface StickyHeaderParams<T, K extends React.Key = React.Key> {
   group: Group<T, K> | undefined;
   headerRows: { groupKey: K; rowIndex: number }[];
   groupKeyToItems: Map<K, T[]>;
-  containerRef: React.RefObject<HTMLDivElement>;
-  listRef: React.RefObject<ListRef>;
+  containerRef: React.RefObject<HTMLDivElement | null>;
+  listRef: React.RefObject<ListRef | null>;
   prefixCls: string;
 }
 
@@ -34,23 +34,27 @@ export default function useStickyGroupHeader<
     (info: ExtraRenderInfo) => {
       const { virtual } = info;
 
-      if (!enabled || !headerRows.length || !virtual) {
+      if (!enabled || !group || !headerRows.length || !virtual) {
         lastHeaderIdxRef.current = 0;
+        return null;
+      }
+
+      const container = containerRef.current;
+      if (!container) {
         return null;
       }
 
       // maybe rc-virtual-list will expose scrollTop in the future
       const getHolderScrollTop = () => {
-        const container = containerRef.current;
         const holder =
-          container?.querySelector<HTMLDivElement>(`.${prefixCls}-holder`) ||
+          container.querySelector<HTMLDivElement>(`.${prefixCls}-holder`) ||
           listRef.current?.nativeElement?.querySelector?.(
             `.${prefixCls}-holder`,
           );
         if (holder) {
           return holder.scrollTop;
         }
-        const infoScrollTop = listRef.current?.getScrollInfo?.().y;
+        const infoScrollTop = listRef.current?.getScrollInfo?.().y ?? 0;
         return infoScrollTop;
       };
 
@@ -105,7 +109,7 @@ export default function useStickyGroupHeader<
       );
 
       return (
-        <Portal open getContainer={() => containerRef.current}>
+        <Portal open getContainer={() => container}>
           {headerNode}
         </Portal>
       );

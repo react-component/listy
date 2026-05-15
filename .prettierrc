@@ -4,5 +4,13 @@
   "singleQuote": true,
   "tabWidth": 2,
   "trailingComma": "all",
-  "jsxSingleQuote": false
+  "jsxSingleQuote": false,
+  "overrides": [
+    {
+      "files": "**/*.md",
+      "options": {
+        "requirePragma": true
+      }
+    }
+  ]
 }

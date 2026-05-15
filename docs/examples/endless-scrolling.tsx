@@ -23,7 +23,9 @@ export default () => {
   const listRef = useRef<ListyRef>(null);
   const nextIdRef = useRef(BATCH_SIZE + 1);
 
-  const [items, setItems] = useState<RowItem[]>(() => createBatch(1, BATCH_SIZE));
+  const [items, setItems] = useState<RowItem[]>(() =>
+    createBatch(1, BATCH_SIZE),
+  );
   const [loading, setLoading] = useState(false);
 
   const loadMore = useCallback(() => {
@@ -45,6 +47,17 @@ export default () => {
     }, LOAD_DELAY);
   }, [loading]);
 
+  const handleScroll = useCallback<React.UIEventHandler<HTMLElement>>(
+    (event) => {
+      const { scrollTop, clientHeight, scrollHeight } = event.currentTarget;
+
+      if (scrollHeight - (scrollTop + clientHeight) <= 0) {
+        loadMore();
+      }
+    },
+    [loadMore],
+  );
+
   const itemStyle = useMemo<React.CSSProperties>(
     () => ({
       padding: '0 12px',
@@ -64,10 +77,8 @@ export default () => {
         itemHeight={32}
         items={items}
         rowKey="id"
-        itemRender={(item) => (
-          <div style={itemStyle}>{item.name}</div>
-        )}
-        onEndReached={loadMore}
+        itemRender={(item) => <div style={itemStyle}>{item.name}</div>}
+        onScroll={handleScroll}
       />
 
       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>

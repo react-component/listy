@@ -32,7 +32,7 @@ export interface ListyProps<T, K extends React.Key = React.Key> {
   virtual?: boolean;
   prefixCls?: string;
   rowKey: RowKey<T>;
-  onEndReached?: () => void;
+  onScroll?: React.UIEventHandler<HTMLElement>;
   itemRender: (item: T, index: number) => React.ReactNode;
 }
 
