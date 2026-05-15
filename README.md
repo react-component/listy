@@ -78,78 +78,18 @@ npm start
 
 ### props
 
-<table class="table table-bordered table-striped">
-    <thead>
-    <tr>
-        <th style="width: 100px;">name</th>
-        <th style="width: 50px;">type</th>
-        <th style="width: 50px;">default</th>
-        <th>description</th>
-    </tr>
-    </thead>
-    <tbody>
-        <tr>
-          <td>items</td>
-          <td>T[]</td>
-          <td>[]</td>
-          <td>列表数据源，虚拟滚动会基于此计算高度。</td>
-        </tr>
-        <tr>
-          <td>rowKey</td>
-          <td>React.Key | (item: T) => React.Key</td>
-          <td>required</td>
-          <td>返回每一项的唯一标识，用于缓存高度与滚动定位。</td>
-        </tr>
-        <tr>
-          <td>itemRender</td>
-          <td>(item: T, index: number) => React.ReactNode</td>
-          <td>required</td>
-          <td>渲染单行内容的函数。</td>
-        </tr>
-        <tr>
-          <td>height</td>
-          <td>number</td>
-          <td>required</td>
-          <td>列表可视区域高度。</td>
-        </tr>
-        <tr>
-          <td>itemHeight</td>
-          <td>number</td>
-          <td>required</td>
-          <td>每行的基础高度，虚拟滚动会以此做初始估算。</td>
-        </tr>
-        <tr>
-          <td>group</td>
-          <td>Group&lt;T&gt;</td>
-          <td></td>
-          <td>提供分组 key 与标题渲染，开启后会生成组头。</td>
-        </tr>
-        <tr>
-          <td>sticky</td>
-          <td>boolean</td>
-          <td>false</td>
-          <td>为分组头启用粘性悬停效果。</td>
-        </tr>
-        <tr>
-          <td>virtual</td>
-          <td>boolean</td>
-          <td>true</td>
-          <td>是否启用虚拟列表模式，可根据需要关闭。</td>
-        </tr>
-        <tr>
-          <td>onEndReached</td>
-          <td>() => void</td>
-          <td></td>
-          <td>滚动触达底部时触发，常用于触发下一页加载。</td>
-        </tr>
-        <tr>
-          <td>prefixCls</td>
-          <td>string</td>
-          <td>rc-listy</td>
-          <td>组件样式前缀，方便自定义样式隔离。</td>
-        </tr>
-    </tbody>
-</table>
+| name | type | default | description |
+| --- | --- | --- | --- |
+| items | `T[]` | `[]` | 列表数据源，虚拟滚动会基于此计算高度。 |
+| rowKey | `keyof T \| (item: T) => React.Key` | required | 返回每一项的唯一标识，用于缓存高度与滚动定位。 |
+| itemRender | `(item: T, index: number) => React.ReactNode` | required | 渲染单行内容的函数。 |
+| height | `number` | - | 列表可视区域高度。 |
+| itemHeight | `number` | - | 每行的基础高度，虚拟滚动会以此做初始估算。 |
+| group | `{ key: ((item: T) => K) \| K; title: (groupKey: K, items: T[]) => React.ReactNode }` | - | 提供分组 key 与标题渲染，开启后会生成组头。 |
+| sticky | `boolean` | `false` | 为分组头启用粘性悬停效果。 |
+| virtual | `boolean` | `true` | 是否启用虚拟列表模式，可根据需要关闭。 |
+| onScroll | `React.UIEventHandler<HTMLElement>` | - | 滚动时触发，透传内部滚动容器的滚动事件。 |
+| prefixCls | `string` | `rc-listy` | 组件样式前缀，方便自定义样式隔离。 |
 
 ### ListyRef
 
