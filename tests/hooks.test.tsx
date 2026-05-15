@@ -4,7 +4,7 @@ import type { ListRef } from 'rc-virtual-list';
 import type { ExtraRenderInfo } from 'rc-virtual-list/lib/interface';
 
 import useFlattenRows from '../src/hooks/useFlattenRows';
-import useGroupData from '../src/hooks/useGroupData';
+import useGroupSegments from '../src/hooks/useGroupSegments';
 import useStickyGroupHeader from '../src/hooks/useStickyGroupHeader';
 import type { StickyHeaderParams } from '../src/hooks/useStickyGroupHeader';
 
@@ -65,7 +65,7 @@ const createListRef = (
   } as React.RefObject<ListRef>;
 };
 
-describe('useGroupData', () => {
+describe('useGroupSegments', () => {
   it('groups items by key across the full data set', () => {
     const items: GroupedItem[] = [
       { id: 0, group: 'A' },
@@ -76,7 +76,7 @@ describe('useGroupData', () => {
     ];
 
     const { result } = renderHook(() =>
-      useGroupData(items, {
+      useGroupSegments(items, {
         key: (item) => item.group,
         title: () => null,
       }),
@@ -106,7 +106,7 @@ describe('useGroupData', () => {
   it('supports empty states', () => {
     const staticGroup = { key: () => 'static', title: () => null };
     const { result: staticResult } = renderHook(() =>
-      useGroupData([{ id: 1, group: 'unused' }], staticGroup),
+      useGroupSegments([{ id: 1, group: 'unused' }], staticGroup),
     );
 
     expect(staticResult.current).toEqual(
@@ -114,12 +114,12 @@ describe('useGroupData', () => {
     );
 
     const { result: noGroup } = renderHook(() =>
-      useGroupData([{ id: 1, group: 'A' }], undefined),
+      useGroupSegments([{ id: 1, group: 'A' }], undefined),
     );
     expect(noGroup.current).toEqual(new Map());
 
     const { result: noItems } = renderHook(() =>
-      useGroupData<GroupedItem>([], {
+      useGroupSegments<GroupedItem>([], {
         key: (item) => item.group,
         title: () => null,
       }),
@@ -141,7 +141,7 @@ describe('useFlattenRows', () => {
     };
 
     const { result } = renderHook(() => {
-      const groupData = useGroupData(items, group);
+      const groupData = useGroupSegments(items, group);
       return useFlattenRows(items, groupData, group);
     });
 
@@ -171,7 +171,7 @@ describe('useFlattenRows', () => {
     ];
 
     const { result } = renderHook(() => {
-      const groupData = useGroupData(items);
+      const groupData = useGroupSegments(items);
       return useFlattenRows(items, groupData);
     });
 

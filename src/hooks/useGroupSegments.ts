@@ -5,7 +5,7 @@ export interface Group<T, K extends React.Key = React.Key> {
   title: (groupKey: K, items: T[]) => React.ReactNode;
 }
 
-export interface GroupDataItem<T> {
+export interface GroupSegmentItem<T> {
   item: T;
   index: number;
 }
@@ -16,12 +16,12 @@ export interface GroupDataItem<T> {
  * This groups by key across the full data set and does not require items with
  * the same key to be contiguous.
  */
-export default function useGroupData<T, K extends React.Key = React.Key>(
+export default function useGroupSegments<T, K extends React.Key = React.Key>(
   data: T[],
   group?: Group<T, K>,
-): Map<K, GroupDataItem<T>[]> {
+): Map<K, GroupSegmentItem<T>[]> {
   return React.useMemo(() => {
-    const map = new Map<K, GroupDataItem<T>[]>();
+    const map = new Map<K, GroupSegmentItem<T>[]>();
 
     if (!group) {
       return map;
@@ -30,12 +30,12 @@ export default function useGroupData<T, K extends React.Key = React.Key>(
     data.forEach((item, index) => {
       const groupKey = group.key(item);
       const groupItems = map.get(groupKey);
-      const groupDataItem = { item, index };
+      const groupSegmentItem = { item, index };
 
       if (groupItems) {
-        groupItems.push(groupDataItem);
+        groupItems.push(groupSegmentItem);
       } else {
-        map.set(groupKey, [groupDataItem]);
+        map.set(groupKey, [groupSegmentItem]);
       }
     });
 

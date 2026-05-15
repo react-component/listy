@@ -1,5 +1,5 @@
 import * as React from 'react';
-import type { Group, GroupDataItem } from './useGroupData';
+import type { Group, GroupSegmentItem } from './useGroupSegments';
 
 export type Row<T, K extends React.Key = React.Key> =
   | { type: 'header'; groupKey: K }
@@ -18,7 +18,7 @@ export interface FlattenRowsResult<T, K extends React.Key = React.Key> {
  */
 export default function useFlattenRows<T, K extends React.Key = React.Key>(
   data: T[],
-  groupData: Map<K, GroupDataItem<T>[]>,
+  groupData: Map<K, GroupSegmentItem<T>[]>,
   group?: Group<T, K>,
 ): FlattenRowsResult<T, K> {
   return React.useMemo(() => {

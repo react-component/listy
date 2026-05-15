@@ -2,8 +2,8 @@ import * as React from 'react';
 import VirtualList, { type ListRef } from 'rc-virtual-list';
 import type { ScrollTo } from 'rc-virtual-list/lib/List';
 import { useImperativeHandle, forwardRef } from 'react';
-import useGroupData from './hooks/useGroupData';
-import type { Group } from './hooks/useGroupData';
+import useGroupSegments from './hooks/useGroupSegments';
+import type { Group } from './hooks/useGroupSegments';
 import useFlattenRows from './hooks/useFlattenRows';
 import type { Row } from './hooks/useFlattenRows';
 import useStickyGroupHeader from './hooks/useStickyGroupHeader';
@@ -83,7 +83,7 @@ function Listy<T, K extends React.Key = React.Key>(
   }));
 
   // ============================= Grouping =============================
-  const groupData = useGroupData<T, K>(data, group);
+  const groupData = useGroupSegments<T, K>(data, group);
 
   // ============================= Row Keys =============================
   const getKey = useEvent((row: Row<T, K>): React.Key => {
