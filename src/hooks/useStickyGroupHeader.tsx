@@ -43,7 +43,13 @@ export default function useStickyGroupHeader<
       }
 
       const groupItems = groupKeyToItems.get(currHeader.groupKey) || [];
-      const scrollTop = listRef.current?.getScrollInfo?.().y ?? offsetY;
+      const holder = listRef.current?.nativeElement?.querySelector<HTMLElement>(
+        `.${prefixCls}-holder`,
+      );
+      // `extraRender` runs before the imperative ListRef is refreshed for this
+      // render, but rc-virtual-list syncs the holder scrollTop first.
+      const scrollTop =
+        holder?.scrollTop ?? listRef.current?.getScrollInfo?.().y ?? offsetY;
       const top = scrollTop - offsetY;
 
       return (

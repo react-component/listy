@@ -58,6 +58,22 @@ const createListRef = (
   } as React.RefObject<ListRef>;
 };
 
+const createListRefWithHolder = (
+  holderScrollTop: number,
+  overrides: Partial<ListRef> = {},
+): React.RefObject<ListRef> => {
+  const nativeElement = document.createElement('div');
+  const holder = document.createElement('div');
+  holder.className = `${PREFIX_CLS}-holder`;
+  holder.scrollTop = holderScrollTop;
+  nativeElement.appendChild(holder);
+
+  return createListRef({
+    nativeElement,
+    ...overrides,
+  });
+};
+
 describe('useGroupSegments', () => {
   it('groups items by key across the full data set', () => {
     const items: GroupedItem[] = [
@@ -296,9 +312,9 @@ describe('useStickyGroupHeader', () => {
     expect(title).toHaveBeenCalledWith('Group 2', baseItems.slice(3, 6));
   });
 
-  it('offsets the fixed header by the virtual filler position', () => {
-    const listRef = createListRef({
-      getScrollInfo: () => ({ x: 0, y: 80 }),
+  it('uses holder scrollTop to avoid stale ref offset while scrolling', () => {
+    const listRef = createListRefWithHolder(80, {
+      getScrollInfo: () => ({ x: 0, y: 64 }),
     });
 
     const title = jest.fn().mockImplementation((key: React.Key) => (
