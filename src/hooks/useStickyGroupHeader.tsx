@@ -1,7 +1,11 @@
 import * as React from 'react';
-import type { ExtraRenderInfo } from 'rc-virtual-list/lib/interface';
+import type { ListProps as VirtualListProps } from '@rc-component/virtual-list';
 import type { Group } from './useGroupSegments';
 import GroupHeader from '../GroupHeader';
+
+type ExtraRenderInfo = Parameters<
+  NonNullable<VirtualListProps<unknown>['extraRender']>
+>[0];
 
 type StickyExtraRenderInfo = ExtraRenderInfo & {
   scrollTop?: number;

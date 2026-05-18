@@ -1,6 +1,6 @@
 import React from 'react';
 import { render, renderHook } from '@testing-library/react';
-import type { ExtraRenderInfo } from 'rc-virtual-list/lib/interface';
+import type { ListProps as VirtualListProps } from '@rc-component/virtual-list';
 
 import useFlattenRows from '../src/hooks/useFlattenRows';
 import useGroupSegments from '../src/hooks/useGroupSegments';
@@ -13,6 +13,10 @@ interface GroupedItem {
   id: number;
   group: string;
 }
+
+type ExtraRenderInfo = Parameters<
+  NonNullable<VirtualListProps<unknown>['extraRender']>
+>[0];
 
 type StickyExtraRenderInfo = ExtraRenderInfo & {
   scrollTop?: number;

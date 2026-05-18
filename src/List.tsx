@@ -1,6 +1,8 @@
 import * as React from 'react';
-import VirtualList, { type ListRef } from 'rc-virtual-list';
-import type { ScrollTo } from 'rc-virtual-list/lib/List';
+import VirtualList, {
+  type ListRef,
+  type ScrollTo,
+} from '@rc-component/virtual-list';
 import { useImperativeHandle, forwardRef } from 'react';
 import useGroupSegments from './hooks/useGroupSegments';
 import type { Group } from './hooks/useGroupSegments';
