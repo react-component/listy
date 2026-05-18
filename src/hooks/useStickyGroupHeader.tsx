@@ -1,15 +1,17 @@
 import * as React from 'react';
-import type { ListRef } from 'rc-virtual-list';
 import type { ExtraRenderInfo } from 'rc-virtual-list/lib/interface';
 import type { Group } from './useGroupSegments';
 import GroupHeader from '../GroupHeader';
+
+type StickyExtraRenderInfo = ExtraRenderInfo & {
+  scrollTop?: number;
+};
 
 export interface StickyHeaderParams<T, K extends React.Key = React.Key> {
   enabled: boolean;
   group: Group<T, K> | undefined;
   headerRows: { groupKey: K; rowIndex: number }[];
   groupKeyToItems: Map<K, T[]>;
-  listRef: React.RefObject<ListRef | null>;
   prefixCls: string;
 }
 
@@ -22,35 +24,38 @@ export default function useStickyGroupHeader<
     group,
     headerRows,
     groupKeyToItems,
-    listRef,
     prefixCls,
   } = params;
 
   const extraRender = React.useCallback(
     (info: ExtraRenderInfo) => {
-      const { offsetY, start, virtual } = info;
+      const { getSize, offsetY, scrollTop = offsetY, start, virtual } =
+        info as StickyExtraRenderInfo;
 
       if (!enabled || !group || !headerRows.length || !virtual) {
         return null;
       }
 
+      let activeHeaderIdx = 0;
       let currHeader = headerRows[0];
       for (let i = headerRows.length - 1; i >= 0; i -= 1) {
         if (headerRows[i].rowIndex <= start) {
+          activeHeaderIdx = i;
           currHeader = headerRows[i];
           break;
         }
       }
 
       const groupItems = groupKeyToItems.get(currHeader.groupKey) || [];
-      const holder = listRef.current?.nativeElement?.querySelector<HTMLElement>(
-        `.${prefixCls}-holder`,
-      );
-      // `extraRender` runs before the imperative ListRef is refreshed for this
-      // render, but rc-virtual-list syncs the holder scrollTop first.
-      const scrollTop =
-        holder?.scrollTop ?? listRef.current?.getScrollInfo?.().y ?? offsetY;
-      const top = scrollTop - offsetY;
+      const currentSize = getSize(currHeader.groupKey);
+      const headerHeight = currentSize.bottom - currentSize.top;
+      const fixedTop = scrollTop - offsetY;
+
+      const nextHeader = headerRows[activeHeaderIdx + 1];
+      const nextTop = nextHeader
+        ? getSize(nextHeader.groupKey).top - headerHeight - offsetY
+        : fixedTop;
+      const top = Math.min(fixedTop, nextTop);
 
       return (
         <GroupHeader
@@ -63,7 +68,7 @@ export default function useStickyGroupHeader<
         />
       );
     },
-    [enabled, group, headerRows, groupKeyToItems, listRef, prefixCls],
+    [enabled, group, headerRows, groupKeyToItems, prefixCls],
   );
 
   return extraRender;

@@ -109,7 +109,6 @@ function Listy<T, K extends React.Key = React.Key>(
     group,
     headerRows,
     groupKeyToItems,
-    listRef,
     prefixCls,
   });
 
