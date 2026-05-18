@@ -3,6 +3,7 @@ import Portal from '@rc-component/portal';
 import type { ListRef } from 'rc-virtual-list';
 import type { ExtraRenderInfo } from 'rc-virtual-list/lib/interface';
 import type { Group } from './useGroupSegments';
+import GroupHeader from '../GroupHeader';
 
 export interface StickyHeaderParams<T, K extends React.Key = React.Key> {
   enabled: boolean;
@@ -103,9 +104,13 @@ export default function useStickyGroupHeader<
       const groupItems = groupKeyToItems.get(currHeader.groupKey) || [];
 
       const headerNode = (
-        <div className={`${prefixCls}-sticky-header`}>
-          {group.title(currHeader.groupKey, groupItems)}
-        </div>
+        <GroupHeader
+          group={group}
+          groupKey={currHeader.groupKey}
+          groupItems={groupItems}
+          prefixCls={prefixCls}
+          variant="sticky"
+        />
       );
 
       return (

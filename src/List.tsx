@@ -7,7 +7,7 @@ import type { Group } from './hooks/useGroupSegments';
 import useFlattenRows from './hooks/useFlattenRows';
 import type { Row } from './hooks/useFlattenRows';
 import useStickyGroupHeader from './hooks/useStickyGroupHeader';
-import clsx from 'clsx';
+import GroupHeader from './GroupHeader';
 import { useEvent } from '@rc-component/util';
 
 type RowKey<T> = keyof T | ((item: T) => React.Key);
@@ -123,14 +123,15 @@ function Listy<T, K extends React.Key = React.Key>(
       }
 
       const groupItems = groupKeyToItems.get(groupKey) || [];
-      const headerClassName = clsx(`${prefixCls}-group-header`, {
-        [`${prefixCls}-group-header-sticky`]: sticky && !virtual,
-      });
 
       return (
-        <div className={headerClassName}>
-          {group.title(groupKey, groupItems)}
-        </div>
+        <GroupHeader
+          group={group}
+          groupKey={groupKey}
+          groupItems={groupItems}
+          prefixCls={prefixCls}
+          sticky={sticky && !virtual}
+        />
       );
     },
     [group, groupKeyToItems, prefixCls, sticky, virtual],
