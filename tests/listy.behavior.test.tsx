@@ -143,10 +143,55 @@ describe('Listy behaviors', () => {
     const stickyHeader = container.querySelector(
       '.rc-listy-group-header-sticky',
     );
+    const groupSections = container.querySelectorAll('.rc-listy-group-section');
+
+    expect(container.querySelector('[data-testid="mock-virtual-list"]')).toBeNull();
     expect(stickyHeader).not.toBeNull();
     expect(stickyHeader).toHaveClass('rc-listy-group-header');
     expect(stickyHeader).toHaveTextContent('Group Group A');
+    expect(groupSections).toHaveLength(1);
+    expect(groupSections[0]).toContainElement(stickyHeader as HTMLElement);
     expect(title).toHaveBeenCalled();
+  });
+
+  it('scrolls raw list group sections by group key', () => {
+    const ref = React.createRef<ListyRef>();
+    const { container } = renderList({
+      ref,
+      virtual: false,
+      items: [
+        { id: 1, group: 'Group A' },
+        { id: 2, group: 'Group A' },
+        { id: 3, group: 'Group B' },
+      ],
+      group: {
+        key: (item) => item.group,
+        title: (groupKey) => <span>Group {String(groupKey)}</span>,
+      },
+    });
+
+    const holder = container.querySelector('.rc-listy-holder') as HTMLDivElement;
+    const groupSections = container.querySelectorAll('.rc-listy-group-section');
+    const groupBSection = groupSections[1] as HTMLElement;
+
+    Object.defineProperty(holder, 'clientHeight', {
+      configurable: true,
+      value: 100,
+    });
+    holder.getBoundingClientRect = () =>
+      ({ top: 10, bottom: 110 } as DOMRect);
+    groupBSection.getBoundingClientRect = () =>
+      ({ top: 210, bottom: 270 } as DOMRect);
+
+    act(() => {
+      ref.current?.scrollTo({
+        groupKey: 'Group B',
+        align: 'top',
+        offset: 5,
+      });
+    });
+
+    expect(holder.scrollTop).toBe(195);
   });
 
   it('scroll to group', () => {

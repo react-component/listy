@@ -10,6 +10,7 @@ import useFlattenRows from './hooks/useFlattenRows';
 import type { Row } from './hooks/useFlattenRows';
 import useStickyGroupHeader from './hooks/useStickyGroupHeader';
 import GroupHeader from './GroupHeader';
+import RawList from './RawList';
 import { useEvent } from '@rc-component/util';
 
 type RowKey<T> = keyof T | ((item: T) => React.Key);
@@ -137,19 +138,34 @@ function Listy<T, K extends React.Key = React.Key>(
   );
 
   // ============================== Render ===============================
-  return (
-    <div className={prefixCls}>
+  const sharedListProps = {
+    ref: listRef,
+    height,
+    onScroll,
+    prefixCls,
+  };
+
+  const listNode =
+    virtual === false ? (
+      <RawList
+        {...sharedListProps}
+        data={data}
+        group={group}
+        groupData={groupData}
+        groupKeyToItems={groupKeyToItems}
+        getKey={getKey}
+        itemRender={itemRender}
+        sticky={sticky}
+      />
+    ) : (
       <VirtualList
+        {...sharedListProps}
         virtual={virtual}
-        ref={listRef}
         data={rows}
         fullHeight={false}
         itemHeight={itemHeight}
         itemKey={getKey}
-        height={height}
         extraRender={extraRender}
-        onScroll={onScroll}
-        prefixCls={prefixCls}
       >
         {(row: Row<T, K>) =>
           row.type === 'header'
@@ -157,6 +173,11 @@ function Listy<T, K extends React.Key = React.Key>(
             : itemRender(row.item, row.index)
         }
       </VirtualList>
+    );
+
+  return (
+    <div className={prefixCls}>
+      {listNode}
     </div>
   );
 }
