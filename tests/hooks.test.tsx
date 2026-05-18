@@ -18,13 +18,9 @@ type ExtraRenderInfo = Parameters<
   NonNullable<VirtualListProps<unknown>['extraRender']>
 >[0];
 
-type StickyExtraRenderInfo = ExtraRenderInfo & {
-  scrollTop?: number;
-};
-
 const createRenderInfo = (
-  overrides: Partial<StickyExtraRenderInfo> = {},
-): StickyExtraRenderInfo => ({
+  overrides: Partial<ExtraRenderInfo> = {},
+): ExtraRenderInfo => ({
   start: 0,
   end: 0,
   virtual: true,
@@ -41,7 +37,7 @@ const StickyHeaderTester = ({
   info,
 }: {
   params: StickyHeaderParams<GroupedItem>;
-  info: StickyExtraRenderInfo;
+  info: ExtraRenderInfo;
 }) => {
   const extraRender = useStickyGroupHeader<GroupedItem>(params);
   return <>{extraRender(info)}</>;

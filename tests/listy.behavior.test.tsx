@@ -14,6 +14,7 @@ jest.mock('@rc-component/virtual-list', () => {
     end: 0,
     virtual: true,
     offsetX: 0,
+    scrollTop: 0,
     offsetY: 0,
     rtl: false,
     getSize: () => ({ top: 0, bottom: 0 }),

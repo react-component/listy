@@ -7,10 +7,6 @@ type ExtraRenderInfo = Parameters<
   NonNullable<VirtualListProps<unknown>['extraRender']>
 >[0];
 
-type StickyExtraRenderInfo = ExtraRenderInfo & {
-  scrollTop?: number;
-};
-
 export interface StickyHeaderParams<T, K extends React.Key = React.Key> {
   enabled: boolean;
   group: Group<T, K> | undefined;
@@ -33,8 +29,7 @@ export default function useStickyGroupHeader<
 
   const extraRender = React.useCallback(
     (info: ExtraRenderInfo) => {
-      const { getSize, offsetY, scrollTop = offsetY, start, virtual } =
-        info as StickyExtraRenderInfo;
+      const { getSize, offsetY, scrollTop, start, virtual } = info;
 
       if (!enabled || !group || !headerRows.length || !virtual) {
         return null;
