@@ -1,7 +1,6 @@
 import React from 'react';
 import { render, renderHook } from '@testing-library/react';
-import type { ListRef } from 'rc-virtual-list';
-import type { ExtraRenderInfo } from 'rc-virtual-list/lib/interface';
+import type { ListProps as VirtualListProps } from '@rc-component/virtual-list';
 
 import useFlattenRows from '../src/hooks/useFlattenRows';
 import useGroupSegments from '../src/hooks/useGroupSegments';
@@ -15,6 +14,10 @@ interface GroupedItem {
   group: string;
 }
 
+type ExtraRenderInfo = Parameters<
+  NonNullable<VirtualListProps<unknown>['extraRender']>
+>[0];
+
 const createRenderInfo = (
   overrides: Partial<ExtraRenderInfo> = {},
 ): ExtraRenderInfo => ({
@@ -22,6 +25,7 @@ const createRenderInfo = (
   end: 0,
   virtual: true,
   offsetX: 0,
+  scrollTop: 0,
   offsetY: 0,
   rtl: false,
   getSize: () => ({ top: 0, bottom: 0 }),
@@ -37,32 +41,6 @@ const StickyHeaderTester = ({
 }) => {
   const extraRender = useStickyGroupHeader<GroupedItem>(params);
   return <>{extraRender(info)}</>;
-};
-
-const createRefObject = <T extends HTMLElement>(
-  element: T,
-): React.RefObject<T> =>
-  ({
-    current: element,
-  } as React.RefObject<T>);
-
-const createListRef = (
-  overrides: Partial<ListRef> = {},
-): React.RefObject<ListRef> => {
-  const defaultHolder = document.createElement('div');
-  const base: ListRef = {
-    nativeElement: defaultHolder,
-    getScrollInfo: () => ({ x: 0, y: 0 }),
-    scrollTo: () => {},
-  };
-
-  return {
-    current: {
-      ...base,
-      ...overrides,
-      nativeElement: overrides.nativeElement ?? base.nativeElement,
-    },
-  } as React.RefObject<ListRef>;
 };
 
 describe('useGroupSegments', () => {
@@ -204,11 +182,7 @@ describe('useStickyGroupHeader', () => {
     ['Group 2', baseItems.slice(3, 6)],
   ]);
 
-  it('renders sticky portal for the active header row', () => {
-    const container = document.createElement('div');
-    document.body.appendChild(container);
-    const containerRef = createRefObject(container);
-
+  it('renders sticky header for the active header row', () => {
     const title = jest
       .fn()
       .mockImplementation((key: React.Key, groupItems: GroupedItem[]) => (
@@ -216,7 +190,7 @@ describe('useStickyGroupHeader', () => {
           {String(key)}-{groupItems.length}
         </span>
       ));
-    const info = createRenderInfo({ start: 5 });
+    const info = createRenderInfo({ scrollTop: 5, start: 5 });
     const params: StickyHeaderParams<GroupedItem> = {
       enabled: true,
       group: {
@@ -225,32 +199,25 @@ describe('useStickyGroupHeader', () => {
       },
       headerRows,
       groupKeyToItems: baseItemsMap,
-      containerRef,
-      listRef: createListRef({
-        nativeElement: container,
-        getScrollInfo: () => ({ x: 0, y: info.start }),
-      }),
       prefixCls: PREFIX_CLS,
     };
 
-    const { unmount } = render(
+    const { container: renderContainer } = render(
       <StickyHeaderTester params={params} info={info} />,
     );
 
-    const stickyHeader = container.querySelector(`.${PREFIX_CLS}-sticky-header`);
+    const stickyHeader = renderContainer.querySelector(
+      `.${PREFIX_CLS}-group-header-fixed`,
+    );
     expect(stickyHeader).not.toBeNull();
+    expect(stickyHeader).toHaveClass(`${PREFIX_CLS}-group-header`);
+    expect(stickyHeader).toHaveClass(`${PREFIX_CLS}-group-header-fixed`);
     expect(stickyHeader).toHaveTextContent('Group 2-3');
+    expect(stickyHeader).toHaveStyle({ top: '5px' });
     expect(title).toHaveBeenCalledWith('Group 2', baseItems.slice(3, 6));
-
-    unmount();
-    document.body.removeChild(container);
   });
 
-  it('skips portal rendering when virtual list is disabled', () => {
-    const container = document.createElement('div');
-    document.body.appendChild(container);
-    const containerRef = createRefObject(container);
-
+  it('skips sticky header rendering when virtual list is disabled', () => {
     const info = createRenderInfo({ virtual: false });
     const params: StickyHeaderParams<GroupedItem> = {
       enabled: true,
@@ -260,41 +227,28 @@ describe('useStickyGroupHeader', () => {
       },
       headerRows,
       groupKeyToItems: baseItemsMap,
-      containerRef,
-      listRef: createListRef({ nativeElement: container }),
       prefixCls: PREFIX_CLS,
     };
 
-    const { unmount } = render(<StickyHeaderTester params={params} info={info} />);
+    const { container: renderContainer } = render(
+      <StickyHeaderTester params={params} info={info} />,
+    );
 
-    const stickyHeader = container.querySelector(`.${PREFIX_CLS}-sticky-header`);
+    const stickyHeader = renderContainer.querySelector(
+      `.${PREFIX_CLS}-group-header-fixed`,
+    );
     expect(stickyHeader).toBeNull();
-
-    unmount();
-    document.body.removeChild(container);
   });
 
-  it('syncs sticky header with scrollTop even if start index is stale', () => {
-    const container = document.createElement('div');
-    document.body.appendChild(container);
-    const containerRef = createRefObject(container);
-    const listRef = createListRef({ getScrollInfo: () => ({ x: 0, y: 80 }) });
-
+  it('uses the visible start row to resolve the active header', () => {
     const title = jest.fn().mockImplementation((key: React.Key) => (
       <span data-testid="sticky-title">{String(key)}</span>
     ));
 
     const info = createRenderInfo({
-      start: 3,
-      getSize: (key: React.Key) => {
-        if (key === 'Group 1') {
-          return { top: 0, bottom: 60 };
-        }
-        if (key === 'Group 2') {
-          return { top: 80, bottom: 120 };
-        }
-        return { top: 0, bottom: 0 };
-      },
+      offsetY: 80,
+      scrollTop: 80,
+      start: 4,
     });
 
     const params: StickyHeaderParams<GroupedItem> = {
@@ -305,51 +259,71 @@ describe('useStickyGroupHeader', () => {
       },
       headerRows,
       groupKeyToItems: baseItemsMap,
-      containerRef,
-      listRef,
       prefixCls: PREFIX_CLS,
     };
 
-    const { unmount } = render(
+    const { container: renderContainer } = render(
       <StickyHeaderTester params={params} info={info} />,
     );
 
-    const stickyHeader = container.querySelector(`.${PREFIX_CLS}-sticky-header`);
+    const stickyHeader = renderContainer.querySelector(
+      `.${PREFIX_CLS}-group-header-fixed`,
+    );
     expect(stickyHeader).not.toBeNull();
     expect(stickyHeader).toHaveTextContent('Group 2');
+    expect(stickyHeader).toHaveStyle({ top: '0px' });
     expect(title).toHaveBeenCalledWith('Group 2', baseItems.slice(3, 6));
-
-    unmount();
-    document.body.removeChild(container);
   });
 
-  it('prefers holder scrollTop over virtual start', () => {
-    const holder = document.createElement('div');
-    holder.className = `${PREFIX_CLS}-holder`;
-    holder.scrollTop = 80;
-
-    const container = document.createElement('div');
-    container.appendChild(holder);
-    document.body.appendChild(container);
-
-    const containerRef = createRefObject(container);
-    const listRef = createListRef({
-      nativeElement: container,
-      getScrollInfo: () => ({ x: 0, y: 0 }),
-    });
-
+  it('offsets the fixed header by the extra render scrollTop', () => {
     const title = jest.fn().mockImplementation((key: React.Key) => (
       <span data-testid="sticky-title">{String(key)}</span>
     ));
 
     const info = createRenderInfo({
+      offsetY: 64,
+      scrollTop: 80,
+      start: 4,
+    });
+
+    const params: StickyHeaderParams<GroupedItem> = {
+      enabled: true,
+      group: {
+        key: (item) => item.group,
+        title,
+      },
+      headerRows,
+      groupKeyToItems: baseItemsMap,
+      prefixCls: PREFIX_CLS,
+    };
+
+    const { container: renderContainer } = render(
+      <StickyHeaderTester params={params} info={info} />,
+    );
+
+    const stickyHeader = renderContainer.querySelector(
+      `.${PREFIX_CLS}-group-header-fixed`,
+    );
+    expect(stickyHeader).not.toBeNull();
+    expect(stickyHeader).toHaveTextContent('Group 2');
+    expect(stickyHeader).toHaveStyle({ top: '16px' });
+  });
+
+  it('pushes the fixed header away when the next group reaches the top', () => {
+    const title = jest.fn().mockImplementation((key: React.Key) => (
+      <span data-testid="sticky-title">{String(key)}</span>
+    ));
+
+    const info = createRenderInfo({
+      offsetY: 64,
+      scrollTop: 70,
       start: 3,
       getSize: (key: React.Key) => {
         if (key === 'Group 1') {
-          return { top: 0, bottom: 60 };
+          return { top: 0, bottom: 20 };
         }
         if (key === 'Group 2') {
-          return { top: 80, bottom: 120 };
+          return { top: 80, bottom: 100 };
         }
         return { top: 0, bottom: 0 };
       },
@@ -363,20 +337,18 @@ describe('useStickyGroupHeader', () => {
       },
       headerRows,
       groupKeyToItems: baseItemsMap,
-      containerRef,
-      listRef,
       prefixCls: PREFIX_CLS,
     };
 
-    const { unmount } = render(
+    const { container: renderContainer } = render(
       <StickyHeaderTester params={params} info={info} />,
     );
 
-    const stickyHeader = container.querySelector(`.${PREFIX_CLS}-sticky-header`);
+    const stickyHeader = renderContainer.querySelector(
+      `.${PREFIX_CLS}-group-header-fixed`,
+    );
     expect(stickyHeader).not.toBeNull();
-    expect(stickyHeader).toHaveTextContent('Group 2');
-
-    unmount();
-    document.body.removeChild(container);
+    expect(stickyHeader).toHaveTextContent('Group 1');
+    expect(stickyHeader).toHaveStyle({ top: '-4px' });
   });
 });

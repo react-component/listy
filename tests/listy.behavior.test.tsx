@@ -1,15 +1,20 @@
 import React from 'react';
 import { act, render } from '@testing-library/react';
-import type { ExtraRenderInfo } from 'rc-virtual-list/lib/interface';
+import type { ListProps as VirtualListProps } from '@rc-component/virtual-list';
 import Listy, { type ListyRef, type ListyProps } from '@rc-component/listy';
 
-jest.mock('rc-virtual-list', () => {
+type ExtraRenderInfo = Parameters<
+  NonNullable<VirtualListProps<unknown>['extraRender']>
+>[0];
+
+jest.mock('@rc-component/virtual-list', () => {
   const React = require('react');
   let extraInfo = {
     start: 0,
     end: 0,
     virtual: true,
     offsetX: 0,
+    scrollTop: 0,
     offsetY: 0,
     rtl: false,
     getSize: () => ({ top: 0, bottom: 0 }),
@@ -62,7 +67,7 @@ type MockedVirtualListComponent = React.ForwardRefExoticComponent<any> & {
   __getLastProps(): any;
 };
 
-const MockedVirtualList = require('rc-virtual-list')
+const MockedVirtualList = require('@rc-component/virtual-list')
   .default as MockedVirtualListComponent;
 
 describe('Listy behaviors', () => {
@@ -139,6 +144,7 @@ describe('Listy behaviors', () => {
       '.rc-listy-group-header-sticky',
     );
     expect(stickyHeader).not.toBeNull();
+    expect(stickyHeader).toHaveClass('rc-listy-group-header');
     expect(stickyHeader).toHaveTextContent('Group Group A');
     expect(title).toHaveBeenCalled();
   });

@@ -1,13 +1,15 @@
 import * as React from 'react';
-import VirtualList, { type ListRef } from 'rc-virtual-list';
-import type { ScrollTo } from 'rc-virtual-list/lib/List';
+import VirtualList, {
+  type ListRef,
+  type ScrollTo,
+} from '@rc-component/virtual-list';
 import { useImperativeHandle, forwardRef } from 'react';
 import useGroupSegments from './hooks/useGroupSegments';
 import type { Group } from './hooks/useGroupSegments';
 import useFlattenRows from './hooks/useFlattenRows';
 import type { Row } from './hooks/useFlattenRows';
 import useStickyGroupHeader from './hooks/useStickyGroupHeader';
-import clsx from 'clsx';
+import GroupHeader from './GroupHeader';
 import { useEvent } from '@rc-component/util';
 
 type RowKey<T> = keyof T | ((item: T) => React.Key);
@@ -64,7 +66,6 @@ function Listy<T, K extends React.Key = React.Key>(
 
   // =============================== Refs ===============================
   const listRef = React.useRef<ListRef>(null);
-  const containerRef = React.useRef<HTMLDivElement>(null);
 
   // ========================== Imperative API ==========================
   useImperativeHandle(ref, () => ({
@@ -106,12 +107,10 @@ function Listy<T, K extends React.Key = React.Key>(
 
   // =========================== Sticky Header ===========================
   const extraRender = useStickyGroupHeader<T, K>({
-    enabled: !!(sticky && group),
+    enabled: !!(sticky && group && virtual),
     group,
     headerRows,
     groupKeyToItems,
-    containerRef,
-    listRef,
     prefixCls,
   });
 
@@ -123,14 +122,15 @@ function Listy<T, K extends React.Key = React.Key>(
       }
 
       const groupItems = groupKeyToItems.get(groupKey) || [];
-      const headerClassName = clsx(`${prefixCls}-group-header`, {
-        [`${prefixCls}-group-header-sticky`]: sticky && !virtual,
-      });
 
       return (
-        <div className={headerClassName}>
-          {group.title(groupKey, groupItems)}
-        </div>
+        <GroupHeader
+          group={group}
+          groupKey={groupKey}
+          groupItems={groupItems}
+          prefixCls={prefixCls}
+          sticky={sticky && !virtual}
+        />
       );
     },
     [group, groupKeyToItems, prefixCls, sticky, virtual],
@@ -138,7 +138,7 @@ function Listy<T, K extends React.Key = React.Key>(
 
   // ============================== Render ===============================
   return (
-    <div ref={containerRef} className={prefixCls}>
+    <div className={prefixCls}>
       <VirtualList
         virtual={virtual}
         ref={listRef}
