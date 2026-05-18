@@ -106,7 +106,7 @@ export default function useRawListScroll(ref: React.Ref<ListRef>) {
   React.useImperativeHandle(
     ref,
     () => ({
-      nativeElement: holderRef.current,
+      nativeElement: holderRef.current as HTMLDivElement,
       scrollTo,
       getScrollInfo: () => ({
         x: holderRef.current?.scrollLeft || 0,
