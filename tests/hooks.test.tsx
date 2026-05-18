@@ -39,13 +39,6 @@ const StickyHeaderTester = ({
   return <>{extraRender(info)}</>;
 };
 
-const createRefObject = <T extends HTMLElement>(
-  element: T,
-): React.RefObject<T> =>
-  ({
-    current: element,
-  } as React.RefObject<T>);
-
 const createListRef = (
   overrides: Partial<ListRef> = {},
 ): React.RefObject<ListRef> => {
@@ -205,10 +198,6 @@ describe('useStickyGroupHeader', () => {
   ]);
 
   it('renders sticky header for the active header row', () => {
-    const container = document.createElement('div');
-    document.body.appendChild(container);
-    const containerRef = createRefObject(container);
-
     const title = jest
       .fn()
       .mockImplementation((key: React.Key, groupItems: GroupedItem[]) => (
@@ -225,15 +214,13 @@ describe('useStickyGroupHeader', () => {
       },
       headerRows,
       groupKeyToItems: baseItemsMap,
-      containerRef,
       listRef: createListRef({
-        nativeElement: container,
         getScrollInfo: () => ({ x: 0, y: info.start }),
       }),
       prefixCls: PREFIX_CLS,
     };
 
-    const { container: renderContainer, unmount } = render(
+    const { container: renderContainer } = render(
       <StickyHeaderTester params={params} info={info} />,
     );
 
@@ -246,16 +233,9 @@ describe('useStickyGroupHeader', () => {
     expect(stickyHeader).toHaveTextContent('Group 2-3');
     expect(stickyHeader).toHaveStyle({ top: '5px' });
     expect(title).toHaveBeenCalledWith('Group 2', baseItems.slice(3, 6));
-
-    unmount();
-    document.body.removeChild(container);
   });
 
   it('skips sticky header rendering when virtual list is disabled', () => {
-    const container = document.createElement('div');
-    document.body.appendChild(container);
-    const containerRef = createRefObject(container);
-
     const info = createRenderInfo({ virtual: false });
     const params: StickyHeaderParams<GroupedItem> = {
       enabled: true,
@@ -265,12 +245,11 @@ describe('useStickyGroupHeader', () => {
       },
       headerRows,
       groupKeyToItems: baseItemsMap,
-      containerRef,
-      listRef: createListRef({ nativeElement: container }),
+      listRef: createListRef(),
       prefixCls: PREFIX_CLS,
     };
 
-    const { container: renderContainer, unmount } = render(
+    const { container: renderContainer } = render(
       <StickyHeaderTester params={params} info={info} />,
     );
 
@@ -278,15 +257,9 @@ describe('useStickyGroupHeader', () => {
       `.${PREFIX_CLS}-group-header-fixed`,
     );
     expect(stickyHeader).toBeNull();
-
-    unmount();
-    document.body.removeChild(container);
   });
 
-  it('syncs sticky header with scrollTop even if start index is stale', () => {
-    const container = document.createElement('div');
-    document.body.appendChild(container);
-    const containerRef = createRefObject(container);
+  it('uses the visible start row to resolve the active header', () => {
     const listRef = createListRef({ getScrollInfo: () => ({ x: 0, y: 80 }) });
 
     const title = jest.fn().mockImplementation((key: React.Key) => (
@@ -294,16 +267,8 @@ describe('useStickyGroupHeader', () => {
     ));
 
     const info = createRenderInfo({
-      start: 3,
-      getSize: (key: React.Key) => {
-        if (key === 'Group 1') {
-          return { top: 0, bottom: 60 };
-        }
-        if (key === 'Group 2') {
-          return { top: 80, bottom: 120 };
-        }
-        return { top: 0, bottom: 0 };
-      },
+      offsetY: 80,
+      start: 4,
     });
 
     const params: StickyHeaderParams<GroupedItem> = {
@@ -314,12 +279,11 @@ describe('useStickyGroupHeader', () => {
       },
       headerRows,
       groupKeyToItems: baseItemsMap,
-      containerRef,
       listRef,
       prefixCls: PREFIX_CLS,
     };
 
-    const { container: renderContainer, unmount } = render(
+    const { container: renderContainer } = render(
       <StickyHeaderTester params={params} info={info} />,
     );
 
@@ -328,25 +292,13 @@ describe('useStickyGroupHeader', () => {
     );
     expect(stickyHeader).not.toBeNull();
     expect(stickyHeader).toHaveTextContent('Group 2');
+    expect(stickyHeader).toHaveStyle({ top: '0px' });
     expect(title).toHaveBeenCalledWith('Group 2', baseItems.slice(3, 6));
-
-    unmount();
-    document.body.removeChild(container);
   });
 
-  it('prefers holder scrollTop over virtual start', () => {
-    const holder = document.createElement('div');
-    holder.className = `${PREFIX_CLS}-holder`;
-    holder.scrollTop = 80;
-
-    const container = document.createElement('div');
-    container.appendChild(holder);
-    document.body.appendChild(container);
-
-    const containerRef = createRefObject(container);
+  it('offsets the fixed header by the virtual filler position', () => {
     const listRef = createListRef({
-      nativeElement: container,
-      getScrollInfo: () => ({ x: 0, y: 0 }),
+      getScrollInfo: () => ({ x: 0, y: 80 }),
     });
 
     const title = jest.fn().mockImplementation((key: React.Key) => (
@@ -355,16 +307,7 @@ describe('useStickyGroupHeader', () => {
 
     const info = createRenderInfo({
       offsetY: 64,
-      start: 3,
-      getSize: (key: React.Key) => {
-        if (key === 'Group 1') {
-          return { top: 0, bottom: 60 };
-        }
-        if (key === 'Group 2') {
-          return { top: 80, bottom: 120 };
-        }
-        return { top: 0, bottom: 0 };
-      },
+      start: 4,
     });
 
     const params: StickyHeaderParams<GroupedItem> = {
@@ -375,12 +318,11 @@ describe('useStickyGroupHeader', () => {
       },
       headerRows,
       groupKeyToItems: baseItemsMap,
-      containerRef,
       listRef,
       prefixCls: PREFIX_CLS,
     };
 
-    const { container: renderContainer, unmount } = render(
+    const { container: renderContainer } = render(
       <StickyHeaderTester params={params} info={info} />,
     );
 
@@ -390,8 +332,5 @@ describe('useStickyGroupHeader', () => {
     expect(stickyHeader).not.toBeNull();
     expect(stickyHeader).toHaveTextContent('Group 2');
     expect(stickyHeader).toHaveStyle({ top: '16px' });
-
-    unmount();
-    document.body.removeChild(container);
   });
 });

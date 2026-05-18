@@ -64,7 +64,6 @@ function Listy<T, K extends React.Key = React.Key>(
 
   // =============================== Refs ===============================
   const listRef = React.useRef<ListRef>(null);
-  const containerRef = React.useRef<HTMLDivElement>(null);
 
   // ========================== Imperative API ==========================
   useImperativeHandle(ref, () => ({
@@ -106,11 +105,10 @@ function Listy<T, K extends React.Key = React.Key>(
 
   // =========================== Sticky Header ===========================
   const extraRender = useStickyGroupHeader<T, K>({
-    enabled: !!(sticky && group),
+    enabled: !!(sticky && group && virtual),
     group,
     headerRows,
     groupKeyToItems,
-    containerRef,
     listRef,
     prefixCls,
   });
@@ -139,7 +137,7 @@ function Listy<T, K extends React.Key = React.Key>(
 
   // ============================== Render ===============================
   return (
-    <div ref={containerRef} className={prefixCls}>
+    <div className={prefixCls}>
       <VirtualList
         virtual={virtual}
         ref={listRef}

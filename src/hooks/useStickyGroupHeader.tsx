@@ -9,7 +9,6 @@ export interface StickyHeaderParams<T, K extends React.Key = React.Key> {
   group: Group<T, K> | undefined;
   headerRows: { groupKey: K; rowIndex: number }[];
   groupKeyToItems: Map<K, T[]>;
-  containerRef: React.RefObject<HTMLDivElement | null>;
   listRef: React.RefObject<ListRef | null>;
   prefixCls: string;
 }
@@ -23,85 +22,29 @@ export default function useStickyGroupHeader<
     group,
     headerRows,
     groupKeyToItems,
-    containerRef,
     listRef,
     prefixCls,
   } = params;
 
-  const lastHeaderIdxRef = React.useRef(0);
-
   const extraRender = React.useCallback(
     (info: ExtraRenderInfo) => {
-      const { virtual } = info;
+      const { offsetY, start, virtual } = info;
 
       if (!enabled || !group || !headerRows.length || !virtual) {
-        lastHeaderIdxRef.current = 0;
         return null;
       }
 
-      const container = containerRef.current;
-      if (!container) {
-        return null;
+      let currHeader = headerRows[0];
+      for (let i = headerRows.length - 1; i >= 0; i -= 1) {
+        if (headerRows[i].rowIndex <= start) {
+          currHeader = headerRows[i];
+          break;
+        }
       }
 
-      // maybe rc-virtual-list will expose scrollTop in the future
-      const getHolderScrollTop = () => {
-        const holder =
-          container.querySelector<HTMLDivElement>(`.${prefixCls}-holder`) ||
-          listRef.current?.nativeElement?.querySelector?.(
-            `.${prefixCls}-holder`,
-          );
-        if (holder) {
-          return holder.scrollTop;
-        }
-        const infoScrollTop = listRef.current?.getScrollInfo?.().y ?? 0;
-        return infoScrollTop;
-      };
-
-      const resolveByScrollTop = (scrollTop: number) => {
-        const cachedIdx = lastHeaderIdxRef.current;
-        const cachedRow = headerRows[cachedIdx];
-        const cachedTop = cachedRow
-          ? info.getSize(cachedRow.groupKey).top
-          : null;
-        const nextRow = headerRows[cachedIdx + 1];
-        const nextTop = nextRow ? info.getSize(nextRow.groupKey).top : null;
-
-        if (
-          cachedRow &&
-          cachedTop !== null &&
-          scrollTop >= cachedTop &&
-          (nextTop === null || scrollTop < nextTop)
-        ) {
-          return cachedIdx;
-        }
-
-        let lo = 0;
-        let hi = headerRows.length - 1;
-        let candidate = 0;
-
-        while (lo <= hi) {
-          const mid = Math.floor((lo + hi) / 2);
-          const { top } = info.getSize(headerRows[mid].groupKey);
-          if (top <= scrollTop) {
-            candidate = mid;
-            lo = mid + 1;
-          } else {
-            hi = mid - 1;
-          }
-        }
-
-        return candidate;
-      };
-
-      const scrollTop = getHolderScrollTop();
-      const activeHeaderIdx = resolveByScrollTop(scrollTop);
-
-      lastHeaderIdxRef.current = activeHeaderIdx;
-
-      const currHeader = headerRows[activeHeaderIdx];
       const groupItems = groupKeyToItems.get(currHeader.groupKey) || [];
-      const top = scrollTop - info.offsetY;
+      const scrollTop = listRef.current?.getScrollInfo?.().y ?? offsetY;
+      const top = scrollTop - offsetY;
 
       return (
         <GroupHeader
@@ -114,15 +57,7 @@ export default function useStickyGroupHeader<
         />
       );
     },
-    [
-      enabled,
-      group,
-      headerRows,
-      groupKeyToItems,
-      containerRef,
-      listRef,
-      prefixCls,
-    ],
+    [enabled, group, headerRows, groupKeyToItems, listRef, prefixCls],
   );
 
   return extraRender;
