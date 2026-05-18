@@ -8,6 +8,7 @@ export interface GroupHeaderProps<T, K extends React.Key = React.Key> {
   groupItems: T[];
   prefixCls: string;
   sticky?: boolean;
+  style?: React.CSSProperties;
   variant?: 'list' | 'sticky';
 }
 
@@ -20,6 +21,7 @@ export default function GroupHeader<T, K extends React.Key = React.Key>(
     groupItems,
     prefixCls,
     sticky,
+    style,
     variant = 'list',
   } = props;
 
@@ -32,5 +34,9 @@ export default function GroupHeader<T, K extends React.Key = React.Key>(
     },
   );
 
-  return <div className={className}>{group.title(groupKey, groupItems)}</div>;
+  return (
+    <div className={className} style={style}>
+      {group.title(groupKey, groupItems)}
+    </div>
+  );
 }

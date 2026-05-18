@@ -204,7 +204,7 @@ describe('useStickyGroupHeader', () => {
     ['Group 2', baseItems.slice(3, 6)],
   ]);
 
-  it('renders sticky portal for the active header row', () => {
+  it('renders sticky header for the active header row', () => {
     const container = document.createElement('div');
     document.body.appendChild(container);
     const containerRef = createRefObject(container);
@@ -233,20 +233,23 @@ describe('useStickyGroupHeader', () => {
       prefixCls: PREFIX_CLS,
     };
 
-    const { unmount } = render(
+    const { container: renderContainer, unmount } = render(
       <StickyHeaderTester params={params} info={info} />,
     );
 
-    const stickyHeader = container.querySelector(`.${PREFIX_CLS}-sticky-header`);
+    const stickyHeader = renderContainer.querySelector(
+      `.${PREFIX_CLS}-sticky-header`,
+    );
     expect(stickyHeader).not.toBeNull();
     expect(stickyHeader).toHaveTextContent('Group 2-3');
+    expect(stickyHeader).toHaveStyle({ top: '5px' });
     expect(title).toHaveBeenCalledWith('Group 2', baseItems.slice(3, 6));
 
     unmount();
     document.body.removeChild(container);
   });
 
-  it('skips portal rendering when virtual list is disabled', () => {
+  it('skips sticky header rendering when virtual list is disabled', () => {
     const container = document.createElement('div');
     document.body.appendChild(container);
     const containerRef = createRefObject(container);
@@ -265,9 +268,13 @@ describe('useStickyGroupHeader', () => {
       prefixCls: PREFIX_CLS,
     };
 
-    const { unmount } = render(<StickyHeaderTester params={params} info={info} />);
+    const { container: renderContainer, unmount } = render(
+      <StickyHeaderTester params={params} info={info} />,
+    );
 
-    const stickyHeader = container.querySelector(`.${PREFIX_CLS}-sticky-header`);
+    const stickyHeader = renderContainer.querySelector(
+      `.${PREFIX_CLS}-sticky-header`,
+    );
     expect(stickyHeader).toBeNull();
 
     unmount();
@@ -310,11 +317,13 @@ describe('useStickyGroupHeader', () => {
       prefixCls: PREFIX_CLS,
     };
 
-    const { unmount } = render(
+    const { container: renderContainer, unmount } = render(
       <StickyHeaderTester params={params} info={info} />,
     );
 
-    const stickyHeader = container.querySelector(`.${PREFIX_CLS}-sticky-header`);
+    const stickyHeader = renderContainer.querySelector(
+      `.${PREFIX_CLS}-sticky-header`,
+    );
     expect(stickyHeader).not.toBeNull();
     expect(stickyHeader).toHaveTextContent('Group 2');
     expect(title).toHaveBeenCalledWith('Group 2', baseItems.slice(3, 6));
@@ -343,6 +352,7 @@ describe('useStickyGroupHeader', () => {
     ));
 
     const info = createRenderInfo({
+      offsetY: 64,
       start: 3,
       getSize: (key: React.Key) => {
         if (key === 'Group 1') {
@@ -368,13 +378,16 @@ describe('useStickyGroupHeader', () => {
       prefixCls: PREFIX_CLS,
     };
 
-    const { unmount } = render(
+    const { container: renderContainer, unmount } = render(
       <StickyHeaderTester params={params} info={info} />,
     );
 
-    const stickyHeader = container.querySelector(`.${PREFIX_CLS}-sticky-header`);
+    const stickyHeader = renderContainer.querySelector(
+      `.${PREFIX_CLS}-sticky-header`,
+    );
     expect(stickyHeader).not.toBeNull();
     expect(stickyHeader).toHaveTextContent('Group 2');
+    expect(stickyHeader).toHaveStyle({ top: '16px' });
 
     unmount();
     document.body.removeChild(container);

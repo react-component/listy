@@ -1,5 +1,4 @@
 import * as React from 'react';
-import Portal from '@rc-component/portal';
 import type { ListRef } from 'rc-virtual-list';
 import type { ExtraRenderInfo } from 'rc-virtual-list/lib/interface';
 import type { Group } from './useGroupSegments';
@@ -102,21 +101,17 @@ export default function useStickyGroupHeader<
 
       const currHeader = headerRows[activeHeaderIdx];
       const groupItems = groupKeyToItems.get(currHeader.groupKey) || [];
+      const top = scrollTop - info.offsetY;
 
-      const headerNode = (
+      return (
         <GroupHeader
           group={group}
           groupKey={currHeader.groupKey}
           groupItems={groupItems}
           prefixCls={prefixCls}
+          style={{ top }}
           variant="sticky"
         />
-      );
-
-      return (
-        <Portal open getContainer={() => container}>
-          {headerNode}
-        </Portal>
       );
     },
     [
