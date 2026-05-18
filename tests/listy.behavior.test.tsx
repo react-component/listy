@@ -92,6 +92,9 @@ describe('Listy behaviors', () => {
           { id: 1, group: 'Group A' },
           { id: 2, group: 'Group A' },
         ];
+    const resolvedItemRender =
+      rest.itemRender ||
+      ((item) => <div data-testid={`item-${item.id}`}>{item.id}</div>);
 
     return render(
       <Listy
@@ -101,9 +104,7 @@ describe('Listy behaviors', () => {
         rowKey="id"
         itemHeight={20}
         height={100}
-        itemRender={(item) => (
-          <div data-testid={`item-${item.id}`}>{item.id}</div>
-        )}
+        itemRender={resolvedItemRender}
       />,
     );
   };
@@ -192,6 +193,67 @@ describe('Listy behaviors', () => {
     });
 
     expect(holder.scrollTop).toBe(195);
+  });
+
+  it('supports raw list scroll APIs without grouping', () => {
+    const ref = React.createRef<ListyRef>();
+    const { container } = renderList({
+      ref,
+      virtual: false,
+      items: [
+        { id: 1, name: 'One' },
+        { id: 2, name: 'Two' },
+      ],
+      itemRender: (item) => item.name,
+    });
+
+    const holder = container.querySelector('.rc-listy-holder') as HTMLDivElement;
+    const itemNodes = container.querySelectorAll(
+      '.rc-listy-holder-inner > div',
+    );
+    const secondItem = itemNodes[1] as HTMLElement;
+
+    Object.defineProperty(holder, 'clientHeight', {
+      configurable: true,
+      value: 50,
+    });
+    Object.defineProperty(secondItem, 'offsetHeight', {
+      configurable: true,
+      value: 30,
+    });
+    holder.getBoundingClientRect = () => ({ top: 10 } as DOMRect);
+    secondItem.getBoundingClientRect = () => ({ top: 100 } as DOMRect);
+
+    act(() => {
+      ref.current?.scrollTo();
+      ref.current?.scrollTo(24);
+    });
+    expect(holder.scrollTop).toBe(24);
+
+    act(() => {
+      ref.current?.scrollTo({ left: 7, top: 12 });
+    });
+    expect(holder.scrollLeft).toBe(7);
+    expect(holder.scrollTop).toBe(12);
+
+    act(() => {
+      ref.current?.scrollTo({ index: 1, align: 'bottom', offset: 3 });
+    });
+    expect(holder.scrollTop).toBe(85);
+
+    holder.scrollTop = 50;
+    secondItem.getBoundingClientRect = () => ({ top: 0 } as DOMRect);
+    act(() => {
+      ref.current?.scrollTo({ index: 1, align: 'auto', offset: 4 });
+    });
+    expect(holder.scrollTop).toBe(36);
+
+    holder.scrollTop = 10;
+    secondItem.getBoundingClientRect = () => ({ top: 100 } as DOMRect);
+    act(() => {
+      ref.current?.scrollTo({ index: 1, align: 'auto', offset: 4 });
+    });
+    expect(holder.scrollTop).toBe(84);
   });
 
   it('scroll to group', () => {
