@@ -238,9 +238,11 @@ describe('useStickyGroupHeader', () => {
     );
 
     const stickyHeader = renderContainer.querySelector(
-      `.${PREFIX_CLS}-sticky-header`,
+      `.${PREFIX_CLS}-group-header-fixed`,
     );
     expect(stickyHeader).not.toBeNull();
+    expect(stickyHeader).toHaveClass(`${PREFIX_CLS}-group-header`);
+    expect(stickyHeader).toHaveClass(`${PREFIX_CLS}-group-header-fixed`);
     expect(stickyHeader).toHaveTextContent('Group 2-3');
     expect(stickyHeader).toHaveStyle({ top: '5px' });
     expect(title).toHaveBeenCalledWith('Group 2', baseItems.slice(3, 6));
@@ -273,7 +275,7 @@ describe('useStickyGroupHeader', () => {
     );
 
     const stickyHeader = renderContainer.querySelector(
-      `.${PREFIX_CLS}-sticky-header`,
+      `.${PREFIX_CLS}-group-header-fixed`,
     );
     expect(stickyHeader).toBeNull();
 
@@ -322,7 +324,7 @@ describe('useStickyGroupHeader', () => {
     );
 
     const stickyHeader = renderContainer.querySelector(
-      `.${PREFIX_CLS}-sticky-header`,
+      `.${PREFIX_CLS}-group-header-fixed`,
     );
     expect(stickyHeader).not.toBeNull();
     expect(stickyHeader).toHaveTextContent('Group 2');
@@ -383,7 +385,7 @@ describe('useStickyGroupHeader', () => {
     );
 
     const stickyHeader = renderContainer.querySelector(
-      `.${PREFIX_CLS}-sticky-header`,
+      `.${PREFIX_CLS}-group-header-fixed`,
     );
     expect(stickyHeader).not.toBeNull();
     expect(stickyHeader).toHaveTextContent('Group 2');

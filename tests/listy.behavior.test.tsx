@@ -139,6 +139,7 @@ describe('Listy behaviors', () => {
       '.rc-listy-group-header-sticky',
     );
     expect(stickyHeader).not.toBeNull();
+    expect(stickyHeader).toHaveClass('rc-listy-group-header');
     expect(stickyHeader).toHaveTextContent('Group Group A');
     expect(title).toHaveBeenCalled();
   });

@@ -105,12 +105,12 @@ export default function useStickyGroupHeader<
 
       return (
         <GroupHeader
+          fixed
           group={group}
           groupKey={currHeader.groupKey}
           groupItems={groupItems}
           prefixCls={prefixCls}
           style={{ top }}
-          variant="sticky"
         />
       );
     },

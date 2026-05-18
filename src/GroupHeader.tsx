@@ -7,9 +7,9 @@ export interface GroupHeaderProps<T, K extends React.Key = React.Key> {
   groupKey: K;
   groupItems: T[];
   prefixCls: string;
+  fixed?: boolean;
   sticky?: boolean;
   style?: React.CSSProperties;
-  variant?: 'list' | 'sticky';
 }
 
 export default function GroupHeader<T, K extends React.Key = React.Key>(
@@ -20,19 +20,15 @@ export default function GroupHeader<T, K extends React.Key = React.Key>(
     groupKey,
     groupItems,
     prefixCls,
+    fixed,
     sticky,
     style,
-    variant = 'list',
   } = props;
 
-  const className = clsx(
-    variant === 'sticky'
-      ? `${prefixCls}-sticky-header`
-      : `${prefixCls}-group-header`,
-    {
-      [`${prefixCls}-group-header-sticky`]: variant === 'list' && sticky,
-    },
-  );
+  const className = clsx(`${prefixCls}-group-header`, {
+    [`${prefixCls}-group-header-sticky`]: sticky,
+    [`${prefixCls}-group-header-fixed`]: fixed,
+  });
 
   return (
     <div className={className} style={style}>
