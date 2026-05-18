@@ -241,6 +241,30 @@ describe('Listy behaviors', () => {
     expect(holder.scrollTop).toBe(12);
 
     act(() => {
+      ref.current?.scrollTo({ left: 8 });
+    });
+    expect(holder.scrollLeft).toBe(8);
+    expect(holder.scrollTop).toBe(12);
+
+    act(() => {
+      ref.current?.scrollTo({ top: 13 });
+    });
+    expect(holder.scrollLeft).toBe(8);
+    expect(holder.scrollTop).toBe(13);
+
+    holder.scrollTop = 0;
+    act(() => {
+      ref.current?.scrollTo({ key: 2 });
+    });
+    expect(holder.scrollTop).toBe(90);
+
+    act(() => {
+      ref.current?.scrollTo({ index: 99 });
+    });
+    expect(holder.scrollTop).toBe(90);
+
+    holder.scrollTop = 12;
+    act(() => {
       ref.current?.scrollTo({ index: 1, align: 'bottom', offset: 3 });
     });
     expect(holder.scrollTop).toBe(85);
@@ -258,11 +282,18 @@ describe('Listy behaviors', () => {
       ref.current?.scrollTo({ index: 1, align: 'auto', offset: 4 });
     });
     expect(holder.scrollTop).toBe(84);
+
+    holder.scrollTop = 20;
+    secondItem.getBoundingClientRect = () => ({ top: 10 } as DOMRect);
+    act(() => {
+      ref.current?.scrollTo({ index: 1, align: 'auto', offset: 4 });
+    });
+    expect(holder.scrollTop).toBe(20);
   });
 
   it('exposes raw list scroll info', () => {
     const ref = React.createRef<VirtualListRef>();
-    const { container } = render(
+    const { container, unmount } = render(
       <RawList
         ref={ref}
         data={[{ id: 1 }]}
@@ -281,6 +312,38 @@ describe('Listy behaviors', () => {
 
     expect(ref.current?.nativeElement).toBe(holder);
     expect(ref.current?.getScrollInfo()).toEqual({ x: 11, y: 22 });
+
+    const rawListRef = ref.current;
+    unmount();
+    expect(rawListRef?.getScrollInfo()).toEqual({ x: 0, y: 0 });
+  });
+
+  it('passes empty group items when raw group item map is missing', () => {
+    const title = jest.fn(() => null);
+
+    render(
+      <RawList
+        data={[]}
+        group={{
+          key: (item: { id: number; group: string }) => item.group,
+          title,
+        }}
+        groupData={
+          new Map([
+            [
+              'Group A',
+              [{ item: { id: 1, group: 'Group A' }, index: 0 }],
+            ],
+          ])
+        }
+        groupKeyToItems={new Map()}
+        getKey={(row) => (row.type === 'item' ? row.item.id : row.groupKey)}
+        itemRender={(item) => <div>{item.id}</div>}
+        prefixCls="rc-listy"
+      />,
+    );
+
+    expect(title).toHaveBeenCalledWith('Group A', []);
   });
 
   it('scroll to group', () => {
