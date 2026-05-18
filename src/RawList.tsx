@@ -79,10 +79,7 @@ function RawList<T, K extends React.Key = React.Key>(
       align: 'top' | 'bottom' | 'auto' = 'top',
       offset = 0,
     ) => {
-      const holder = holderRef.current;
-      if (!holder) {
-        return;
-      }
+      const holder = holderRef.current as HTMLDivElement;
 
       const elementTop = getElementTop(holder, element);
       const elementBottom = elementTop + element.offsetHeight;
