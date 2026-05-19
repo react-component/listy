@@ -157,7 +157,6 @@ describe('Listy behaviors', () => {
     expect(groupSections).toHaveLength(1);
     expect(groupSections[0]).toContainElement(stickyHeader as HTMLElement);
     expect(groupSections[0]).toHaveAttribute('data-key', 'Group A');
-    expect(groupSections[0]).toHaveAttribute('data-index', '0');
     expect(title).toHaveBeenCalled();
   });
 
@@ -260,35 +259,24 @@ describe('Listy behaviors', () => {
     });
     expect(holder.scrollTop).toBe(90);
 
-    act(() => {
-      ref.current?.scrollTo({ index: 99 });
-    });
-    expect(holder.scrollTop).toBe(90);
-
-    holder.scrollTop = 12;
-    act(() => {
-      ref.current?.scrollTo({ index: 1, align: 'bottom', offset: 3 });
-    });
-    expect(holder.scrollTop).toBe(85);
-
     holder.scrollTop = 50;
     secondItem.getBoundingClientRect = () => ({ top: 0 } as DOMRect);
     act(() => {
-      ref.current?.scrollTo({ index: 1, align: 'auto', offset: 4 });
+      ref.current?.scrollTo({ key: 2, align: 'auto', offset: 4 });
     });
     expect(holder.scrollTop).toBe(36);
 
     holder.scrollTop = 10;
     secondItem.getBoundingClientRect = () => ({ top: 100 } as DOMRect);
     act(() => {
-      ref.current?.scrollTo({ index: 1, align: 'auto', offset: 4 });
+      ref.current?.scrollTo({ key: 2, align: 'auto', offset: 4 });
     });
     expect(holder.scrollTop).toBe(84);
 
     holder.scrollTop = 20;
     secondItem.getBoundingClientRect = () => ({ top: 10 } as DOMRect);
     act(() => {
-      ref.current?.scrollTo({ index: 1, align: 'auto', offset: 4 });
+      ref.current?.scrollTo({ key: 2, align: 'auto', offset: 4 });
     });
     expect(holder.scrollTop).toBe(20);
   });

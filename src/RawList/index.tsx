@@ -38,19 +38,18 @@ function RawList<T, K extends React.Key = React.Key>(
   const holderRef = useRawListScroll(ref);
 
   const getScrollTargetProps = React.useCallback(
-    (key: React.Key, rowIndex: number) => ({
+    (key: React.Key) => ({
       'data-key': String(key),
-      'data-index': rowIndex,
     }),
     [],
   );
 
   const renderItem = React.useCallback(
-    (item: T, index: number, rowIndex: number) => {
+    (item: T, index: number) => {
       const row = { type: 'item', item, index } as Row<T, K>;
       const key = getKey(row);
       const node = itemRender(item, index);
-      const scrollTargetProps = getScrollTargetProps(key, rowIndex);
+      const scrollTargetProps = getScrollTargetProps(key);
 
       if (React.isValidElement(node)) {
         return React.cloneElement(node as React.ReactElement<any>, {
@@ -68,21 +67,17 @@ function RawList<T, K extends React.Key = React.Key>(
     [getKey, getScrollTargetProps, itemRender],
   );
 
-  let rowIndex = 0;
   const rawContent = group
     ? Array.from(groupData).map(([groupKey, groupItems]) => {
         const headerRow = { type: 'header', groupKey } as Row<T, K>;
         const key = getKey(headerRow);
-        const groupRowIndex = rowIndex;
         const currentGroupItems = groupKeyToItems.get(groupKey) || [];
-
-        rowIndex += 1;
 
         return (
           <section
             key={key}
             className={`${prefixCls}-group-section`}
-            {...getScrollTargetProps(key, groupRowIndex)}
+            {...getScrollTargetProps(key)}
           >
             <GroupHeader
               group={group}
@@ -92,17 +87,13 @@ function RawList<T, K extends React.Key = React.Key>(
               sticky={sticky}
             />
             {groupItems.map(({ item, index }) => {
-              const itemNode = renderItem(item, index, rowIndex);
-              rowIndex += 1;
-              return itemNode;
+              return renderItem(item, index);
             })}
           </section>
         );
       })
     : data.map((item, index) => {
-        const itemNode = renderItem(item, index, rowIndex);
-        rowIndex += 1;
-        return itemNode;
+        return renderItem(item, index);
       });
 
   return (

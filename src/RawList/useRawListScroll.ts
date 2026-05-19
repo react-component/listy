@@ -4,13 +4,6 @@ import type { ListRef, ScrollTo } from '@rc-component/virtual-list';
 type ScrollConfig = NonNullable<Parameters<ScrollTo>[0]>;
 type ScrollPositionConfig = Extract<ScrollConfig, { left?: number; top?: number }>;
 type ScrollKeyConfig = Extract<ScrollConfig, { key: React.Key }>;
-type ScrollIndexConfig = Extract<ScrollConfig, { index: number }>;
-
-function isScrollPositionConfig(
-  config: ScrollConfig,
-): config is ScrollPositionConfig {
-  return typeof config === 'object' && ('left' in config || 'top' in config);
-}
 
 function isScrollKeyConfig(config: ScrollConfig): config is ScrollKeyConfig {
   return typeof config === 'object' && 'key' in config;
@@ -26,12 +19,11 @@ function getElementTop(container: HTMLElement, element: HTMLElement) {
 
 function findDataElement(
   container: HTMLElement,
-  dataName: 'key' | 'index',
   value: React.Key,
 ) {
-  return Array.from(
-    container.querySelectorAll<HTMLElement>(`[data-${dataName}]`),
-  ).find(element => element.dataset[dataName] === String(value));
+  return Array.from(container.querySelectorAll<HTMLElement>('[data-key]')).find(
+    element => element.dataset.key === String(value),
+  );
 }
 
 export default function useRawListScroll(ref: React.Ref<ListRef>) {
@@ -78,22 +70,21 @@ export default function useRawListScroll(ref: React.Ref<ListRef>) {
         return;
       }
 
-      if (isScrollPositionConfig(config)) {
-        if (config.left !== undefined) {
-          holder.scrollLeft = config.left;
-        }
-        if (config.top !== undefined) {
-          holder.scrollTop = config.top;
+      if (isScrollKeyConfig(config)) {
+        const targetElement = findDataElement(holder, config.key);
+
+        if (targetElement) {
+          scrollToElement(targetElement, config.align, config.offset);
         }
         return;
       }
 
-      const targetElement = isScrollKeyConfig(config)
-        ? findDataElement(holder, 'key', config.key)
-        : findDataElement(holder, 'index', (config as ScrollIndexConfig).index);
-
-      if (targetElement) {
-        scrollToElement(targetElement, config.align, config.offset);
+      const { left, top } = config as ScrollPositionConfig;
+      if (left !== undefined) {
+        holder.scrollLeft = left;
+      }
+      if (top !== undefined) {
+        holder.scrollTop = top;
       }
     },
     [scrollToElement],
