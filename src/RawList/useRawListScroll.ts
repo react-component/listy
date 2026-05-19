@@ -4,6 +4,7 @@ import type { ListRef, ScrollTo } from '@rc-component/virtual-list';
 type ScrollConfig = NonNullable<Parameters<ScrollTo>[0]>;
 type ScrollPositionConfig = Extract<ScrollConfig, { left?: number; top?: number }>;
 type ScrollKeyConfig = Extract<ScrollConfig, { key: React.Key }>;
+type ScrollIndexConfig = Extract<ScrollConfig, { index: number }>;
 
 function isScrollPositionConfig(
   config: ScrollConfig,
@@ -23,23 +24,18 @@ function getElementTop(container: HTMLElement, element: HTMLElement) {
   );
 }
 
+function findDataElement(
+  container: HTMLElement,
+  dataName: 'key' | 'index',
+  value: React.Key,
+) {
+  return Array.from(
+    container.querySelectorAll<HTMLElement>(`[data-${dataName}]`),
+  ).find(element => element.dataset[dataName] === String(value));
+}
+
 export default function useRawListScroll(ref: React.Ref<ListRef>) {
   const holderRef = React.useRef<HTMLDivElement>(null);
-  const keyElementMapRef = React.useRef(new Map<React.Key, HTMLElement>());
-  const indexElementMapRef = React.useRef(new Map<number, HTMLElement>());
-
-  const registerElement = React.useCallback(
-    (key: React.Key, rowIndex: number, element: HTMLElement | null) => {
-      if (element) {
-        keyElementMapRef.current.set(key, element);
-        indexElementMapRef.current.set(rowIndex, element);
-      } else {
-        keyElementMapRef.current.delete(key);
-        indexElementMapRef.current.delete(rowIndex);
-      }
-    },
-    [],
-  );
 
   const scrollToElement = React.useCallback(
     (
@@ -93,8 +89,8 @@ export default function useRawListScroll(ref: React.Ref<ListRef>) {
       }
 
       const targetElement = isScrollKeyConfig(config)
-        ? keyElementMapRef.current.get(config.key)
-        : indexElementMapRef.current.get(config.index);
+        ? findDataElement(holder, 'key', config.key)
+        : findDataElement(holder, 'index', (config as ScrollIndexConfig).index);
 
       if (targetElement) {
         scrollToElement(targetElement, config.align, config.offset);
@@ -116,8 +112,5 @@ export default function useRawListScroll(ref: React.Ref<ListRef>) {
     [scrollTo],
   );
 
-  return {
-    holderRef,
-    registerElement,
-  };
+  return holderRef;
 }

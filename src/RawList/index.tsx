@@ -35,31 +35,37 @@ function RawList<T, K extends React.Key = React.Key>(
     sticky,
   } = props;
 
-  const { holderRef, registerElement } = useRawListScroll(ref);
+  const holderRef = useRawListScroll(ref);
+
+  const getScrollTargetProps = React.useCallback(
+    (key: React.Key, rowIndex: number) => ({
+      'data-key': String(key),
+      'data-index': rowIndex,
+    }),
+    [],
+  );
 
   const renderItem = React.useCallback(
     (item: T, index: number, rowIndex: number) => {
       const row = { type: 'item', item, index } as Row<T, K>;
       const key = getKey(row);
       const node = itemRender(item, index);
-      const setRef = (element: HTMLElement | null) => {
-        registerElement(key, rowIndex, element);
-      };
+      const scrollTargetProps = getScrollTargetProps(key, rowIndex);
 
       if (React.isValidElement(node)) {
         return React.cloneElement(node as React.ReactElement<any>, {
           key,
-          ref: setRef,
+          ...scrollTargetProps,
         });
       }
 
       return (
-        <div key={key} ref={setRef}>
+        <div key={key} {...scrollTargetProps}>
           {node}
         </div>
       );
     },
-    [getKey, itemRender, registerElement],
+    [getKey, getScrollTargetProps, itemRender],
   );
 
   let rowIndex = 0;
@@ -76,7 +82,7 @@ function RawList<T, K extends React.Key = React.Key>(
           <section
             key={key}
             className={`${prefixCls}-group-section`}
-            ref={(element) => registerElement(key, groupRowIndex, element)}
+            {...getScrollTargetProps(key, groupRowIndex)}
           >
             <GroupHeader
               group={group}

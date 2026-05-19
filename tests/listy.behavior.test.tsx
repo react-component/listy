@@ -156,6 +156,8 @@ describe('Listy behaviors', () => {
     expect(stickyHeader).toHaveTextContent('Group Group A');
     expect(groupSections).toHaveLength(1);
     expect(groupSections[0]).toContainElement(stickyHeader as HTMLElement);
+    expect(groupSections[0]).toHaveAttribute('data-key', 'Group A');
+    expect(groupSections[0]).toHaveAttribute('data-index', '0');
     expect(title).toHaveBeenCalled();
   });
 
