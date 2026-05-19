@@ -9,54 +9,24 @@ function isScrollKeyConfig(config: ScrollConfig): config is ScrollKeyConfig {
   return typeof config === 'object' && 'key' in config;
 }
 
-function getElementTop(container: HTMLElement, element: HTMLElement) {
-  return (
-    element.getBoundingClientRect().top -
-    container.getBoundingClientRect().top +
-    container.scrollTop
-  );
-}
-
-function findDataElement(
-  container: HTMLElement,
-  value: React.Key,
-) {
+function findDataElement(container: HTMLElement, value: React.Key) {
   return Array.from(container.querySelectorAll<HTMLElement>('[data-key]')).find(
     element => element.dataset.key === String(value),
   );
 }
 
+function getScrollIntoViewOptions(
+  align: ScrollKeyConfig['align'] = 'top',
+): ScrollIntoViewOptions {
+  return {
+    block:
+      align === 'bottom' ? 'end' : align === 'auto' ? 'nearest' : 'start',
+    inline: 'nearest',
+  };
+}
+
 export default function useRawListScroll(ref: React.Ref<ListRef>) {
   const holderRef = React.useRef<HTMLDivElement>(null);
-
-  const scrollToElement = React.useCallback(
-    (
-      element: HTMLElement,
-      align: 'top' | 'bottom' | 'auto' = 'top',
-      offset = 0,
-    ) => {
-      const holder = holderRef.current as HTMLDivElement;
-
-      const elementTop = getElementTop(holder, element);
-      const elementBottom = elementTop + element.offsetHeight;
-      const scrollBottom = holder.scrollTop + holder.clientHeight;
-
-      if (align === 'auto') {
-        if (elementTop < holder.scrollTop) {
-          holder.scrollTop = elementTop - offset;
-        } else if (elementBottom > scrollBottom) {
-          holder.scrollTop = elementBottom - holder.clientHeight + offset;
-        }
-        return;
-      }
-
-      holder.scrollTop =
-        align === 'bottom'
-          ? elementBottom - holder.clientHeight + offset
-          : elementTop - offset;
-    },
-    [],
-  );
 
   const scrollTo: ScrollTo = React.useCallback(
     (config) => {
@@ -74,7 +44,7 @@ export default function useRawListScroll(ref: React.Ref<ListRef>) {
         const targetElement = findDataElement(holder, config.key);
 
         if (targetElement) {
-          scrollToElement(targetElement, config.align, config.offset);
+          targetElement.scrollIntoView(getScrollIntoViewOptions(config.align));
         }
         return;
       }
@@ -87,7 +57,7 @@ export default function useRawListScroll(ref: React.Ref<ListRef>) {
         holder.scrollTop = top;
       }
     },
-    [scrollToElement],
+    [],
   );
 
   React.useImperativeHandle(

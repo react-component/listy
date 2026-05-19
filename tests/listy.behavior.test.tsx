@@ -176,18 +176,10 @@ describe('Listy behaviors', () => {
       },
     });
 
-    const holder = container.querySelector('.rc-listy-holder') as HTMLDivElement;
     const groupSections = container.querySelectorAll('.rc-listy-group-section');
     const groupBSection = groupSections[1] as HTMLElement;
-
-    Object.defineProperty(holder, 'clientHeight', {
-      configurable: true,
-      value: 100,
-    });
-    holder.getBoundingClientRect = () =>
-      ({ top: 10, bottom: 110 } as DOMRect);
-    groupBSection.getBoundingClientRect = () =>
-      ({ top: 210, bottom: 270 } as DOMRect);
+    const scrollIntoView = jest.fn();
+    groupBSection.scrollIntoView = scrollIntoView;
 
     act(() => {
       ref.current?.scrollTo({
@@ -197,7 +189,10 @@ describe('Listy behaviors', () => {
       });
     });
 
-    expect(holder.scrollTop).toBe(195);
+    expect(scrollIntoView).toHaveBeenCalledWith({
+      block: 'start',
+      inline: 'nearest',
+    });
   });
 
   it('supports raw list scroll APIs without grouping', () => {
@@ -217,17 +212,8 @@ describe('Listy behaviors', () => {
       '.rc-listy-holder-inner > div',
     );
     const secondItem = itemNodes[1] as HTMLElement;
-
-    Object.defineProperty(holder, 'clientHeight', {
-      configurable: true,
-      value: 50,
-    });
-    Object.defineProperty(secondItem, 'offsetHeight', {
-      configurable: true,
-      value: 30,
-    });
-    holder.getBoundingClientRect = () => ({ top: 10 } as DOMRect);
-    secondItem.getBoundingClientRect = () => ({ top: 100 } as DOMRect);
+    const scrollIntoView = jest.fn();
+    secondItem.scrollIntoView = scrollIntoView;
 
     act(() => {
       ref.current?.scrollTo();
@@ -257,28 +243,32 @@ describe('Listy behaviors', () => {
     act(() => {
       ref.current?.scrollTo({ key: 2 });
     });
-    expect(holder.scrollTop).toBe(90);
+    expect(scrollIntoView).toHaveBeenLastCalledWith({
+      block: 'start',
+      inline: 'nearest',
+    });
 
-    holder.scrollTop = 50;
-    secondItem.getBoundingClientRect = () => ({ top: 0 } as DOMRect);
+    act(() => {
+      ref.current?.scrollTo({ key: 2, align: 'bottom', offset: 4 });
+    });
+    expect(scrollIntoView).toHaveBeenLastCalledWith({
+      block: 'end',
+      inline: 'nearest',
+    });
+
     act(() => {
       ref.current?.scrollTo({ key: 2, align: 'auto', offset: 4 });
     });
-    expect(holder.scrollTop).toBe(36);
-
-    holder.scrollTop = 10;
-    secondItem.getBoundingClientRect = () => ({ top: 100 } as DOMRect);
-    act(() => {
-      ref.current?.scrollTo({ key: 2, align: 'auto', offset: 4 });
+    expect(scrollIntoView).toHaveBeenLastCalledWith({
+      block: 'nearest',
+      inline: 'nearest',
     });
-    expect(holder.scrollTop).toBe(84);
 
-    holder.scrollTop = 20;
-    secondItem.getBoundingClientRect = () => ({ top: 10 } as DOMRect);
+    const scrollCount = scrollIntoView.mock.calls.length;
     act(() => {
-      ref.current?.scrollTo({ key: 2, align: 'auto', offset: 4 });
+      ref.current?.scrollTo({ key: 99 });
     });
-    expect(holder.scrollTop).toBe(20);
+    expect(scrollIntoView).toHaveBeenCalledTimes(scrollCount);
   });
 
   it('exposes raw list scroll info', () => {
