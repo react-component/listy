@@ -10,8 +10,8 @@ function isScrollKeyConfig(config: ScrollConfig): config is ScrollKeyConfig {
 }
 
 function findDataElement(container: HTMLElement, value: React.Key) {
-  return Array.from(container.querySelectorAll<HTMLElement>('[data-key]')).find(
-    element => element.dataset.key === String(value),
+  return container.querySelector<HTMLElement>(
+    `[data-key="${CSS.escape(String(value))}"]`,
   );
 }
 
