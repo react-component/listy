@@ -1,13 +1,10 @@
 import * as React from 'react';
-import type { ListRef, ScrollTo } from '@rc-component/virtual-list';
+import type { ListyRef, PositionScrollToConfig } from '../List';
 
-type ScrollConfig = NonNullable<Parameters<ScrollTo>[0]>;
-type ScrollPositionConfig = Extract<ScrollConfig, { left?: number; top?: number }>;
-
-export default function useRawListScroll(ref: React.Ref<ListRef>) {
+export default function useRawListScroll(ref: React.Ref<ListyRef>) {
   const holderRef = React.useRef<HTMLDivElement>(null);
 
-  const scrollTo: ScrollTo = React.useCallback(
+  const scrollTo: ListyRef['scrollTo'] = React.useCallback(
     (config) => {
       const holder = holderRef.current;
       if (!holder || config == null) {
@@ -39,7 +36,7 @@ export default function useRawListScroll(ref: React.Ref<ListRef>) {
         return;
       }
 
-      const { left, top } = config as ScrollPositionConfig;
+      const { left, top } = config as PositionScrollToConfig;
       if (left !== undefined) {
         holder.scrollLeft = left;
       }
@@ -53,12 +50,7 @@ export default function useRawListScroll(ref: React.Ref<ListRef>) {
   React.useImperativeHandle(
     ref,
     () => ({
-      nativeElement: holderRef.current as HTMLDivElement,
       scrollTo,
-      getScrollInfo: () => ({
-        x: holderRef.current?.scrollLeft || 0,
-        y: holderRef.current?.scrollTop || 0,
-      }),
     }),
     [scrollTo],
   );

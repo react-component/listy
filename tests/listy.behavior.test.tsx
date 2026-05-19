@@ -2,7 +2,6 @@ import React from 'react';
 import { act, render } from '@testing-library/react';
 import type {
   ListProps as VirtualListProps,
-  ListRef as VirtualListRef,
 } from '@rc-component/virtual-list';
 import Listy, { type ListyRef, type ListyProps } from '@rc-component/listy';
 import RawList from '../src/RawList';
@@ -271,9 +270,9 @@ describe('Listy behaviors', () => {
     expect(scrollIntoView).toHaveBeenCalledTimes(scrollCount);
   });
 
-  it('exposes raw list scroll info', () => {
-    const ref = React.createRef<VirtualListRef>();
-    const { container, unmount } = render(
+  it('exposes raw list scrollTo only', () => {
+    const ref = React.createRef<ListyRef>();
+    render(
       <RawList
         ref={ref}
         data={[{ id: 1 }]}
@@ -286,16 +285,7 @@ describe('Listy behaviors', () => {
       />,
     );
 
-    const holder = container.querySelector('.rc-listy-holder') as HTMLDivElement;
-    holder.scrollLeft = 11;
-    holder.scrollTop = 22;
-
-    expect(ref.current?.nativeElement).toBe(holder);
-    expect(ref.current?.getScrollInfo()).toEqual({ x: 11, y: 22 });
-
-    const rawListRef = ref.current;
-    unmount();
-    expect(rawListRef?.getScrollInfo()).toEqual({ x: 0, y: 0 });
+    expect(Object.keys(ref.current || {})).toEqual(['scrollTo']);
   });
 
   it('passes empty group items when raw group item map is missing', () => {

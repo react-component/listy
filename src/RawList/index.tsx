@@ -1,9 +1,9 @@
 import * as React from 'react';
-import type { ListRef } from '@rc-component/virtual-list';
 import GroupHeader from '../GroupHeader';
 import type { Row } from '../hooks/useFlattenRows';
 import type { GroupSegmentItem, Group } from '../hooks/useGroupSegments';
 import useRawListScroll from './useRawListScroll';
+import type { ListyRef } from '../List';
 
 export interface RawListProps<T, K extends React.Key = React.Key> {
   data: T[];
@@ -20,7 +20,7 @@ export interface RawListProps<T, K extends React.Key = React.Key> {
 
 function RawList<T, K extends React.Key = React.Key>(
   props: RawListProps<T, K>,
-  ref: React.Ref<ListRef>,
+  ref: React.Ref<ListyRef>,
 ) {
   const {
     data,
@@ -116,7 +116,7 @@ const RawListWithRef = React.forwardRef(RawList) as <
   T,
   K extends React.Key = React.Key,
 >(
-  props: RawListProps<T, K> & { ref?: React.Ref<ListRef> },
+  props: RawListProps<T, K> & { ref?: React.Ref<ListyRef> },
 ) => React.ReactElement;
 
 export default RawListWithRef;

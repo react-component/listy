@@ -1,7 +1,6 @@
 import * as React from 'react';
 import VirtualList, {
-  type ListRef,
-  type ScrollTo,
+  type ListRef as VirtualListRef,
 } from '@rc-component/virtual-list';
 import { useImperativeHandle, forwardRef } from 'react';
 import useGroupSegments from './hooks/useGroupSegments';
@@ -18,13 +17,27 @@ type RowKey<T> = keyof T | ((item: T) => React.Key);
 export type ScrollAlign = 'top' | 'bottom' | 'auto';
 
 export interface GroupScrollToConfig {
-  groupKey: string;
+  groupKey: React.Key;
   align?: ScrollAlign;
   offset?: number;
 }
 
+export interface KeyScrollToConfig {
+  key: React.Key;
+  align?: ScrollAlign;
+  offset?: number;
+}
+
+export interface PositionScrollToConfig {
+  left?: number;
+  top?: number;
+}
+
 export type ListyScrollToConfig =
-  | Parameters<ScrollTo>[0]
+  | number
+  | null
+  | KeyScrollToConfig
+  | PositionScrollToConfig
   | GroupScrollToConfig;
 
 export interface ListyRef {
@@ -66,7 +79,7 @@ function Listy<T, K extends React.Key = React.Key>(
   const data = React.useMemo(() => items || [], [items]);
 
   // =============================== Refs ===============================
-  const listRef = React.useRef<ListRef>(null);
+  const listRef = React.useRef<ListyRef>(null);
 
   // ========================== Imperative API ==========================
   useImperativeHandle(ref, () => ({
@@ -80,7 +93,7 @@ function Listy<T, K extends React.Key = React.Key>(
         });
         return;
       }
-      listRef.current?.scrollTo(config as Parameters<ScrollTo>[0]);
+      listRef.current?.scrollTo(config);
     },
   }));
 
@@ -139,7 +152,6 @@ function Listy<T, K extends React.Key = React.Key>(
 
   // ============================== Render ===============================
   const sharedListProps = {
-    ref: listRef,
     height,
     onScroll,
     prefixCls,
@@ -148,6 +160,7 @@ function Listy<T, K extends React.Key = React.Key>(
   const listNode =
     virtual === false ? (
       <RawList
+        ref={listRef}
         {...sharedListProps}
         data={data}
         group={group}
@@ -159,6 +172,7 @@ function Listy<T, K extends React.Key = React.Key>(
       />
     ) : (
       <VirtualList
+        ref={listRef as React.Ref<VirtualListRef>}
         {...sharedListProps}
         virtual={virtual}
         data={rows}
