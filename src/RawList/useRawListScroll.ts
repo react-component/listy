@@ -3,27 +3,6 @@ import type { ListRef, ScrollTo } from '@rc-component/virtual-list';
 
 type ScrollConfig = NonNullable<Parameters<ScrollTo>[0]>;
 type ScrollPositionConfig = Extract<ScrollConfig, { left?: number; top?: number }>;
-type ScrollKeyConfig = Extract<ScrollConfig, { key: React.Key }>;
-
-function isScrollKeyConfig(config: ScrollConfig): config is ScrollKeyConfig {
-  return typeof config === 'object' && 'key' in config;
-}
-
-function findDataElement(container: HTMLElement, value: React.Key) {
-  return container.querySelector<HTMLElement>(
-    `[data-key="${CSS.escape(String(value))}"]`,
-  );
-}
-
-function getScrollIntoViewOptions(
-  align: ScrollKeyConfig['align'] = 'top',
-): ScrollIntoViewOptions {
-  return {
-    block:
-      align === 'bottom' ? 'end' : align === 'auto' ? 'nearest' : 'start',
-    inline: 'nearest',
-  };
-}
 
 export default function useRawListScroll(ref: React.Ref<ListRef>) {
   const holderRef = React.useRef<HTMLDivElement>(null);
@@ -40,11 +19,22 @@ export default function useRawListScroll(ref: React.Ref<ListRef>) {
         return;
       }
 
-      if (isScrollKeyConfig(config)) {
-        const targetElement = findDataElement(holder, config.key);
+      if ('key' in config) {
+        const targetElement = holder.querySelector<HTMLElement>(
+          `[data-key="${CSS.escape(String(config.key))}"]`,
+        );
 
         if (targetElement) {
-          targetElement.scrollIntoView(getScrollIntoViewOptions(config.align));
+          const { align = 'top' } = config;
+          targetElement.scrollIntoView({
+            block:
+              align === 'bottom'
+                ? 'end'
+                : align === 'auto'
+                  ? 'nearest'
+                  : 'start',
+            inline: 'nearest',
+          });
         }
         return;
       }
