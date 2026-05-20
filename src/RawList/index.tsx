@@ -105,11 +105,6 @@ function RawList<T, K extends React.Key = React.Key>(
   );
 }
 
-const RawListWithRef = React.forwardRef(RawList) as <
-  T,
-  K extends React.Key = React.Key,
->(
-  props: RawListProps<T, K> & { ref?: React.Ref<ListyRef> },
-) => React.ReactElement;
+const RawListWithRef = React.forwardRef(RawList as any) as any;
 
 export default RawListWithRef;

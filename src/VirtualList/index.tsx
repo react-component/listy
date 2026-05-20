@@ -165,11 +165,6 @@ function VirtualList<T, K extends React.Key = React.Key>(
   );
 }
 
-const VirtualListWithRef = React.forwardRef(VirtualList) as <
-  T,
-  K extends React.Key = React.Key,
->(
-  props: VirtualListProps<T, K> & { ref?: React.Ref<ListyRef> },
-) => React.ReactElement;
+const VirtualListWithRef = React.forwardRef(VirtualList as any) as any;
 
 export default VirtualListWithRef;
