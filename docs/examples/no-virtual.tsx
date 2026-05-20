@@ -159,8 +159,8 @@ export default () => {
             </button>
           );
         })}
-        <button onClick={() => handleScrollToItem('desserts-10')}>
-          Scroll to Creme Brulee
+        <button onClick={() => handleScrollToItem('desserts-3')}>
+          Scroll to Panna Cotta
         </button>
         <span>Total Items: {items.length}</span>
       </div>
