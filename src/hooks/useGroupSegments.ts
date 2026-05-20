@@ -1,7 +1,5 @@
 import * as React from 'react';
-import type { Group } from '../interface';
-
-export type { Group } from '../interface';
+import type { Group } from '../List';
 
 export interface GroupSegmentItem<T> {
   item: T;

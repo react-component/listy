@@ -1,6 +1,6 @@
 import * as React from 'react';
 import clsx from 'clsx';
-import type { Group } from './interface';
+import type { Group } from './List';
 
 export interface GroupHeaderProps<T, K extends React.Key = React.Key> {
   group: Group<T, K>;

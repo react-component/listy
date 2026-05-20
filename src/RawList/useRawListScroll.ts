@@ -1,5 +1,5 @@
 import * as React from 'react';
-import type { ListyRef, PositionScrollToConfig } from '../interface';
+import type { ListyRef, PositionScrollToConfig } from '../List';
 
 export default function useRawListScroll(ref: React.Ref<ListyRef>) {
   const holderRef = React.useRef<HTMLDivElement>(null);

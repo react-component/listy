@@ -3,7 +3,7 @@ import { useEvent } from '@rc-component/util';
 import GroupHeader from '../GroupHeader';
 import useGroupSegments from '../hooks/useGroupSegments';
 import useRawListScroll from './useRawListScroll';
-import type { ListComponentProps, ListyRef } from '../interface';
+import type { ListComponentProps, ListyRef } from '../List';
 
 export type RawListProps<T, K extends React.Key = React.Key> =
   ListComponentProps<T, K>;

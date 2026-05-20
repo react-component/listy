@@ -1,5 +1,5 @@
 import * as React from 'react';
-import type { Group } from '../interface';
+import type { Group } from '../List';
 import type { GroupSegmentItem } from './useGroupSegments';
 
 export type Row<T, K extends React.Key = React.Key> =
