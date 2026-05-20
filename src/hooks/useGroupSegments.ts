@@ -1,5 +1,9 @@
 import * as React from 'react';
-import type { Group } from '../List';
+
+export interface Group<T, K extends React.Key = React.Key> {
+  key: (item: T) => K;
+  title: (groupKey: K, items: T[]) => React.ReactNode;
+}
 
 export interface GroupSegmentItem<T> {
   item: T;

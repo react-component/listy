@@ -2,15 +2,11 @@ import * as React from 'react';
 import { forwardRef } from 'react';
 import RawList from './RawList';
 import VirtualList from './VirtualList';
+import type { Group } from './hooks/useGroupSegments';
 
 export type RowKey<T> = keyof T | ((item: T) => React.Key);
 
 export type ScrollAlign = 'top' | 'bottom' | 'auto';
-
-export interface Group<T, K extends React.Key = React.Key> {
-  key: (item: T) => K;
-  title: (groupKey: K, items: T[]) => React.ReactNode;
-}
 
 export interface GroupScrollToConfig {
   groupKey: React.Key;

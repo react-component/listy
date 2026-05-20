@@ -1,6 +1,6 @@
 import * as React from 'react';
 import type { ListProps as VirtualListProps } from '@rc-component/virtual-list';
-import type { Group } from '../List';
+import type { Group } from '../hooks/useGroupSegments';
 import GroupHeader from '../GroupHeader';
 
 type ExtraRenderInfo = Parameters<
