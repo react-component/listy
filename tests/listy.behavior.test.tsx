@@ -325,10 +325,28 @@ describe('Listy behaviors', () => {
     expect(container.querySelector('[data-key="item-1"]')).not.toBeNull();
   });
 
+  it('wraps raw list fragment items as scroll targets', () => {
+    const { container } = render(
+      <RawList
+        data={[{ id: 1 }]}
+        group={undefined}
+        itemRender={(item) => (
+          <>
+            <span>{item.id}</span>
+          </>
+        )}
+        prefixCls="rc-listy"
+        rowKey="id"
+      />,
+    );
+
+    expect(container.querySelector('[data-key="1"]')).not.toBeNull();
+  });
+
   it('scroll to group', () => {
     const scrollHandler = jest.fn();
     MockedVirtualList.__setScrollHandler(scrollHandler);
-  
+
     const ref = React.createRef<ListyRef>();
     renderList({
       ref,
@@ -337,15 +355,53 @@ describe('Listy behaviors', () => {
         title: () => null,
       },
     });
-  
+
     act(() => {
-      ref.current?.scrollTo({ groupKey: 'Group A', align: 'bottom', offset: 12 });
+      ref.current?.scrollTo({
+        groupKey: 'Group A',
+        align: 'bottom',
+        offset: 12,
+      });
     });
-  
+
     expect(scrollHandler).toHaveBeenCalledWith({
       key: 'Group A',
       align: 'bottom',
       offset: 12,
     });
-  });  
+  });
+
+  it('offsets sticky virtual scrollTo by group header height', () => {
+    const scrollHandler = jest.fn();
+    MockedVirtualList.__setScrollHandler(scrollHandler);
+
+    const ref = React.createRef<ListyRef>();
+    renderList({
+      ref,
+      sticky: true,
+      group: {
+        key: (item) => item.group,
+        title: () => null,
+      },
+    });
+
+    act(() => {
+      ref.current?.scrollTo({ key: 2, align: 'top', offset: 5 });
+    });
+
+    expect(scrollHandler).toHaveBeenCalledWith({
+      key: 2,
+      align: 'top',
+      offset: expect.any(Function),
+    });
+
+    const [{ offset }] = scrollHandler.mock.calls[0];
+
+    expect(
+      offset({
+        getSize: (key: React.Key) =>
+          key === 'Group A' ? { top: 10, bottom: 34 } : { top: 0, bottom: 0 },
+      }),
+    ).toBe(29);
+  });
 });

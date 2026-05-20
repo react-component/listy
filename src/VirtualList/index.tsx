@@ -2,6 +2,7 @@ import * as React from 'react';
 import RcVirtualList, {
   type ListRef as RcVirtualListRef,
   type ScrollConfig,
+  type ScrollOffsetInfo,
 } from '@rc-component/virtual-list';
 import { useEvent } from '@rc-component/util';
 import GroupHeader from '../GroupHeader';
@@ -34,43 +35,88 @@ function VirtualList<T, K extends React.Key = React.Key>(
 
   const listRef = React.useRef<RcVirtualListRef>(null);
 
-  React.useImperativeHandle(
-    ref,
-    () => ({
-      scrollTo: (config) => {
-        if (config && typeof config === 'object' && 'groupKey' in config) {
-          const { groupKey, align, offset } = config;
-          listRef.current?.scrollTo({
-            key: groupKey,
-            align,
-            offset,
-          });
-          return;
-        }
-
-        listRef.current?.scrollTo(config as number | ScrollConfig | null);
-      },
-    }),
-    [],
-  );
-
   const groupData = useGroupSegments<T, K>(data, group);
+
+  const getItemKey = useEvent((item: T): React.Key => {
+    if (typeof rowKey === 'function') {
+      return rowKey(item);
+    }
+    return item[rowKey] as React.Key;
+  });
 
   const getKey = useEvent((row: Row<T, K>): React.Key => {
     if (row.type === 'header') {
       return row.groupKey;
     }
 
-    if (typeof rowKey === 'function') {
-      return rowKey(row.item);
-    }
-    return row.item[rowKey] as React.Key;
+    return getItemKey(row.item);
   });
 
   const { rows, headerRows, groupKeyToItems } = useFlattenRows<T, K>(
     data,
     groupData,
     group,
+  );
+
+  const itemKeyToGroupKey = React.useMemo(() => {
+    const itemGroupMap = new Map<React.Key, K>();
+
+    groupData.forEach((groupItems, groupKey) => {
+      groupItems.forEach(({ item }) => {
+        itemGroupMap.set(getItemKey(item), groupKey);
+      });
+    });
+
+    return itemGroupMap;
+  }, [getItemKey, groupData]);
+
+  const scrollTo = useEvent<ListyRef['scrollTo']>((config) => {
+    if (config && typeof config === 'object' && 'groupKey' in config) {
+      const { groupKey, align, offset } = config;
+      listRef.current?.scrollTo({
+        key: groupKey,
+        align,
+        offset,
+      });
+      return;
+    }
+
+    if (
+      config &&
+      typeof config === 'object' &&
+      'key' in config &&
+      sticky &&
+      group &&
+      config.align === 'top'
+    ) {
+      const groupKey = itemKeyToGroupKey.get(config.key);
+
+      if (groupKey !== undefined) {
+        const { offset = 0 } = config;
+
+        listRef.current?.scrollTo({
+          ...config,
+          // Use the measured header height so top-aligned items stay below it.
+          offset: ({ getSize }: ScrollOffsetInfo) => {
+            const headerSize = getSize(groupKey);
+            const headerHeight = headerSize.bottom - headerSize.top;
+
+            return offset + (Number.isFinite(headerHeight) ? headerHeight : 0);
+          },
+        });
+        return;
+      }
+    }
+
+    listRef.current?.scrollTo(config as number | ScrollConfig | null);
+  });
+
+  React.useImperativeHandle(
+    ref,
+    () => ({
+      scrollTo,
+    }),
+    [scrollTo],
   );
 
   const extraRender = useStickyGroupHeader<T, K>({

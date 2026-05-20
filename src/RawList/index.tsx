@@ -46,7 +46,7 @@ function RawList<T, K extends React.Key = React.Key>(
       const node = itemRender(item, index);
       const scrollTargetProps = getScrollTargetProps(key);
 
-      if (React.isValidElement(node)) {
+      if (React.isValidElement(node) && node.type !== React.Fragment) {
         return React.cloneElement(node as React.ReactElement<any>, {
           key,
           ...scrollTargetProps,
@@ -63,7 +63,7 @@ function RawList<T, K extends React.Key = React.Key>(
   );
 
   const rawContent = group
-    ? Array.from(groupData).map(([groupKey, groupItems]) => {
+    ? Array.from(groupData, ([groupKey, groupItems]) => {
         const currentGroupItems = groupItems.map(({ item }) => item);
 
         return (
