@@ -92,6 +92,10 @@ export default () => {
     [],
   );
 
+  const handleScrollToItem = useCallback((itemId: string) => {
+    listRef.current?.scrollTo({ key: itemId, align: 'top' });
+  }, []);
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
       <Listy
@@ -155,6 +159,9 @@ export default () => {
             </button>
           );
         })}
+        <button onClick={() => handleScrollToItem('desserts-10')}>
+          Scroll to Creme Brulee
+        </button>
         <span>Total Items: {items.length}</span>
       </div>
     </div>
