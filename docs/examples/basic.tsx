@@ -8,7 +8,7 @@ export default () => {
     const groupItemsCount = 20;
     const groupIndex = Math.floor(index / groupItemsCount);
     return {
-      id: index + 1,
+      id: index,
       name: `${index} (group ${groupIndex})`,
       type: `Group ${groupIndex * groupItemsCount}`,
     };
