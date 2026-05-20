@@ -20,7 +20,6 @@ export default () => {
     lineHeight: '32px',
     borderBottom: '1px solid rgb(79, 53, 53)',
   };
-  const groupHeaderHeight = 32;
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
@@ -41,8 +40,8 @@ export default () => {
               style={{
                 fontWeight: 600,
                 padding: '0 12px',
-                height: groupHeaderHeight,
-                lineHeight: `${groupHeaderHeight}px`,
+                height: 32,
+                lineHeight: '32px',
                 borderBottom: '1px solid #f5f5f5',
                 backgroundColor: 'gray',
               }}
@@ -58,7 +57,6 @@ export default () => {
           listRef.current?.scrollTo({
             key: 100,
             align: 'top',
-            offset: groupHeaderHeight,
           })
         }
       >
