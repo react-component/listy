@@ -277,43 +277,52 @@ describe('Listy behaviors', () => {
         ref={ref}
         data={[{ id: 1 }]}
         group={undefined}
-        groupData={new Map()}
-        groupKeyToItems={new Map()}
-        getKey={(row) => (row.type === 'item' ? row.item.id : row.groupKey)}
         itemRender={(item) => <div>{item.id}</div>}
         prefixCls="rc-listy"
+        rowKey="id"
       />,
     );
 
     expect(Object.keys(ref.current || {})).toEqual(['scrollTo']);
   });
 
-  it('passes empty group items when raw group item map is missing', () => {
+  it('passes raw group items to title', () => {
     const title = jest.fn(() => null);
 
     render(
       <RawList
-        data={[]}
+        data={[
+          { id: 1, group: 'Group A' },
+          { id: 2, group: 'Group A' },
+        ]}
         group={{
           key: (item: { id: number; group: string }) => item.group,
           title,
         }}
-        groupData={
-          new Map([
-            [
-              'Group A',
-              [{ item: { id: 1, group: 'Group A' }, index: 0 }],
-            ],
-          ])
-        }
-        groupKeyToItems={new Map()}
-        getKey={(row) => (row.type === 'item' ? row.item.id : row.groupKey)}
         itemRender={(item) => <div>{item.id}</div>}
         prefixCls="rc-listy"
+        rowKey="id"
       />,
     );
 
-    expect(title).toHaveBeenCalledWith('Group A', []);
+    expect(title).toHaveBeenCalledWith('Group A', [
+      { id: 1, group: 'Group A' },
+      { id: 2, group: 'Group A' },
+    ]);
+  });
+
+  it('supports raw list rowKey function', () => {
+    const { container } = render(
+      <RawList
+        data={[{ id: 1 }]}
+        group={undefined}
+        itemRender={(item) => <div>{item.id}</div>}
+        prefixCls="rc-listy"
+        rowKey={(item) => `item-${item.id}`}
+      />,
+    );
+
+    expect(container.querySelector('[data-key="item-1"]')).not.toBeNull();
   });
 
   it('scroll to group', () => {

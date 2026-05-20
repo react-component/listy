@@ -1,5 +1,5 @@
 import * as React from 'react';
-import type { ListyRef, PositionScrollToConfig } from '../List';
+import type { ListyRef, PositionScrollToConfig } from '../interface';
 
 export default function useRawListScroll(ref: React.Ref<ListyRef>) {
   const holderRef = React.useRef<HTMLDivElement>(null);
@@ -16,9 +16,10 @@ export default function useRawListScroll(ref: React.Ref<ListyRef>) {
         return;
       }
 
-      if ('key' in config) {
+      if ('key' in config || 'groupKey' in config) {
+        const targetKey = 'groupKey' in config ? config.groupKey : config.key;
         const targetElement = holder.querySelector<HTMLElement>(
-          `[data-key="${CSS.escape(String(config.key))}"]`,
+          `[data-key="${CSS.escape(String(targetKey))}"]`,
         );
 
         if (targetElement) {
