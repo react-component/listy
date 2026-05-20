@@ -159,7 +159,11 @@ function VirtualList<T, K extends React.Key = React.Key>(
       {(row: Row<T, K>) =>
         row.type === 'header'
           ? renderHeaderRow(row.groupKey)
-          : itemRender(row.item, row.index)
+          : (
+              <div className={`${prefixCls}-item`}>
+                {itemRender(row.item, row.index)}
+              </div>
+            )
       }
     </RcVirtualList>
   );

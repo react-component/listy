@@ -43,23 +43,19 @@ function RawList<T, K extends React.Key = React.Key>(
   const renderItem = React.useCallback(
     (item: T, index: number) => {
       const key = getItemKey(item);
-      const node = itemRender(item, index);
       const scrollTargetProps = getScrollTargetProps(key);
 
-      if (React.isValidElement(node) && node.type !== React.Fragment) {
-        return React.cloneElement(node as React.ReactElement<any>, {
-          key,
-          ...scrollTargetProps,
-        });
-      }
-
       return (
-        <div key={key} {...scrollTargetProps}>
-          {node}
+        <div
+          key={key}
+          className={`${prefixCls}-item`}
+          {...scrollTargetProps}
+        >
+          {itemRender(item, index)}
         </div>
       );
     },
-    [getItemKey, getScrollTargetProps, itemRender],
+    [getItemKey, getScrollTargetProps, itemRender, prefixCls],
   );
 
   const rawContent = group

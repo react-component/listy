@@ -17,8 +17,12 @@ exports[`Listy should match snapshot 1`] = `
             class="rc-listy-holder-inner"
             style="display: flex; flex-direction: column;"
           >
-            <div>
-              1
+            <div
+              class="rc-listy-item"
+            >
+              <div>
+                1
+              </div>
             </div>
           </div>
         </div>

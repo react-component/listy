@@ -133,6 +133,17 @@ describe('Listy behaviors', () => {
     expect(lastProps.data).toEqual([]);
   });
 
+  it('wraps virtual items with item class', () => {
+    const { container } = renderList();
+
+    const itemNodes = container.querySelectorAll('.rc-listy-item');
+
+    expect(itemNodes).toHaveLength(2);
+    expect(itemNodes[0]).toContainElement(
+      container.querySelector('[data-testid="item-1"]') as HTMLElement,
+    );
+  });
+
   it('applies sticky class when virtual list is disabled', () => {
     const title = jest.fn((key: React.Key) => <span>Group {String(key)}</span>);
     const { container } = renderList({
@@ -207,9 +218,7 @@ describe('Listy behaviors', () => {
     });
 
     const holder = container.querySelector('.rc-listy-holder') as HTMLDivElement;
-    const itemNodes = container.querySelectorAll(
-      '.rc-listy-holder-inner > div',
-    );
+    const itemNodes = container.querySelectorAll('.rc-listy-item');
     const secondItem = itemNodes[1] as HTMLElement;
     const scrollIntoView = jest.fn();
     secondItem.scrollIntoView = scrollIntoView;
@@ -322,10 +331,12 @@ describe('Listy behaviors', () => {
       />,
     );
 
-    expect(container.querySelector('[data-key="item-1"]')).not.toBeNull();
+    const itemNode = container.querySelector('.rc-listy-item');
+
+    expect(itemNode).toHaveAttribute('data-key', 'item-1');
   });
 
-  it('wraps raw list fragment items as scroll targets', () => {
+  it('wraps raw list items with item class', () => {
     const { container } = render(
       <RawList
         data={[{ id: 1 }]}
@@ -340,7 +351,10 @@ describe('Listy behaviors', () => {
       />,
     );
 
-    expect(container.querySelector('[data-key="1"]')).not.toBeNull();
+    const itemNode = container.querySelector('.rc-listy-item');
+
+    expect(itemNode).toHaveAttribute('data-key', '1');
+    expect(itemNode).toContainElement(container.querySelector('span'));
   });
 
   it('scroll to group', () => {
