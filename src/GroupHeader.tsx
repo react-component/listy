@@ -12,8 +12,9 @@ export interface GroupHeaderProps<T, K extends React.Key = React.Key> {
   style?: React.CSSProperties;
 }
 
-export default function GroupHeader<T, K extends React.Key = React.Key>(
+function GroupHeader<T, K extends React.Key = React.Key>(
   props: GroupHeaderProps<T, K>,
+  ref: React.Ref<HTMLDivElement>,
 ) {
   const {
     group,
@@ -31,8 +32,17 @@ export default function GroupHeader<T, K extends React.Key = React.Key>(
   });
 
   return (
-    <div className={className} style={style}>
+    <div ref={ref} className={className} style={style}>
       {group.title(groupKey, groupItems)}
     </div>
   );
 }
+
+const GroupHeaderWithRef = React.forwardRef(GroupHeader) as <
+  T,
+  K extends React.Key = React.Key,
+>(
+  props: GroupHeaderProps<T, K> & { ref?: React.Ref<HTMLDivElement> },
+) => React.ReactElement;
+
+export default GroupHeaderWithRef;

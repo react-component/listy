@@ -1,5 +1,6 @@
 import React from 'react';
 import { act, render } from '@testing-library/react';
+import { _rs as triggerResize } from '@rc-component/resize-observer';
 import type {
   ListProps as VirtualListProps,
 } from '@rc-component/virtual-list';
@@ -355,6 +356,51 @@ describe('Listy behaviors', () => {
 
     expect(itemNode).toHaveAttribute('data-key', '1');
     expect(itemNode).toContainElement(container.querySelector('span'));
+  });
+
+  it('keeps raw sticky group header from covering top-aligned items', async () => {
+    const { container } = renderList({
+      virtual: false,
+      sticky: true,
+      group: {
+        key: (item) => item.group,
+        title: (groupKey) => <span>{String(groupKey)}</span>,
+      },
+    });
+
+    const groupHeader = container.querySelector(
+      '.rc-listy-group-header',
+    ) as HTMLElement;
+    Object.defineProperty(groupHeader, 'offsetHeight', {
+      configurable: true,
+      value: 36,
+    });
+    groupHeader.getBoundingClientRect = jest.fn(
+      () =>
+        ({
+          bottom: 36,
+          height: 36,
+          left: 0,
+          right: 100,
+          top: 0,
+          width: 100,
+          x: 0,
+          y: 0,
+          toJSON: () => {},
+        }) as DOMRect,
+    );
+
+    await act(async () => {
+      triggerResize?.([
+        { target: groupHeader } as unknown as ResizeObserverEntry,
+      ]);
+      await Promise.resolve();
+    });
+
+    const itemNode = container.querySelector('[data-key="1"]') as HTMLElement;
+
+    expect(itemNode).toHaveClass('rc-listy-item');
+    expect(itemNode).toHaveStyle({ scrollMarginTop: '36px' });
   });
 
   it('scroll to group', () => {

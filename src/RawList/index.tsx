@@ -1,4 +1,5 @@
 import * as React from 'react';
+import ResizeObserver from '@rc-component/resize-observer';
 import { useEvent } from '@rc-component/util';
 import GroupHeader from '../GroupHeader';
 import useGroupSegments from '../hooks/useGroupSegments';
@@ -25,6 +26,9 @@ function RawList<T, K extends React.Key = React.Key>(
 
   const holderRef = useRawListScroll(ref);
   const groupData = useGroupSegments<T, K>(data, group);
+  const [headerHeights, setHeaderHeights] = React.useState<
+    Map<K, number>
+  >(() => new Map());
 
   const getItemKey = useEvent((item: T): React.Key => {
     if (typeof rowKey === 'function') {
@@ -40,22 +44,49 @@ function RawList<T, K extends React.Key = React.Key>(
     [],
   );
 
+  const setGroupHeaderHeight = React.useCallback(
+    (groupKey: K, headerHeight: number) => {
+      setHeaderHeights((prev) => {
+        const next = new Map(prev);
+        next.set(groupKey, headerHeight);
+        return next;
+      });
+    },
+    [],
+  );
+
   const renderItem = React.useCallback(
-    (item: T, index: number) => {
+    (item: T, index: number, groupKey?: K) => {
       const key = getItemKey(item);
       const scrollTargetProps = getScrollTargetProps(key);
+      const headerHeight =
+        sticky && groupKey !== undefined ? headerHeights.get(groupKey) : 0;
 
       return (
         <div
           key={key}
           className={`${prefixCls}-item`}
+          style={
+            headerHeight
+              ? {
+                  scrollMarginTop: headerHeight,
+                }
+              : undefined
+          }
           {...scrollTargetProps}
         >
           {itemRender(item, index)}
         </div>
       );
     },
-    [getItemKey, getScrollTargetProps, itemRender, prefixCls],
+    [
+      getItemKey,
+      getScrollTargetProps,
+      headerHeights,
+      itemRender,
+      prefixCls,
+      sticky,
+    ],
   );
 
   const rawContent = group
@@ -68,15 +99,22 @@ function RawList<T, K extends React.Key = React.Key>(
             className={`${prefixCls}-group-section`}
             {...getScrollTargetProps(groupKey)}
           >
-            <GroupHeader
-              group={group}
-              groupKey={groupKey}
-              groupItems={currentGroupItems}
-              prefixCls={prefixCls}
-              sticky={sticky}
-            />
+            <ResizeObserver
+              disabled={!sticky}
+              onResize={({ offsetHeight }) => {
+                setGroupHeaderHeight(groupKey, offsetHeight);
+              }}
+            >
+              <GroupHeader
+                group={group}
+                groupKey={groupKey}
+                groupItems={currentGroupItems}
+                prefixCls={prefixCls}
+                sticky={sticky}
+              />
+            </ResizeObserver>
             {groupItems.map(({ item, index }) => {
-              return renderItem(item, index);
+              return renderItem(item, index, groupKey);
             })}
           </div>
         );
