@@ -62,6 +62,17 @@ export default () => {
       >
         Scroll To 100
       </button>
+
+      <button
+        onClick={() =>
+          listRef.current?.scrollTo({
+            groupKey: 'Group 120',
+            align: 'top',
+          })
+        }
+      >
+        Scroll To Group 120
+      </button>
     </div>
   );
 };
