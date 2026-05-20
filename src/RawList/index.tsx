@@ -74,7 +74,7 @@ function RawList<T, K extends React.Key = React.Key>(
         const currentGroupItems = groupKeyToItems.get(groupKey) || [];
 
         return (
-          <section
+          <div
             key={key}
             className={`${prefixCls}-group-section`}
             {...getScrollTargetProps(key)}
@@ -89,7 +89,7 @@ function RawList<T, K extends React.Key = React.Key>(
             {groupItems.map(({ item, index }) => {
               return renderItem(item, index);
             })}
-          </section>
+          </div>
         );
       })
     : data.map((item, index) => {
