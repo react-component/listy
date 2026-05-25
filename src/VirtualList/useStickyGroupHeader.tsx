@@ -3,12 +3,14 @@ import type { ListProps as VirtualListProps } from '@rc-component/virtual-list';
 import type { Group } from '../hooks/useGroupSegments';
 import GroupHeader from '../GroupHeader';
 
+// ============================== Types ===============================
 type ExtraRenderInfo = Parameters<
   NonNullable<VirtualListProps<unknown>['extraRender']>
 >[0];
 
 type HeaderRow<K extends React.Key> = { groupKey: K; rowIndex: number };
 
+// ============================== Utils ===============================
 // `headerRows` is sorted by rowIndex. Find the last header not after `start`.
 function findActiveHeaderIndex<K extends React.Key>(
   headerRows: HeaderRow<K>[],
@@ -32,6 +34,7 @@ function findActiveHeaderIndex<K extends React.Key>(
   return activeIndex;
 }
 
+// ============================== Params ==============================
 export interface StickyHeaderParams<T, K extends React.Key = React.Key> {
   enabled: boolean;
   group: Group<T, K> | undefined;
@@ -44,6 +47,7 @@ export default function useStickyGroupHeader<
   T,
   K extends React.Key = React.Key,
 >(params: StickyHeaderParams<T, K>) {
+  // ============================== Props ==============================
   const {
     enabled,
     group,
@@ -52,6 +56,7 @@ export default function useStickyGroupHeader<
     prefixCls,
   } = params;
 
+  // ============================ Extra Render ==========================
   const extraRender = React.useCallback(
     (info: ExtraRenderInfo) => {
       const { getSize, offsetY, scrollTop, start, virtual } = info;
@@ -88,5 +93,6 @@ export default function useStickyGroupHeader<
     [enabled, group, headerRows, groupKeyToItems, prefixCls],
   );
 
+  // ============================== Return ==============================
   return extraRender;
 }

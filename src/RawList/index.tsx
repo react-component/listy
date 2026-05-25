@@ -6,6 +6,7 @@ import useGroupSegments from '../hooks/useGroupSegments';
 import useRawListScroll from './useRawListScroll';
 import type { ListComponentProps, ListyRef } from '../List';
 
+// ============================== Types ===============================
 export type RawListProps<T, K extends React.Key = React.Key> =
   ListComponentProps<T, K>;
 
@@ -13,6 +14,7 @@ function RawList<T, K extends React.Key = React.Key>(
   props: RawListProps<T, K>,
   ref: React.Ref<ListyRef>,
 ) {
+  // ============================== Props ==============================
   const {
     data,
     group,
@@ -24,12 +26,16 @@ function RawList<T, K extends React.Key = React.Key>(
     sticky,
   } = props;
 
+  // =============================== Refs ===============================
   const holderRef = useRawListScroll(ref);
+
+  // =============================== Data ===============================
   const groupData = useGroupSegments<T, K>(data, group);
   const [headerHeights, setHeaderHeights] = React.useState<
     Map<K, number>
   >(() => new Map());
 
+  // ============================== Utils ===============================
   const getItemKey = useEvent((item: T): React.Key => {
     if (typeof rowKey === 'function') {
       return rowKey(item);
@@ -55,6 +61,7 @@ function RawList<T, K extends React.Key = React.Key>(
     [],
   );
 
+  // ============================ Render Item ===========================
   const renderItem = React.useCallback(
     (item: T, index: number, groupKey?: K) => {
       const key = getItemKey(item);
@@ -89,6 +96,7 @@ function RawList<T, K extends React.Key = React.Key>(
     ],
   );
 
+  // ============================= Content ==============================
   const rawContent = group
     ? Array.from(groupData, ([groupKey, groupItems]) => {
         const currentGroupItems = groupItems.map(({ item }) => item);
@@ -123,6 +131,7 @@ function RawList<T, K extends React.Key = React.Key>(
         return renderItem(item, index);
       });
 
+  // ============================== Render ==============================
   return (
     <div
       ref={holderRef}

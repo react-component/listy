@@ -2,8 +2,10 @@ import * as React from 'react';
 import type { ListyRef, PositionScrollToConfig } from '../List';
 
 export default function useRawListScroll(ref: React.Ref<ListyRef>) {
+  // =============================== Refs ===============================
   const holderRef = React.useRef<HTMLDivElement>(null);
 
+  // ============================== Scroll ==============================
   const scrollTo: ListyRef['scrollTo'] = React.useCallback(
     (config) => {
       const holder = holderRef.current;
@@ -48,6 +50,7 @@ export default function useRawListScroll(ref: React.Ref<ListyRef>) {
     [],
   );
 
+  // ============================ Imperative ============================
   React.useImperativeHandle(
     ref,
     () => ({
@@ -56,5 +59,6 @@ export default function useRawListScroll(ref: React.Ref<ListyRef>) {
     [scrollTo],
   );
 
+  // ============================== Return ==============================
   return holderRef;
 }

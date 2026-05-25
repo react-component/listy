@@ -12,6 +12,7 @@ import type { Row } from '../hooks/useFlattenRows';
 import useGroupSegments from '../hooks/useGroupSegments';
 import useStickyGroupHeader from './useStickyGroupHeader';
 
+// ============================== Types ===============================
 export type VirtualListProps<
   T,
   K extends React.Key = React.Key,
@@ -21,6 +22,7 @@ function VirtualList<T, K extends React.Key = React.Key>(
   props: VirtualListProps<T, K>,
   ref: React.Ref<ListyRef>,
 ) {
+  // ============================== Props ==============================
   const {
     data,
     group,
@@ -33,10 +35,13 @@ function VirtualList<T, K extends React.Key = React.Key>(
     sticky,
   } = props;
 
+  // =============================== Refs ===============================
   const listRef = React.useRef<RcVirtualListRef>(null);
 
+  // =============================== Data ===============================
   const groupData = useGroupSegments<T, K>(data, group);
 
+  // =============================== Keys ===============================
   const getItemKey = useEvent((item: T): React.Key => {
     if (typeof rowKey === 'function') {
       return rowKey(item);
@@ -52,12 +57,14 @@ function VirtualList<T, K extends React.Key = React.Key>(
     return getItemKey(row.item);
   });
 
+  // ============================== Rows ================================
   const { rows, headerRows, groupKeyToItems } = useFlattenRows<T, K>(
     data,
     groupData,
     group,
   );
 
+  // ============================== Lookup ==============================
   const itemKeyToGroupKey = React.useMemo(() => {
     const itemGroupMap = new Map<React.Key, K>();
 
@@ -70,6 +77,7 @@ function VirtualList<T, K extends React.Key = React.Key>(
     return itemGroupMap;
   }, [getItemKey, groupData]);
 
+  // ============================== Scroll ==============================
   const scrollTo = useEvent<ListyRef['scrollTo']>((config) => {
     if (config && typeof config === 'object' && 'groupKey' in config) {
       const { groupKey, align, offset } = config;
@@ -111,6 +119,7 @@ function VirtualList<T, K extends React.Key = React.Key>(
     listRef.current?.scrollTo(config as number | ScrollConfig | null);
   });
 
+  // ============================ Imperative ============================
   React.useImperativeHandle(
     ref,
     () => ({
@@ -119,6 +128,7 @@ function VirtualList<T, K extends React.Key = React.Key>(
     [scrollTo],
   );
 
+  // ============================== Sticky ==============================
   const extraRender = useStickyGroupHeader<T, K>({
     enabled: !!(sticky && group),
     group,
@@ -127,6 +137,7 @@ function VirtualList<T, K extends React.Key = React.Key>(
     prefixCls,
   });
 
+  // ============================ Render Row ============================
   const renderHeaderRow = React.useCallback(
     (groupKey: K) => {
       const groupItems = groupKeyToItems.get(groupKey) || [];
@@ -143,6 +154,7 @@ function VirtualList<T, K extends React.Key = React.Key>(
     [group, groupKeyToItems, prefixCls],
   );
 
+  // ============================== Render ==============================
   return (
     <RcVirtualList
       ref={listRef}

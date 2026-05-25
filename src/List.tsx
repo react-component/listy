@@ -4,6 +4,7 @@ import RawList from './RawList';
 import VirtualList from './VirtualList';
 import type { Group } from './hooks/useGroupSegments';
 
+// ============================== Types ===============================
 export type RowKey<T> = keyof T | ((item: T) => React.Key);
 
 export type ScrollAlign = 'top' | 'bottom' | 'auto';
