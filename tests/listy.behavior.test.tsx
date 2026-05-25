@@ -1,7 +1,11 @@
 import React from 'react';
 import { act, render } from '@testing-library/react';
-import type { ListProps as VirtualListProps } from '@rc-component/virtual-list';
+import { _rs as triggerResize } from '@rc-component/resize-observer';
+import type {
+  ListProps as VirtualListProps,
+} from '@rc-component/virtual-list';
 import Listy, { type ListyRef, type ListyProps } from '@rc-component/listy';
+import RawList from '../src/RawList';
 
 type ExtraRenderInfo = Parameters<
   NonNullable<VirtualListProps<unknown>['extraRender']>
@@ -92,6 +96,9 @@ describe('Listy behaviors', () => {
           { id: 1, group: 'Group A' },
           { id: 2, group: 'Group A' },
         ];
+    const resolvedItemRender =
+      rest.itemRender ||
+      ((item) => <div data-testid={`item-${item.id}`}>{item.id}</div>);
 
     return render(
       <Listy
@@ -101,9 +108,7 @@ describe('Listy behaviors', () => {
         rowKey="id"
         itemHeight={20}
         height={100}
-        itemRender={(item) => (
-          <div data-testid={`item-${item.id}`}>{item.id}</div>
-        )}
+        itemRender={resolvedItemRender}
       />,
     );
   };
@@ -129,6 +134,17 @@ describe('Listy behaviors', () => {
     expect(lastProps.data).toEqual([]);
   });
 
+  it('wraps virtual items with item class', () => {
+    const { container } = renderList();
+
+    const itemNodes = container.querySelectorAll('.rc-listy-item');
+
+    expect(itemNodes).toHaveLength(2);
+    expect(itemNodes[0]).toContainElement(
+      container.querySelector('[data-testid="item-1"]') as HTMLElement,
+    );
+  });
+
   it('applies sticky class when virtual list is disabled', () => {
     const title = jest.fn((key: React.Key) => <span>Group {String(key)}</span>);
     const { container } = renderList({
@@ -143,16 +159,254 @@ describe('Listy behaviors', () => {
     const stickyHeader = container.querySelector(
       '.rc-listy-group-header-sticky',
     );
+    const groupSections = container.querySelectorAll('.rc-listy-group-section');
+
+    expect(container.querySelector('[data-testid="mock-virtual-list"]')).toBeNull();
     expect(stickyHeader).not.toBeNull();
     expect(stickyHeader).toHaveClass('rc-listy-group-header');
     expect(stickyHeader).toHaveTextContent('Group Group A');
+    expect(groupSections).toHaveLength(1);
+    expect(groupSections[0]).toContainElement(stickyHeader as HTMLElement);
+    expect(groupSections[0]).toHaveAttribute('data-key', 'Group A');
     expect(title).toHaveBeenCalled();
+  });
+
+  it('scrolls raw list group sections by group key', () => {
+    const ref = React.createRef<ListyRef>();
+    const { container } = renderList({
+      ref,
+      virtual: false,
+      items: [
+        { id: 1, group: 'Group A' },
+        { id: 2, group: 'Group A' },
+        { id: 3, group: 'Group B' },
+      ],
+      group: {
+        key: (item) => item.group,
+        title: (groupKey) => <span>Group {String(groupKey)}</span>,
+      },
+    });
+
+    const groupSections = container.querySelectorAll('.rc-listy-group-section');
+    const groupBSection = groupSections[1] as HTMLElement;
+    const scrollIntoView = jest.fn();
+    groupBSection.scrollIntoView = scrollIntoView;
+
+    act(() => {
+      ref.current?.scrollTo({
+        groupKey: 'Group B',
+        align: 'top',
+        offset: 5,
+      });
+    });
+
+    expect(scrollIntoView).toHaveBeenCalledWith({
+      block: 'start',
+      inline: 'nearest',
+    });
+  });
+
+  it('supports raw list scroll APIs without grouping', () => {
+    const ref = React.createRef<ListyRef>();
+    const { container } = renderList({
+      ref,
+      virtual: false,
+      items: [
+        { id: 1, name: 'One' },
+        { id: 2, name: 'Two' },
+      ],
+      itemRender: (item) => item.name,
+    });
+
+    const holder = container.querySelector('.rc-listy-holder') as HTMLDivElement;
+    const itemNodes = container.querySelectorAll('.rc-listy-item');
+    const secondItem = itemNodes[1] as HTMLElement;
+    const scrollIntoView = jest.fn();
+    secondItem.scrollIntoView = scrollIntoView;
+
+    act(() => {
+      ref.current?.scrollTo();
+      ref.current?.scrollTo(24);
+    });
+    expect(holder.scrollTop).toBe(24);
+
+    act(() => {
+      ref.current?.scrollTo({ left: 7, top: 12 });
+    });
+    expect(holder.scrollLeft).toBe(7);
+    expect(holder.scrollTop).toBe(12);
+
+    act(() => {
+      ref.current?.scrollTo({ left: 8 });
+    });
+    expect(holder.scrollLeft).toBe(8);
+    expect(holder.scrollTop).toBe(12);
+
+    act(() => {
+      ref.current?.scrollTo({ top: 13 });
+    });
+    expect(holder.scrollLeft).toBe(8);
+    expect(holder.scrollTop).toBe(13);
+
+    holder.scrollTop = 0;
+    act(() => {
+      ref.current?.scrollTo({ key: 2 });
+    });
+    expect(scrollIntoView).toHaveBeenLastCalledWith({
+      block: 'start',
+      inline: 'nearest',
+    });
+
+    act(() => {
+      ref.current?.scrollTo({ key: 2, align: 'bottom', offset: 4 });
+    });
+    expect(scrollIntoView).toHaveBeenLastCalledWith({
+      block: 'end',
+      inline: 'nearest',
+    });
+
+    act(() => {
+      ref.current?.scrollTo({ key: 2, align: 'auto', offset: 4 });
+    });
+    expect(scrollIntoView).toHaveBeenLastCalledWith({
+      block: 'nearest',
+      inline: 'nearest',
+    });
+
+    const scrollCount = scrollIntoView.mock.calls.length;
+    act(() => {
+      ref.current?.scrollTo({ key: 99 });
+    });
+    expect(scrollIntoView).toHaveBeenCalledTimes(scrollCount);
+  });
+
+  it('exposes raw list scrollTo only', () => {
+    const ref = React.createRef<ListyRef>();
+    render(
+      <RawList
+        ref={ref}
+        data={[{ id: 1 }]}
+        group={undefined}
+        itemRender={(item) => <div>{item.id}</div>}
+        prefixCls="rc-listy"
+        rowKey="id"
+      />,
+    );
+
+    expect(Object.keys(ref.current || {})).toEqual(['scrollTo']);
+  });
+
+  it('passes raw group items to title', () => {
+    const title = jest.fn(() => null);
+
+    render(
+      <RawList
+        data={[
+          { id: 1, group: 'Group A' },
+          { id: 2, group: 'Group A' },
+        ]}
+        group={{
+          key: (item: { id: number; group: string }) => item.group,
+          title,
+        }}
+        itemRender={(item) => <div>{item.id}</div>}
+        prefixCls="rc-listy"
+        rowKey="id"
+      />,
+    );
+
+    expect(title).toHaveBeenCalledWith('Group A', [
+      { id: 1, group: 'Group A' },
+      { id: 2, group: 'Group A' },
+    ]);
+  });
+
+  it('supports raw list rowKey function', () => {
+    const { container } = render(
+      <RawList
+        data={[{ id: 1 }]}
+        group={undefined}
+        itemRender={(item) => <div>{item.id}</div>}
+        prefixCls="rc-listy"
+        rowKey={(item) => `item-${item.id}`}
+      />,
+    );
+
+    const itemNode = container.querySelector('.rc-listy-item');
+
+    expect(itemNode).toHaveAttribute('data-key', 'item-1');
+  });
+
+  it('wraps raw list items with item class', () => {
+    const { container } = render(
+      <RawList
+        data={[{ id: 1 }]}
+        group={undefined}
+        itemRender={(item) => (
+          <>
+            <span>{item.id}</span>
+          </>
+        )}
+        prefixCls="rc-listy"
+        rowKey="id"
+      />,
+    );
+
+    const itemNode = container.querySelector('.rc-listy-item');
+
+    expect(itemNode).toHaveAttribute('data-key', '1');
+    expect(itemNode).toContainElement(container.querySelector('span'));
+  });
+
+  it('keeps raw sticky group header from covering top-aligned items', async () => {
+    const { container } = renderList({
+      virtual: false,
+      sticky: true,
+      group: {
+        key: (item) => item.group,
+        title: (groupKey) => <span>{String(groupKey)}</span>,
+      },
+    });
+
+    const groupHeader = container.querySelector(
+      '.rc-listy-group-header',
+    ) as HTMLElement;
+    Object.defineProperty(groupHeader, 'offsetHeight', {
+      configurable: true,
+      value: 36,
+    });
+    groupHeader.getBoundingClientRect = jest.fn(
+      () =>
+        ({
+          bottom: 36,
+          height: 36,
+          left: 0,
+          right: 100,
+          top: 0,
+          width: 100,
+          x: 0,
+          y: 0,
+          toJSON: () => {},
+        }) as DOMRect,
+    );
+
+    await act(async () => {
+      triggerResize?.([
+        { target: groupHeader } as unknown as ResizeObserverEntry,
+      ]);
+      await Promise.resolve();
+    });
+
+    const itemNode = container.querySelector('[data-key="1"]') as HTMLElement;
+
+    expect(itemNode).toHaveClass('rc-listy-item');
+    expect(itemNode).toHaveStyle({ scrollMarginTop: '36px' });
   });
 
   it('scroll to group', () => {
     const scrollHandler = jest.fn();
     MockedVirtualList.__setScrollHandler(scrollHandler);
-  
+
     const ref = React.createRef<ListyRef>();
     renderList({
       ref,
@@ -161,15 +415,53 @@ describe('Listy behaviors', () => {
         title: () => null,
       },
     });
-  
+
     act(() => {
-      ref.current?.scrollTo({ groupKey: 'Group A', align: 'bottom', offset: 12 });
+      ref.current?.scrollTo({
+        groupKey: 'Group A',
+        align: 'bottom',
+        offset: 12,
+      });
     });
-  
+
     expect(scrollHandler).toHaveBeenCalledWith({
       key: 'Group A',
       align: 'bottom',
       offset: 12,
     });
-  });  
+  });
+
+  it('offsets sticky virtual scrollTo by group header height', () => {
+    const scrollHandler = jest.fn();
+    MockedVirtualList.__setScrollHandler(scrollHandler);
+
+    const ref = React.createRef<ListyRef>();
+    renderList({
+      ref,
+      sticky: true,
+      group: {
+        key: (item) => item.group,
+        title: () => null,
+      },
+    });
+
+    act(() => {
+      ref.current?.scrollTo({ key: 2, align: 'top', offset: 5 });
+    });
+
+    expect(scrollHandler).toHaveBeenCalledWith({
+      key: 2,
+      align: 'top',
+      offset: expect.any(Function),
+    });
+
+    const [{ offset }] = scrollHandler.mock.calls[0];
+
+    expect(
+      offset({
+        getSize: (key: React.Key) =>
+          key === 'Group A' ? { top: 10, bottom: 34 } : { top: 0, bottom: 0 },
+      }),
+    ).toBe(29);
+  });
 });

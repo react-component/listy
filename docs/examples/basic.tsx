@@ -8,7 +8,7 @@ export default () => {
     const groupItemsCount = 20;
     const groupIndex = Math.floor(index / groupItemsCount);
     return {
-      id: index + 1,
+      id: index,
       name: `${index} (group ${groupIndex})`,
       type: `Group ${groupIndex * groupItemsCount}`,
     };
@@ -61,6 +61,17 @@ export default () => {
         }
       >
         Scroll To 100
+      </button>
+
+      <button
+        onClick={() =>
+          listRef.current?.scrollTo({
+            groupKey: 'Group 120',
+            align: 'top',
+          })
+        }
+      >
+        Scroll To Group 120
       </button>
     </div>
   );

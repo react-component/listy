@@ -1,16 +1,41 @@
 import * as React from 'react';
 import type { ListProps as VirtualListProps } from '@rc-component/virtual-list';
-import type { Group } from './useGroupSegments';
+import type { Group } from '../hooks/useGroupSegments';
 import GroupHeader from '../GroupHeader';
 
 type ExtraRenderInfo = Parameters<
   NonNullable<VirtualListProps<unknown>['extraRender']>
 >[0];
 
+type HeaderRow<K extends React.Key> = { groupKey: K; rowIndex: number };
+
+// `headerRows` is sorted by rowIndex. Find the last header not after `start`.
+function findActiveHeaderIndex<K extends React.Key>(
+  headerRows: HeaderRow<K>[],
+  start: number,
+) {
+  let left = 0;
+  let right = headerRows.length - 1;
+  let activeIndex = 0;
+
+  while (left <= right) {
+    const mid = Math.floor((left + right) / 2);
+
+    if (headerRows[mid].rowIndex <= start) {
+      activeIndex = mid;
+      left = mid + 1;
+    } else {
+      right = mid - 1;
+    }
+  }
+
+  return activeIndex;
+}
+
 export interface StickyHeaderParams<T, K extends React.Key = React.Key> {
   enabled: boolean;
   group: Group<T, K> | undefined;
-  headerRows: { groupKey: K; rowIndex: number }[];
+  headerRows: HeaderRow<K>[];
   groupKeyToItems: Map<K, T[]>;
   prefixCls: string;
 }
@@ -35,15 +60,8 @@ export default function useStickyGroupHeader<
         return null;
       }
 
-      let activeHeaderIdx = 0;
-      let currHeader = headerRows[0];
-      for (let i = headerRows.length - 1; i >= 0; i -= 1) {
-        if (headerRows[i].rowIndex <= start) {
-          activeHeaderIdx = i;
-          currHeader = headerRows[i];
-          break;
-        }
-      }
+      const activeHeaderIdx = findActiveHeaderIndex(headerRows, start);
+      const currHeader = headerRows[activeHeaderIdx];
 
       const groupItems = groupKeyToItems.get(currHeader.groupKey) || [];
       const currentSize = getSize(currHeader.groupKey);
