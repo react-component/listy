@@ -79,6 +79,7 @@ function VirtualList<T, K extends React.Key = React.Key>(
 
   // ============================== Scroll ==============================
   const scrollTo = useEvent<ListyRef['scrollTo']>((config) => {
+    // Group headers are rows in the virtual data, so group scroll maps to key scroll.
     if (config && typeof config === 'object' && 'groupKey' in config) {
       const { groupKey, align, offset } = config;
       listRef.current?.scrollTo({
@@ -89,6 +90,7 @@ function VirtualList<T, K extends React.Key = React.Key>(
       return;
     }
 
+    // For sticky grouped lists, top-aligned item scroll should land below its header.
     if (
       config &&
       typeof config === 'object' &&
@@ -116,6 +118,7 @@ function VirtualList<T, K extends React.Key = React.Key>(
       }
     }
 
+    // Other scroll shapes are already supported by the underlying virtual list.
     listRef.current?.scrollTo(config as number | ScrollConfig | null);
   });
 
