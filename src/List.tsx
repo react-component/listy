@@ -77,19 +77,14 @@ function Listy<T, K extends React.Key = React.Key>(
     ...restProps,
     data,
     prefixCls,
+    ref,
   };
 
   const listNode =
     virtual === false ? (
-      <RawList
-        ref={ref}
-        {...sharedListProps}
-      />
+      <RawList {...sharedListProps} />
     ) : (
-      <VirtualList
-        ref={ref}
-        {...sharedListProps}
-      />
+      <VirtualList {...sharedListProps} />
     );
 
   return (
