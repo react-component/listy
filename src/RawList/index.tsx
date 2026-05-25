@@ -26,7 +26,7 @@ function RawList<T, K extends React.Key = React.Key>(
   } = props;
 
   // =============================== Refs ===============================
-  const holderRef = useRawListScroll(ref, prefixCls);
+  const holderRef = useRawListScroll(ref, prefixCls, !!(sticky && group));
 
   // =============================== Data ===============================
   const groupData = useGroupSegments<T, K>(data, group);

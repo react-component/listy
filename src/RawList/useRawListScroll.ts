@@ -1,9 +1,10 @@
 import * as React from 'react';
-import type { ListyRef, PositionScrollToConfig } from '../List';
+import type { ListyRef, PositionScrollToConfig, ScrollAlign } from '../List';
 
 export default function useRawListScroll(
   ref: React.Ref<ListyRef>,
   prefixCls: string,
+  stickyGroup: boolean,
 ) {
   // =============================== Refs ===============================
   const holderRef = React.useRef<HTMLDivElement>(null);
@@ -11,11 +12,15 @@ export default function useRawListScroll(
   // ============================== Utils ===============================
   const getStickyHeaderHeight = React.useCallback(
     (targetElement: HTMLElement) => {
+      if (!stickyGroup) {
+        return 0;
+      }
+
       const groupSection = targetElement.closest<HTMLElement>(
         `.${CSS.escape(`${prefixCls}-group-section`)}`,
       );
       const groupHeader = groupSection?.querySelector<HTMLElement>(
-        `.${CSS.escape(`${prefixCls}-group-header-sticky`)}`,
+        `.${CSS.escape(`${prefixCls}-group-header`)}`,
       );
 
       if (!groupHeader) {
@@ -28,11 +33,11 @@ export default function useRawListScroll(
 
       return Number.isFinite(height) ? height : 0;
     },
-    [prefixCls],
+    [prefixCls, stickyGroup],
   );
 
   const setTargetScrollMargin = React.useCallback(
-    (targetElement: HTMLElement, align: string) => {
+    (targetElement: HTMLElement, align: ScrollAlign) => {
       const marginTop =
         align === 'top' ? getStickyHeaderHeight(targetElement) : 0;
 
