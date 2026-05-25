@@ -87,11 +87,7 @@ function Listy<T, K extends React.Key = React.Key>(
       <VirtualList {...sharedListProps} />
     );
 
-  return (
-    <div className={prefixCls}>
-      {listNode}
-    </div>
-  );
+  return listNode;
 }
 
 // Const to support generic with forwardRef
