@@ -7,9 +7,9 @@ import RcVirtualList, {
 import { useEvent } from '@rc-component/util';
 import GroupHeader from '../GroupHeader';
 import type { ListComponentProps, ListyRef } from '../List';
-import useFlattenRows from '../hooks/useFlattenRows';
-import type { Row } from '../hooks/useFlattenRows';
 import useGroupSegments from '../hooks/useGroupSegments';
+import useFlattenRows from './useFlattenRows';
+import type { Row } from './useFlattenRows';
 import useStickyGroupHeader from './useStickyGroupHeader';
 
 // ============================== Types ===============================

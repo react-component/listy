@@ -2,8 +2,8 @@ import React from 'react';
 import { render, renderHook } from '@testing-library/react';
 import type { ListProps as VirtualListProps } from '@rc-component/virtual-list';
 
-import useFlattenRows from '../src/hooks/useFlattenRows';
 import useGroupSegments from '../src/hooks/useGroupSegments';
+import useFlattenRows from '../src/VirtualList/useFlattenRows';
 import useStickyGroupHeader from '../src/VirtualList/useStickyGroupHeader';
 import type { StickyHeaderParams } from '../src/VirtualList/useStickyGroupHeader';
 
