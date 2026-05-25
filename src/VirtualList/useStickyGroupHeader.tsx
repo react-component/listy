@@ -65,20 +65,25 @@ export default function useStickyGroupHeader<
         return null;
       }
 
+      // The sticky header is the latest group header before the visible range.
       const activeHeaderIdx = findActiveHeaderIndex(headerRows, start);
       const currHeader = headerRows[activeHeaderIdx];
 
       const groupItems = groupKeyToItems.get(currHeader.groupKey) || [];
       const currentSize = getSize(currHeader.groupKey);
       const headerHeight = currentSize.bottom - currentSize.top;
+
+      // Convert the virtual list scroll position into the overlay top offset.
       const fixedTop = scrollTop - offsetY;
 
+      // Let the next group header push the current fixed header away.
       const nextHeader = headerRows[activeHeaderIdx + 1];
       const nextTop = nextHeader
         ? getSize(nextHeader.groupKey).top - headerHeight - offsetY
         : fixedTop;
       const top = Math.min(fixedTop, nextTop);
 
+      // Render a cloned header above the virtual list items.
       return (
         <GroupHeader
           fixed
