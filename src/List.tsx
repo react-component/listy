@@ -81,10 +81,10 @@ function Listy<T, K extends React.Key = React.Key>(
   };
 
   const listNode =
-    virtual === false ? (
-      <RawList {...sharedListProps} />
-    ) : (
+    virtual ? (
       <VirtualList {...sharedListProps} />
+    ) : (
+      <RawList {...sharedListProps} />
     );
 
   return listNode;
