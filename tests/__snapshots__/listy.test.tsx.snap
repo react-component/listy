@@ -4,25 +4,21 @@ exports[`Listy should match snapshot 1`] = `
 <DocumentFragment>
   <div
     class="rc-listy"
+    style="position: relative;"
   >
     <div
-      class="rc-listy"
-      style="position: relative;"
+      class="rc-listy-holder"
     >
-      <div
-        class="rc-listy-holder"
-      >
-        <div>
+      <div>
+        <div
+          class="rc-listy-holder-inner"
+          style="display: flex; flex-direction: column;"
+        >
           <div
-            class="rc-listy-holder-inner"
-            style="display: flex; flex-direction: column;"
+            class="rc-listy-item"
           >
-            <div
-              class="rc-listy-item"
-            >
-              <div>
-                1
-              </div>
+            <div>
+              1
             </div>
           </div>
         </div>

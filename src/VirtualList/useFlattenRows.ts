@@ -1,6 +1,7 @@
 import * as React from 'react';
-import type { Group, GroupSegmentItem } from './useGroupSegments';
+import type { Group, GroupSegmentItem } from '../hooks/useGroupSegments';
 
+// ============================== Types ===============================
 export type Row<T, K extends React.Key = React.Key> =
   | { type: 'header'; groupKey: K }
   | { type: 'item'; item: T; index: number };
@@ -22,10 +23,12 @@ export default function useFlattenRows<T, K extends React.Key = React.Key>(
   group?: Group<T, K>,
 ): FlattenRowsResult<T, K> {
   return React.useMemo(() => {
+    // ============================== Init ================================
     const flatRows: Row<T, K>[] = [];
     const headerRows: { groupKey: K; rowIndex: number }[] = [];
     const groupKeyToItems = new Map<K, T[]>();
 
+    // ============================ No Group ==============================
     if (!group) {
       data.forEach((item, index) => {
         flatRows.push({ type: 'item', item, index });
@@ -34,6 +37,7 @@ export default function useFlattenRows<T, K extends React.Key = React.Key>(
       return { rows: flatRows, headerRows, groupKeyToItems };
     }
 
+    // ============================= Flatten ==============================
     groupData.forEach((groupItems, groupKey) => {
       groupKeyToItems.set(
         groupKey,
@@ -48,6 +52,7 @@ export default function useFlattenRows<T, K extends React.Key = React.Key>(
       });
     });
 
+    // ============================== Return ==============================
     return { rows: flatRows, headerRows, groupKeyToItems };
   }, [data, group, groupData]);
 }

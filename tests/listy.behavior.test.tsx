@@ -1,6 +1,5 @@
 import React from 'react';
 import { act, render } from '@testing-library/react';
-import { _rs as triggerResize } from '@rc-component/resize-observer';
 import type {
   ListProps as VirtualListProps,
 } from '@rc-component/virtual-list';
@@ -218,7 +217,7 @@ describe('Listy behaviors', () => {
       itemRender: (item) => item.name,
     });
 
-    const holder = container.querySelector('.rc-listy-holder') as HTMLDivElement;
+    const holder = container.querySelector('.rc-listy') as HTMLDivElement;
     const itemNodes = container.querySelectorAll('.rc-listy-item');
     const secondItem = itemNodes[1] as HTMLElement;
     const scrollIntoView = jest.fn();
@@ -358,8 +357,10 @@ describe('Listy behaviors', () => {
     expect(itemNode).toContainElement(container.querySelector('span'));
   });
 
-  it('keeps raw sticky group header from covering top-aligned items', async () => {
+  it('sets raw sticky scroll margin before scrolling top-aligned items', () => {
+    const ref = React.createRef<ListyRef>();
     const { container } = renderList({
+      ref,
       virtual: false,
       sticky: true,
       group: {
@@ -390,17 +391,52 @@ describe('Listy behaviors', () => {
         }) as DOMRect,
     );
 
-    await act(async () => {
-      triggerResize?.([
-        { target: groupHeader } as unknown as ResizeObserverEntry,
-      ]);
-      await Promise.resolve();
+    const itemNode = container.querySelector('[data-key="1"]') as HTMLElement;
+    const scrollIntoView = jest.fn(() => {
+      expect(
+        itemNode.style.getPropertyValue('--rc-listy-item-scroll-margin-top'),
+      ).toBe('36px');
+    });
+    itemNode.scrollIntoView = scrollIntoView;
+
+    act(() => {
+      ref.current?.scrollTo({ key: 1, align: 'top' });
     });
 
-    const itemNode = container.querySelector('[data-key="1"]') as HTMLElement;
-
     expect(itemNode).toHaveClass('rc-listy-item');
-    expect(itemNode).toHaveStyle({ scrollMarginTop: '36px' });
+    expect(itemNode.style.scrollMarginTop).toBe(
+      'var(--rc-listy-item-scroll-margin-top, 0px)',
+    );
+    expect(scrollIntoView).toHaveBeenCalledWith({
+      block: 'start',
+      inline: 'nearest',
+    });
+  });
+
+  it('falls back to zero raw sticky scroll margin without a header', () => {
+    const ref = React.createRef<ListyRef>();
+    const { container } = renderList({
+      ref,
+      virtual: false,
+      sticky: true,
+      group: {
+        key: (item) => item.group,
+        title: (groupKey) => <span>{String(groupKey)}</span>,
+      },
+    });
+
+    container.querySelector('.rc-listy-group-header')?.remove();
+
+    const itemNode = container.querySelector('[data-key="1"]') as HTMLElement;
+    itemNode.scrollIntoView = jest.fn();
+
+    act(() => {
+      ref.current?.scrollTo({ key: 1, align: 'top' });
+    });
+
+    expect(
+      itemNode.style.getPropertyValue('--rc-listy-item-scroll-margin-top'),
+    ).toBe('0px');
   });
 
   it('scroll to group', () => {

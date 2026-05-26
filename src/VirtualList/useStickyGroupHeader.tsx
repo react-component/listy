@@ -3,12 +3,14 @@ import type { ListProps as VirtualListProps } from '@rc-component/virtual-list';
 import type { Group } from '../hooks/useGroupSegments';
 import GroupHeader from '../GroupHeader';
 
+// ============================== Types ===============================
 type ExtraRenderInfo = Parameters<
   NonNullable<VirtualListProps<unknown>['extraRender']>
 >[0];
 
 type HeaderRow<K extends React.Key> = { groupKey: K; rowIndex: number };
 
+// ============================== Utils ===============================
 // `headerRows` is sorted by rowIndex. Find the last header not after `start`.
 function findActiveHeaderIndex<K extends React.Key>(
   headerRows: HeaderRow<K>[],
@@ -32,6 +34,7 @@ function findActiveHeaderIndex<K extends React.Key>(
   return activeIndex;
 }
 
+// ============================== Params ==============================
 export interface StickyHeaderParams<T, K extends React.Key = React.Key> {
   enabled: boolean;
   group: Group<T, K> | undefined;
@@ -44,6 +47,7 @@ export default function useStickyGroupHeader<
   T,
   K extends React.Key = React.Key,
 >(params: StickyHeaderParams<T, K>) {
+  // ============================== Props ==============================
   const {
     enabled,
     group,
@@ -52,6 +56,7 @@ export default function useStickyGroupHeader<
     prefixCls,
   } = params;
 
+  // ============================ Extra Render ==========================
   const extraRender = React.useCallback(
     (info: ExtraRenderInfo) => {
       const { getSize, offsetY, scrollTop, start, virtual } = info;
@@ -60,20 +65,25 @@ export default function useStickyGroupHeader<
         return null;
       }
 
+      // The sticky header is the latest group header before the visible range.
       const activeHeaderIdx = findActiveHeaderIndex(headerRows, start);
       const currHeader = headerRows[activeHeaderIdx];
 
       const groupItems = groupKeyToItems.get(currHeader.groupKey) || [];
       const currentSize = getSize(currHeader.groupKey);
       const headerHeight = currentSize.bottom - currentSize.top;
+
+      // Convert the virtual list scroll position into the overlay top offset.
       const fixedTop = scrollTop - offsetY;
 
+      // Let the next group header push the current fixed header away.
       const nextHeader = headerRows[activeHeaderIdx + 1];
       const nextTop = nextHeader
         ? getSize(nextHeader.groupKey).top - headerHeight - offsetY
         : fixedTop;
       const top = Math.min(fixedTop, nextTop);
 
+      // Render a cloned header above the virtual list items.
       return (
         <GroupHeader
           fixed
@@ -88,5 +98,6 @@ export default function useStickyGroupHeader<
     [enabled, group, headerRows, groupKeyToItems, prefixCls],
   );
 
+  // ============================== Return ==============================
   return extraRender;
 }

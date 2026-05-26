@@ -4,6 +4,7 @@ import RawList from './RawList';
 import VirtualList from './VirtualList';
 import type { Group } from './hooks/useGroupSegments';
 
+// ============================== Types ===============================
 export type RowKey<T> = keyof T | ((item: T) => React.Key);
 
 export type ScrollAlign = 'top' | 'bottom' | 'auto';
@@ -76,26 +77,17 @@ function Listy<T, K extends React.Key = React.Key>(
     ...restProps,
     data,
     prefixCls,
+    ref,
   };
 
   const listNode =
-    virtual === false ? (
-      <RawList
-        ref={ref}
-        {...sharedListProps}
-      />
+    virtual ? (
+      <VirtualList {...sharedListProps} />
     ) : (
-      <VirtualList
-        ref={ref}
-        {...sharedListProps}
-      />
+      <RawList {...sharedListProps} />
     );
 
-  return (
-    <div className={prefixCls}>
-      {listNode}
-    </div>
-  );
+  return listNode;
 }
 
 // Const to support generic with forwardRef
