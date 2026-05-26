@@ -413,6 +413,32 @@ describe('Listy behaviors', () => {
     });
   });
 
+  it('falls back to zero raw sticky scroll margin without a header', () => {
+    const ref = React.createRef<ListyRef>();
+    const { container } = renderList({
+      ref,
+      virtual: false,
+      sticky: true,
+      group: {
+        key: (item) => item.group,
+        title: (groupKey) => <span>{String(groupKey)}</span>,
+      },
+    });
+
+    container.querySelector('.rc-listy-group-header')?.remove();
+
+    const itemNode = container.querySelector('[data-key="1"]') as HTMLElement;
+    itemNode.scrollIntoView = jest.fn();
+
+    act(() => {
+      ref.current?.scrollTo({ key: 1, align: 'top' });
+    });
+
+    expect(
+      itemNode.style.getPropertyValue('--rc-listy-item-scroll-margin-top'),
+    ).toBe('0px');
+  });
+
   it('scroll to group', () => {
     const scrollHandler = jest.fn();
     MockedVirtualList.__setScrollHandler(scrollHandler);
