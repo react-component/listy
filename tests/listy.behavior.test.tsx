@@ -217,7 +217,7 @@ describe('Listy behaviors', () => {
       itemRender: (item) => item.name,
     });
 
-    const holder = container.querySelector('.rc-listy-holder') as HTMLDivElement;
+    const holder = container.querySelector('.rc-listy') as HTMLDivElement;
     const itemNodes = container.querySelectorAll('.rc-listy-item');
     const secondItem = itemNodes[1] as HTMLElement;
     const scrollIntoView = jest.fn();

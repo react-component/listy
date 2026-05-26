@@ -110,7 +110,7 @@ function RawList<T, K extends React.Key = React.Key>(
   return (
     <div
       ref={holderRef}
-      className={`${prefixCls}-holder`}
+      className={prefixCls}
       style={{
         maxHeight: height,
         overflowY: height === undefined ? undefined : 'auto',
@@ -118,7 +118,7 @@ function RawList<T, K extends React.Key = React.Key>(
       }}
       onScroll={onScroll}
     >
-      <div className={`${prefixCls}-holder-inner`}>{rawContent}</div>
+      {rawContent}
     </div>
   );
 }
