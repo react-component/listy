@@ -23,7 +23,7 @@ jest.mock('@rc-component/virtual-list', () => {
     getSize: () => ({ top: 0, bottom: 0 }),
   };
   let scrollHandler = (config: any) => {};
-  let lastProps = null;
+  let lastProps: any = null;
 
   const MockVirtualList = React.forwardRef((props: any, ref: any) => {
     lastProps = props;
@@ -286,7 +286,7 @@ describe('Listy behaviors', () => {
         ref={ref}
         data={[{ id: 1 }]}
         group={undefined}
-        itemRender={(item) => <div>{item.id}</div>}
+        itemRender={(item: { id: number }) => <div>{item.id}</div>}
         prefixCls="rc-listy"
         rowKey="id"
       />,
@@ -308,7 +308,7 @@ describe('Listy behaviors', () => {
           key: (item: { id: number; group: string }) => item.group,
           title,
         }}
-        itemRender={(item) => <div>{item.id}</div>}
+        itemRender={(item: { id: number }) => <div>{item.id}</div>}
         prefixCls="rc-listy"
         rowKey="id"
       />,
@@ -325,9 +325,9 @@ describe('Listy behaviors', () => {
       <RawList
         data={[{ id: 1 }]}
         group={undefined}
-        itemRender={(item) => <div>{item.id}</div>}
+        itemRender={(item: { id: number }) => <div>{item.id}</div>}
         prefixCls="rc-listy"
-        rowKey={(item) => `item-${item.id}`}
+        rowKey={(item: { id: number }) => `item-${item.id}`}
       />,
     );
 
@@ -341,7 +341,7 @@ describe('Listy behaviors', () => {
       <RawList
         data={[{ id: 1 }]}
         group={undefined}
-        itemRender={(item) => (
+        itemRender={(item: { id: number }) => (
           <>
             <span>{item.id}</span>
           </>
