@@ -8,7 +8,7 @@ export type Row<T, K extends React.Key = React.Key> =
 
 export interface FlattenRowsResult<T, K extends React.Key = React.Key> {
   rows: Row<T, K>[];
-  headerRows: { groupKey: K; rowIndex: number }[];
+  groupKeys: K[];
   groupKeyToItems: Map<K, T[]>;
 }
 
@@ -25,7 +25,7 @@ export default function useFlattenRows<T, K extends React.Key = React.Key>(
   return React.useMemo(() => {
     // ============================== Init ================================
     const flatRows: Row<T, K>[] = [];
-    const headerRows: { groupKey: K; rowIndex: number }[] = [];
+    const groupKeys: K[] = [];
     const groupKeyToItems = new Map<K, T[]>();
 
     // ============================ No Group ==============================
@@ -34,7 +34,7 @@ export default function useFlattenRows<T, K extends React.Key = React.Key>(
         flatRows.push({ type: 'item', item, index });
       });
 
-      return { rows: flatRows, headerRows, groupKeyToItems };
+      return { rows: flatRows, groupKeys, groupKeyToItems };
     }
 
     // ============================= Flatten ==============================
@@ -44,7 +44,7 @@ export default function useFlattenRows<T, K extends React.Key = React.Key>(
         groupItems.map(({ item }) => item),
       );
 
-      headerRows.push({ groupKey, rowIndex: flatRows.length });
+      groupKeys.push(groupKey);
       flatRows.push({ type: 'header', groupKey });
 
       groupItems.forEach(({ item, index }) => {
@@ -53,6 +53,6 @@ export default function useFlattenRows<T, K extends React.Key = React.Key>(
     });
 
     // ============================== Return ==============================
-    return { rows: flatRows, headerRows, groupKeyToItems };
+    return { rows: flatRows, groupKeys, groupKeyToItems };
   }, [data, group, groupData]);
 }

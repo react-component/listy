@@ -12,22 +12,20 @@ type ExtraRenderInfo = Parameters<
   NonNullable<VirtualListProps<unknown>['extraRender']>
 >[0];
 
-type HeaderRow<K extends React.Key> = { groupKey: K; rowIndex: number };
-
 // ============================== Utils ===============================
-// `headerRows` is sorted by rowIndex. Find the last header not after `start`.
 function findActiveHeaderIndex<K extends React.Key>(
-  headerRows: HeaderRow<K>[],
-  start: number,
+  groupKeys: K[],
+  getHeaderTop: (groupKey: K) => number,
+  scrollTop: number,
 ) {
   let left = 0;
-  let right = headerRows.length - 1;
+  let right = groupKeys.length - 1;
   let activeIndex = 0;
 
   while (left <= right) {
     const mid = Math.floor((left + right) / 2);
 
-    if (headerRows[mid].rowIndex <= start) {
+    if (getHeaderTop(groupKeys[mid]) <= scrollTop) {
       activeIndex = mid;
       left = mid + 1;
     } else {
@@ -42,7 +40,7 @@ function findActiveHeaderIndex<K extends React.Key>(
 export interface StickyHeaderParams<T, K extends React.Key = React.Key> {
   enabled: boolean;
   group: Group<T, K> | undefined;
-  headerRows: HeaderRow<K>[];
+  groupKeys: K[];
   groupKeyToItems: Map<K, T[]>;
   prefixCls: string;
   listRef: React.RefObject<RcVirtualListRef | null>;
@@ -56,7 +54,7 @@ export default function useStickyGroupHeader<
   const {
     enabled,
     group,
-    headerRows,
+    groupKeys,
     groupKeyToItems,
     prefixCls,
     listRef,
@@ -65,9 +63,9 @@ export default function useStickyGroupHeader<
   // ============================ Extra Render ==========================
   const extraRender = React.useCallback(
     (info: ExtraRenderInfo) => {
-      const { getSize, scrollTop, start, virtual } = info;
+      const { getSize, scrollTop, virtual } = info;
 
-      if (!enabled || !group || !headerRows.length || !virtual) {
+      if (!enabled || !group || !groupKeys.length || !virtual) {
         return null;
       }
 
@@ -76,17 +74,21 @@ export default function useStickyGroupHeader<
         return null;
       }
 
-      // The sticky header is the latest group header before the visible range.
-      const activeHeaderIdx = findActiveHeaderIndex(headerRows, start);
-      const currHeader = headerRows[activeHeaderIdx];
+      // The sticky header is the group whose section the viewport top sits in.
+      const activeHeaderIdx = findActiveHeaderIndex(
+        groupKeys,
+        (groupKey) => getSize(groupKey).top,
+        scrollTop,
+      );
+      const currGroupKey = groupKeys[activeHeaderIdx];
 
-      const groupItems = groupKeyToItems.get(currHeader.groupKey) || [];
-      const currentSize = getSize(currHeader.groupKey);
+      const groupItems = groupKeyToItems.get(currGroupKey) || [];
+      const currentSize = getSize(currGroupKey);
       const headerHeight = currentSize.bottom - currentSize.top;
 
-      const nextHeader = headerRows[activeHeaderIdx + 1];
-      const top = nextHeader
-        ? Math.min(0, getSize(nextHeader.groupKey).top - headerHeight - scrollTop)
+      const nextGroupKey = groupKeys[activeHeaderIdx + 1];
+      const top = nextGroupKey
+        ? Math.min(0, getSize(nextGroupKey).top - headerHeight - scrollTop)
         : 0;
 
       // Render a cloned header pinned over the virtual list.
@@ -96,7 +98,7 @@ export default function useStickyGroupHeader<
             <GroupHeader
               fixed
               group={group}
-              groupKey={currHeader.groupKey}
+              groupKey={currGroupKey}
               groupItems={groupItems}
               prefixCls={prefixCls}
               style={{ top }}
@@ -105,7 +107,7 @@ export default function useStickyGroupHeader<
         </Portal>
       );
     },
-    [enabled, group, headerRows, groupKeyToItems, prefixCls, listRef],
+    [enabled, group, groupKeys, groupKeyToItems, prefixCls, listRef],
   );
 
   // ============================== Return ==============================
