@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, renderHook } from '@testing-library/react';
+import { cleanup, render, renderHook } from '@testing-library/react';
 import type {
   ListProps as VirtualListProps,
   ListRef as RcVirtualListRef,
@@ -192,6 +192,11 @@ describe('useStickyGroupHeader', () => {
     ['Group 2', baseItems.slice(3, 6)],
   ]);
 
+  afterEach(() => {
+    cleanup();
+    document.body.innerHTML = '';
+  });
+
   it('renders sticky header for the active header row', () => {
     const title = jest
       .fn()
@@ -226,9 +231,7 @@ describe('useStickyGroupHeader', () => {
     expect(stickyHeader).toHaveTextContent('Group 2-3');
     // Last group, nothing to push it: pinned at the container top.
     expect(stickyHeader).toHaveStyle({ top: '0px' });
-    expect(title).toHaveBeenCalledWith('Group 2', baseItems.slice(3, 6));
-    document.body.removeChild(container);
-  });
+    expect(title).toHaveBeenCalledWith('Group 2', baseItems.slice(3, 6));  });
 
   it('skips sticky header rendering when virtual list is disabled', () => {
     const info = createRenderInfo({ virtual: false });
@@ -251,9 +254,7 @@ describe('useStickyGroupHeader', () => {
     const stickyHeader = container.querySelector(
       `.${PREFIX_CLS}-group-header-fixed`,
     );
-    expect(stickyHeader).toBeNull();
-    document.body.removeChild(container);
-  });
+    expect(stickyHeader).toBeNull();  });
 
   it('uses the visible start row to resolve the active header', () => {
     const title = jest.fn().mockImplementation((key: React.Key) => (
@@ -287,9 +288,7 @@ describe('useStickyGroupHeader', () => {
     expect(stickyHeader).not.toBeNull();
     expect(stickyHeader).toHaveTextContent('Group 2');
     expect(stickyHeader).toHaveStyle({ top: '0px' });
-    expect(title).toHaveBeenCalledWith('Group 2', baseItems.slice(3, 6));
-    document.body.removeChild(container);
-  });
+    expect(title).toHaveBeenCalledWith('Group 2', baseItems.slice(3, 6));  });
 
   it('keeps the fixed header pinned at 0 within a group regardless of scroll', () => {
     const title = jest.fn().mockImplementation((key: React.Key) => (
@@ -325,9 +324,7 @@ describe('useStickyGroupHeader', () => {
     );
     expect(stickyHeader).not.toBeNull();
     expect(stickyHeader).toHaveTextContent('Group 1');
-    expect(stickyHeader).toHaveStyle({ top: '0px' });
-    document.body.removeChild(container);
-  });
+    expect(stickyHeader).toHaveStyle({ top: '0px' });  });
 
   it('pushes the fixed header away when the next group reaches the top', () => {
     const title = jest.fn().mockImplementation((key: React.Key) => (
@@ -369,7 +366,5 @@ describe('useStickyGroupHeader', () => {
     );
     expect(stickyHeader).not.toBeNull();
     expect(stickyHeader).toHaveTextContent('Group 1');
-    expect(stickyHeader).toHaveStyle({ top: '-10px' });
-    document.body.removeChild(container);
-  });
+    expect(stickyHeader).toHaveStyle({ top: '-10px' });  });
 });

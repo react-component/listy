@@ -92,14 +92,16 @@ export default function useStickyGroupHeader<
       // Render a cloned header pinned over the virtual list.
       return (
         <Portal open getContainer={() => container}>
-          <GroupHeader
-            fixed
-            group={group}
-            groupKey={currHeader.groupKey}
-            groupItems={groupItems}
-            prefixCls={prefixCls}
-            style={{ top }}
-          />
+          <div className={`${prefixCls}-group-header-holder`}>
+            <GroupHeader
+              fixed
+              group={group}
+              groupKey={currHeader.groupKey}
+              groupItems={groupItems}
+              prefixCls={prefixCls}
+              style={{ top }}
+            />
+          </div>
         </Portal>
       );
     },
