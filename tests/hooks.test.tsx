@@ -368,4 +368,42 @@ describe('useStickyGroupHeader', () => {
     expect(stickyHeader).toHaveStyle({ top: '0px' });
     expect(title).toHaveBeenCalledWith('Group 2', baseItems.slice(3, 6));
   });
+
+  it('tolerates a sub-pixel scroll offset just short of the header top', () => {
+    const title = jest.fn().mockImplementation((key: React.Key) => (
+      <span data-testid="sticky-title">{String(key)}</span>
+    ));
+
+    // On a HiDPI screen the scroll offset can rest a fraction of a pixel below
+    // a header's true top (here 199.5 vs 200). Without tolerance the strict
+    // compare resolves to the previous group and blanks the title.
+    const info = createRenderInfo({
+      scrollTop: 199.5,
+      start: 3,
+      getSize: (key: React.Key) =>
+        key === 'Group 2' ? { top: 200, bottom: 220 } : { top: 0, bottom: 20 },
+    });
+
+    const container = document.createElement('div');
+    document.body.appendChild(container);
+    const params: StickyHeaderParams<GroupedItem> = {
+      enabled: true,
+      group: {
+        key: (item) => item.group,
+        title,
+      },
+      groupKeys,
+      groupKeyToItems: baseItemsMap,
+      prefixCls: PREFIX_CLS,
+      listRef: createListRef(container),
+    };
+
+    render(<StickyHeaderTester params={params} info={info} />);
+
+    const stickyHeader = container.querySelector(
+      `.${PREFIX_CLS}-group-header-fixed`,
+    );
+    expect(stickyHeader).not.toBeNull();
+    expect(stickyHeader).toHaveTextContent('Group 2');
+  });
 });
