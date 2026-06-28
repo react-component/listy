@@ -13,12 +13,6 @@ type ExtraRenderInfo = Parameters<
 >[0];
 
 // ============================== Utils ===============================
-// `scrollTop` is the (possibly sub-pixel rounded) scroll offset while header
-// tops come from summed item heights, so the two can disagree by a fraction of
-// a pixel. On a Retina/HiDPI screen a trackpad scroll routinely rests ~0.5px
-// short of a header top; without slack the strict compare would resolve to the
-// previous group and pin a stale header off-screen. 1px absorbs the rounding
-// and is far smaller than any real gap between consecutive headers.
 const HEADER_TOP_TOLERANCE = 1;
 
 function findActiveHeaderIndex<K extends React.Key>(
