@@ -58,7 +58,7 @@ function VirtualList<T, K extends React.Key = React.Key>(
   });
 
   // ============================== Rows ================================
-  const { rows, headerRows, groupKeyToItems } = useFlattenRows<T, K>(
+  const { rows, groupKeys, groupKeyToItems } = useFlattenRows<T, K>(
     data,
     groupData,
     group,
@@ -135,7 +135,7 @@ function VirtualList<T, K extends React.Key = React.Key>(
   const extraRender = useStickyGroupHeader<T, K>({
     enabled: !!(sticky && group),
     group,
-    headerRows,
+    groupKeys,
     groupKeyToItems,
     prefixCls,
     listRef,
