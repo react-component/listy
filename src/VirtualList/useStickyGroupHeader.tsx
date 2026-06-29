@@ -1,5 +1,9 @@
 import * as React from 'react';
-import type { ListProps as VirtualListProps } from '@rc-component/virtual-list';
+import Portal from '@rc-component/portal';
+import type {
+  ListProps as VirtualListProps,
+  ListRef as RcVirtualListRef,
+} from '@rc-component/virtual-list';
 import type { Group } from '../hooks/useGroupSegments';
 import GroupHeader from '../GroupHeader';
 
@@ -41,6 +45,7 @@ export interface StickyHeaderParams<T, K extends React.Key = React.Key> {
   headerRows: HeaderRow<K>[];
   groupKeyToItems: Map<K, T[]>;
   prefixCls: string;
+  listRef: React.RefObject<RcVirtualListRef | null>;
 }
 
 export default function useStickyGroupHeader<
@@ -54,14 +59,20 @@ export default function useStickyGroupHeader<
     headerRows,
     groupKeyToItems,
     prefixCls,
+    listRef,
   } = params;
 
   // ============================ Extra Render ==========================
   const extraRender = React.useCallback(
     (info: ExtraRenderInfo) => {
-      const { getSize, offsetY, scrollTop, start, virtual } = info;
+      const { getSize, scrollTop, start, virtual } = info;
 
       if (!enabled || !group || !headerRows.length || !virtual) {
+        return null;
+      }
+
+      const container = listRef.current?.nativeElement;
+      if (!container) {
         return null;
       }
 
@@ -73,29 +84,28 @@ export default function useStickyGroupHeader<
       const currentSize = getSize(currHeader.groupKey);
       const headerHeight = currentSize.bottom - currentSize.top;
 
-      // Convert the virtual list scroll position into the overlay top offset.
-      const fixedTop = scrollTop - offsetY;
-
-      // Let the next group header push the current fixed header away.
       const nextHeader = headerRows[activeHeaderIdx + 1];
-      const nextTop = nextHeader
-        ? getSize(nextHeader.groupKey).top - headerHeight - offsetY
-        : fixedTop;
-      const top = Math.min(fixedTop, nextTop);
+      const top = nextHeader
+        ? Math.min(0, getSize(nextHeader.groupKey).top - headerHeight - scrollTop)
+        : 0;
 
-      // Render a cloned header above the virtual list items.
+      // Render a cloned header pinned over the virtual list.
       return (
-        <GroupHeader
-          fixed
-          group={group}
-          groupKey={currHeader.groupKey}
-          groupItems={groupItems}
-          prefixCls={prefixCls}
-          style={{ top }}
-        />
+        <Portal open getContainer={() => container}>
+          <div className={`${prefixCls}-group-header-holder`}>
+            <GroupHeader
+              fixed
+              group={group}
+              groupKey={currHeader.groupKey}
+              groupItems={groupItems}
+              prefixCls={prefixCls}
+              style={{ top }}
+            />
+          </div>
+        </Portal>
       );
     },
-    [enabled, group, headerRows, groupKeyToItems, prefixCls],
+    [enabled, group, headerRows, groupKeyToItems, prefixCls, listRef],
   );
 
   // ============================== Return ==============================

@@ -138,6 +138,7 @@ function VirtualList<T, K extends React.Key = React.Key>(
     headerRows,
     groupKeyToItems,
     prefixCls,
+    listRef,
   });
 
   // ============================ Render Row ============================
