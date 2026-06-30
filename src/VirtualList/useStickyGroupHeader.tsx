@@ -108,7 +108,9 @@ export default function useStickyGroupHeader<
               groupItems={groupItems}
               prefixCls={prefixCls}
               className={headerClassName}
-              style={{ top, ...headerStyle }}
+              // `top` is the computed sticky-push offset and must win over any
+              // user-supplied top in headerStyle, or the sticky behavior breaks.
+              style={{ ...headerStyle, top }}
             />
           </div>
         </Portal>
