@@ -131,6 +131,20 @@ describe('semantic DOM (classNames / styles)', () => {
         'var(--rc-listy-item-scroll-margin-top, 0px)',
       );
     });
+
+    it('does not let styles.item.scrollMarginTop override the internal offset', () => {
+      const { container } = renderRaw({
+        sticky: true,
+        styles: { item: { color: 'rgb(4, 5, 6)', scrollMarginTop: 999 } },
+      });
+      const item = container.querySelector('.rc-listy-item') as HTMLElement;
+      // the internal scrollTo offset must win, not the user's 999px...
+      expect(item.style.scrollMarginTop).toBe(
+        'var(--rc-listy-item-scroll-margin-top, 0px)',
+      );
+      // ...while the user's other item styles still apply.
+      expect(item).toHaveStyle({ color: 'rgb(4, 5, 6)' });
+    });
   });
 
   // =========================== Virtual mode ===========================
@@ -220,6 +234,51 @@ describe('semantic DOM (classNames / styles)', () => {
       expect(clone).not.toBeNull();
       expect(clone).toHaveClass('my-header');
       expect(clone).toHaveStyle({ color: 'rgb(7, 8, 9)' });
+
+      portalContainer.remove();
+    });
+
+    it('does not let headerStyle.top override the computed sticky top', () => {
+      const portalContainer = document.createElement('div');
+      document.body.appendChild(portalContainer);
+      const listRef = {
+        current: { nativeElement: portalContainer },
+      } as any;
+
+      let extraRender: any;
+      function Harness() {
+        extraRender = useStickyGroupHeader({
+          enabled: true,
+          group: group as any,
+          groupKeys: ['A', 'B'],
+          groupKeyToItems: new Map([
+            ['A', []],
+            ['B', []],
+          ]),
+          prefixCls: 'rc-listy',
+          listRef,
+          headerClassName: 'my-header',
+          headerStyle: { top: 999 },
+        });
+        return null;
+      }
+      render(<Harness />);
+      render(
+        extraRender({
+          // A is the active header; B is approaching, so the computed top is a
+          // negative push offset: min(0, 100 - 24 - 90) = -14.
+          getSize: (key: React.Key) =>
+            key === 'B' ? { top: 100, bottom: 124 } : { top: 0, bottom: 24 },
+          scrollTop: 90,
+          virtual: true,
+        }),
+      );
+
+      const clone = portalContainer.querySelector(
+        '.rc-listy-group-header-fixed',
+      ) as HTMLElement;
+      // the computed push offset wins; the user's top:999 must not leak through.
+      expect(clone.style.top).toBe('-14px');
 
       portalContainer.remove();
     });
