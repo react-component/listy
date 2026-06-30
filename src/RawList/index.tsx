@@ -1,4 +1,5 @@
 import * as React from 'react';
+import clsx from 'clsx';
 import { useEvent } from '@rc-component/util';
 import GroupHeader from '../GroupHeader';
 import useGroupSegments from '../hooks/useGroupSegments';
@@ -23,6 +24,8 @@ function RawList<T, K extends React.Key = React.Key>(
     prefixCls,
     rowKey,
     sticky,
+    classNames,
+    styles,
   } = props;
 
   // =============================== Refs ===============================
@@ -55,14 +58,15 @@ function RawList<T, K extends React.Key = React.Key>(
       return (
         <div
           key={key}
-          className={`${prefixCls}-item`}
-          style={
-            sticky && groupKey !== undefined
+          className={clsx(`${prefixCls}-item`, classNames?.item)}
+          style={{
+            ...(sticky && groupKey !== undefined
               ? {
                   scrollMarginTop: `var(--${prefixCls}-item-scroll-margin-top, 0px)`,
                 }
-              : undefined
-          }
+              : undefined),
+            ...styles?.item,
+          }}
           {...scrollTargetProps}
         >
           {itemRender(item, index)}
@@ -70,11 +74,13 @@ function RawList<T, K extends React.Key = React.Key>(
       );
     },
     [
+      classNames?.item,
       getItemKey,
       getScrollTargetProps,
       itemRender,
       prefixCls,
       sticky,
+      styles?.item,
     ],
   );
 
@@ -95,6 +101,8 @@ function RawList<T, K extends React.Key = React.Key>(
               groupItems={currentGroupItems}
               prefixCls={prefixCls}
               sticky={sticky}
+              className={classNames?.groupHeader}
+              style={styles?.groupHeader}
             />
             {groupItems.map(({ item, index }) => {
               return renderItem(item, index, groupKey);
@@ -110,11 +118,12 @@ function RawList<T, K extends React.Key = React.Key>(
   return (
     <div
       ref={holderRef}
-      className={prefixCls}
+      className={clsx(prefixCls, classNames?.root)}
       style={{
         maxHeight: height,
         overflowY: height === undefined ? undefined : 'auto',
         overflowAnchor: 'none',
+        ...styles?.root,
       }}
       onScroll={onScroll}
     >
