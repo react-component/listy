@@ -9,6 +9,12 @@ export type RowKey<T> = keyof T | ((item: T) => React.Key);
 
 export type ScrollAlign = 'top' | 'bottom' | 'auto';
 
+export type ListySemanticName = 'root' | 'item' | 'groupHeader';
+
+export type ListyClassNames = Partial<Record<ListySemanticName, string>>;
+
+export type ListyStyles = Partial<Record<ListySemanticName, React.CSSProperties>>;
+
 export interface GroupScrollToConfig {
   groupKey: React.Key;
   align?: ScrollAlign;
@@ -46,6 +52,8 @@ export interface ListyProps<T, K extends React.Key = React.Key> {
   virtual?: boolean;
   prefixCls?: string;
   rowKey: RowKey<T>;
+  classNames?: ListyClassNames;
+  styles?: ListyStyles;
   onScroll?: React.UIEventHandler<HTMLElement>;
   itemRender: (item: T, index: number) => React.ReactNode;
 }
@@ -58,6 +66,8 @@ export interface ListComponentProps<T, K extends React.Key = React.Key> {
   group?: Group<T, K>;
   prefixCls: string;
   rowKey: RowKey<T>;
+  classNames?: ListyClassNames;
+  styles?: ListyStyles;
   onScroll?: React.UIEventHandler<HTMLElement>;
   itemRender: (item: T, index: number) => React.ReactNode;
 }

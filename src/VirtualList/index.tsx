@@ -1,4 +1,5 @@
 import * as React from 'react';
+import clsx from 'clsx';
 import RcVirtualList, {
   type ListRef as RcVirtualListRef,
   type ScrollConfig,
@@ -33,6 +34,8 @@ function VirtualList<T, K extends React.Key = React.Key>(
     prefixCls,
     rowKey,
     sticky,
+    classNames,
+    styles,
   } = props;
 
   // =============================== Refs ===============================
@@ -139,6 +142,8 @@ function VirtualList<T, K extends React.Key = React.Key>(
     groupKeyToItems,
     prefixCls,
     listRef,
+    headerClassName: classNames?.groupHeader,
+    headerStyle: styles?.groupHeader,
   });
 
   // ============================ Render Row ============================
@@ -152,10 +157,12 @@ function VirtualList<T, K extends React.Key = React.Key>(
           groupKey={groupKey}
           groupItems={groupItems}
           prefixCls={prefixCls}
+          className={classNames?.groupHeader}
+          style={styles?.groupHeader}
         />
       );
     },
-    [group, groupKeyToItems, prefixCls],
+    [classNames?.groupHeader, group, groupKeyToItems, prefixCls, styles?.groupHeader],
   );
 
   // ============================== Render ==============================
@@ -171,12 +178,17 @@ function VirtualList<T, K extends React.Key = React.Key>(
       prefixCls={prefixCls}
       virtual
       extraRender={extraRender}
+      className={classNames?.root}
+      style={styles?.root}
     >
       {(row: Row<T, K>) =>
         row.type === 'header'
           ? renderHeaderRow(row.groupKey)
           : (
-              <div className={`${prefixCls}-item`}>
+              <div
+                className={clsx(`${prefixCls}-item`, classNames?.item)}
+                style={styles?.item}
+              >
                 {itemRender(row.item, row.index)}
               </div>
             )

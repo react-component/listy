@@ -46,6 +46,8 @@ export interface StickyHeaderParams<T, K extends React.Key = React.Key> {
   groupKeyToItems: Map<K, T[]>;
   prefixCls: string;
   listRef: React.RefObject<RcVirtualListRef | null>;
+  headerClassName?: string;
+  headerStyle?: React.CSSProperties;
 }
 
 export default function useStickyGroupHeader<
@@ -60,6 +62,8 @@ export default function useStickyGroupHeader<
     groupKeyToItems,
     prefixCls,
     listRef,
+    headerClassName,
+    headerStyle,
   } = params;
 
   // ============================ Extra Render ==========================
@@ -103,13 +107,25 @@ export default function useStickyGroupHeader<
               groupKey={currGroupKey}
               groupItems={groupItems}
               prefixCls={prefixCls}
-              style={{ top }}
+              className={headerClassName}
+              // `top` is the computed sticky-push offset and must win over any
+              // user-supplied top in headerStyle, or the sticky behavior breaks.
+              style={{ ...headerStyle, top }}
             />
           </div>
         </Portal>
       );
     },
-    [enabled, group, groupKeys, groupKeyToItems, prefixCls, listRef],
+    [
+      enabled,
+      group,
+      groupKeys,
+      groupKeyToItems,
+      prefixCls,
+      listRef,
+      headerClassName,
+      headerStyle,
+    ],
   );
 
   // ============================== Return ==============================
