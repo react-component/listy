@@ -60,12 +60,12 @@ function RawList<T, K extends React.Key = React.Key>(
           key={key}
           className={clsx(`${prefixCls}-item`, classNames?.item)}
           style={{
+            ...styles?.item,
             ...(sticky && groupKey !== undefined
               ? {
                   scrollMarginTop: `var(--${prefixCls}-item-scroll-margin-top, 0px)`,
                 }
               : undefined),
-            ...styles?.item,
           }}
           {...scrollTargetProps}
         >
