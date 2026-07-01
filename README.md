@@ -13,7 +13,7 @@
   </p>
 </div>
 
-<p align="center">English | [简体中文](./README.zh-CN.md)</p>
+<p align="center">English | <a href="./README.zh-CN.md">简体中文</a></p>
 
 ## Highlights
 
@@ -50,21 +50,29 @@ export default () => (
 
 ## API
 
-| Prop | Description |
+| Prop | Description | Type | Default |
+| --- | --- | --- | --- |
+| `items` | List data source. | `T[]` | `[]` |
+| `rowKey` | Resolve item identity. | `keyof T \| (item: T) => React.Key` | required |
+| `itemRender` | Render each item. | `(item: T, index: number) => React.ReactNode` | required |
+| `height` | Viewport height. | `number` | - |
+| `itemHeight` | Estimated item height. | `number` | - |
+| `group` | Group configuration. | `{ key: (item: T) => K; title: (groupKey: K, items: T[]) => React.ReactNode }` | - |
+| `sticky` | Enable sticky group headers. | `boolean` | `false` |
+| `virtual` | Enable virtual scrolling. | `boolean` | `true` |
+| `onScroll` | Triggered when the inner scroll container scrolls. | `React.UIEventHandler<HTMLElement>` | - |
+| `prefixCls` | Component class name prefix. | `string` | `rc-listy` |
+
+### ListyRef
+
+| Method | Description |
 | --- | --- |
-| `items` | List data source. |
-| `rowKey` | Resolve item identity. |
-| `itemRender` | Render each item. |
-| `height` | Viewport height. |
-| `itemHeight` | Estimated item height. |
-| `group` | Group configuration. |
-| `sticky` | Enable sticky group headers. |
-| `virtual` | Enable virtual scrolling. |
+| `scrollTo(config)` | Scroll to a position, item key, or group key. |
 
 ## Development
 
 ```bash
-npm install
+ut install
 npm start
 npm test
 npm run lint
