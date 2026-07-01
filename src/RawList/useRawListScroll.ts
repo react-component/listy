@@ -1,5 +1,5 @@
 import * as React from 'react';
-import type { ListyRef, PositionScrollToConfig, ScrollAlign } from '../List';
+import type { ListyRef, ScrollAlign } from '../List';
 
 export default function useRawListScroll(
   ref: React.Ref<ListyRef>,
@@ -87,7 +87,7 @@ export default function useRawListScroll(
         return;
       }
 
-      const { left, top } = config as PositionScrollToConfig;
+      const { left, top } = config;
       if (left !== undefined) {
         holder.scrollLeft = left;
       }
