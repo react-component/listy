@@ -13,7 +13,7 @@
   </p>
 </div>
 
-<p align="center">简体中文 | [English](./README.md)</p>
+<p align="center">简体中文 | <a href="./README.md">English</a></p>
 
 ## 亮点
 
@@ -50,21 +50,29 @@ export default () => (
 
 ## API
 
-| 名称 | 说明 |
+| 名称 | 说明 | 类型 | 默认值 |
+| --- | --- | --- | --- |
+| `items` | 列表数据源。 | `T[]` | `[]` |
+| `rowKey` | 解析列表项唯一标识。 | `keyof T \| (item: T) => React.Key` | 必填 |
+| `itemRender` | 渲染每一项。 | `(item: T, index: number) => React.ReactNode` | 必填 |
+| `height` | 可视区域高度。 | `number` | - |
+| `itemHeight` | 预估项高度。 | `number` | - |
+| `group` | 分组配置。 | `{ key: (item: T) => K; title: (groupKey: K, items: T[]) => React.ReactNode }` | - |
+| `sticky` | 启用粘性组头。 | `boolean` | `false` |
+| `virtual` | 启用虚拟滚动。 | `boolean` | `true` |
+| `onScroll` | 内部滚动容器滚动时触发。 | `React.UIEventHandler<HTMLElement>` | - |
+| `prefixCls` | 组件样式前缀。 | `string` | `rc-listy` |
+
+### ListyRef
+
+| 方法 | 说明 |
 | --- | --- |
-| `items` | 列表数据源。 |
-| `rowKey` | 解析列表项唯一标识。 |
-| `itemRender` | 渲染每一项。 |
-| `height` | 可视区域高度。 |
-| `itemHeight` | 预估项高度。 |
-| `group` | 分组配置。 |
-| `sticky` | 启用粘性组头。 |
-| `virtual` | 启用虚拟滚动。 |
+| `scrollTo(config)` | 滚动到指定位置、列表项 key 或分组 key。 |
 
 ## 本地开发
 
 ```bash
-npm install
+ut install
 npm start
 npm test
 npm run lint

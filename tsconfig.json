@@ -14,5 +14,6 @@
     },
     "types": ["@testing-library/jest-dom", "node"]
   },
-  "include": ["**/*.ts", "**/*.tsx", ".dumirc.ts"]
+  "include": ["**/*.ts", "**/*.tsx", ".dumirc.ts"],
+  "exclude": ["node_modules", "es", "lib", "dist", "docs-dist", ".doc", ".dumi/tmp", "coverage"]
 }
