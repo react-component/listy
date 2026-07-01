@@ -13,5 +13,6 @@
       "@rc-component/listy": ["./src/index.ts"]
     },
     "types": ["@testing-library/jest-dom", "node"]
-  }
+  },
+  "include": ["**/*.ts", "**/*.tsx", ".dumirc.ts"]
 }
