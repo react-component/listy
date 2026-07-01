@@ -1,7 +1,7 @@
 <div align="center">
   <h1>@rc-component/listy</h1>
-  <p><sub><a href="https://ant.design"><img alt="Ant Design" height="14" src="https://gw.alipayobjects.com/zos/rmsportal/KDpgvguMpGfqaHPjicRK.svg" style="vertical-align: -0.125em;" /></a> Part of the Ant Design ecosystem.</sub></p>
-  <p>📜 Virtualized React list component with grouping and sticky header support.</p>
+  <p><sub><a href="https://ant.design"><img alt="Ant Design" height="14" src="https://gw.alipayobjects.com/zos/rmsportal/KDpgvguMpGfqaHPjicRK.svg" style="vertical-align: -0.125em;" /></a> Ant Design 生态的一部分。</sub></p>
+  <p>📜 支持虚拟滚动、分组与粘性组头的 React 列表组件。</p>
 
   <p>
     <a href="https://npmjs.org/package/@rc-component/listy"><img alt="NPM version" src="https://img.shields.io/npm/v/@rc-component/listy.svg?style=flat-square"></a>
@@ -13,23 +13,23 @@
   </p>
 </div>
 
-<p align="center">English | [简体中文](./README.zh-CN.md)</p>
+<p align="center">简体中文 | [English](./README.md)</p>
 
-## Highlights
+## 亮点
 
-| Area | Support |
+| 方向 | 支持 |
 | --- | --- |
-| Purpose | Virtualized React list component with grouping and sticky header support. |
-| Package | `@rc-component/listy` |
-| Release | `@rc-component/np` / `rc-np` |
+| 定位 | 支持虚拟滚动、分组与粘性组头的 React 列表组件。 |
+| 包名 | `@rc-component/listy` |
+| 发布 | `@rc-component/np` / `rc-np` |
 
-## Install
+## 安装
 
 ```bash
 npm install @rc-component/listy
 ```
 
-## Usage
+## 用法
 
 ```tsx | pure
 import Listy from '@rc-component/listy';
@@ -50,18 +50,18 @@ export default () => (
 
 ## API
 
-| Prop | Description |
+| 名称 | 说明 |
 | --- | --- |
-| `items` | List data source. |
-| `rowKey` | Resolve item identity. |
-| `itemRender` | Render each item. |
-| `height` | Viewport height. |
-| `itemHeight` | Estimated item height. |
-| `group` | Group configuration. |
-| `sticky` | Enable sticky group headers. |
-| `virtual` | Enable virtual scrolling. |
+| `items` | 列表数据源。 |
+| `rowKey` | 解析列表项唯一标识。 |
+| `itemRender` | 渲染每一项。 |
+| `height` | 可视区域高度。 |
+| `itemHeight` | 预估项高度。 |
+| `group` | 分组配置。 |
+| `sticky` | 启用粘性组头。 |
+| `virtual` | 启用虚拟滚动。 |
 
-## Development
+## 本地开发
 
 ```bash
 npm install
@@ -71,16 +71,16 @@ npm run lint
 npm run compile
 ```
 
-The dumi site runs at `http://localhost:8000`.
+本地 dumi 站点默认运行在 `http://localhost:8000`.
 
-## Release
+## 发布
 
 ```bash
 npm run prepublishOnly
 ```
 
-The release flow is handled by `@rc-component/np` through the `rc-np` command when the package uses the shared release flow.
+发布流程通过 `@rc-component/np` 提供的 `rc-np` 命令处理。
 
-## License
+## 许可证
 
-@rc-component/listy is released under the [MIT](./LICENSE) license.
+@rc-component/listy 基于 [MIT](./LICENSE) 协议发布。
