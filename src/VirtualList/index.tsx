@@ -2,7 +2,6 @@ import * as React from 'react';
 import clsx from 'clsx';
 import RcVirtualList, {
   type ListRef as RcVirtualListRef,
-  type ScrollConfig,
   type ScrollOffsetInfo,
 } from '@rc-component/virtual-list';
 import { useEvent } from '@rc-component/util';
@@ -122,7 +121,7 @@ function VirtualList<T, K extends React.Key = React.Key>(
     }
 
     // Other scroll shapes are already supported by the underlying virtual list.
-    listRef.current?.scrollTo(config as number | ScrollConfig | null);
+    listRef.current?.scrollTo(config);
   });
 
   // ============================ Imperative ============================
@@ -197,6 +196,11 @@ function VirtualList<T, K extends React.Key = React.Key>(
   );
 }
 
-const VirtualListWithRef = React.forwardRef(VirtualList as any) as any;
+const VirtualListWithRef = React.forwardRef(VirtualList) as <
+  T,
+  K extends React.Key = React.Key,
+>(
+  props: VirtualListProps<T, K> & { ref?: React.Ref<ListyRef> },
+) => React.ReactElement;
 
 export default VirtualListWithRef;
