@@ -24,6 +24,7 @@ function RawList<T, K extends React.Key = React.Key>(
     prefixCls,
     rowKey,
     sticky,
+    direction,
     classNames,
     styles,
   } = props;
@@ -118,7 +119,12 @@ function RawList<T, K extends React.Key = React.Key>(
   return (
     <div
       ref={holderRef}
-      className={clsx(prefixCls, classNames?.root)}
+      className={clsx(
+        prefixCls,
+        { [`${prefixCls}-rtl`]: direction === 'rtl' },
+        classNames?.root,
+      )}
+      dir={direction}
       style={{
         maxHeight: height,
         overflowY: height === undefined ? undefined : 'auto',
