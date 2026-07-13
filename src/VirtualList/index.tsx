@@ -94,14 +94,16 @@ function VirtualList<T, K extends React.Key = React.Key>(
       return;
     }
 
-    // For sticky grouped lists, top-aligned item scroll should land below its header.
+    // For sticky grouped lists, any scroll that can land the item at the top
+    // (`top`, `auto`, or the default) must sit below its header; only explicit
+    // `bottom` alignment is safe to skip.
     if (
       config &&
       typeof config === 'object' &&
       'key' in config &&
       sticky &&
       group &&
-      config.align === 'top'
+      config.align !== 'bottom'
     ) {
       const groupKey = itemKeyToGroupKey.get(config.key);
 

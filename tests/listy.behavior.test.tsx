@@ -412,6 +412,40 @@ describe('Listy behaviors', () => {
     });
   });
 
+  it('adds the sticky header offset for auto-aligned raw items', () => {
+    const ref = React.createRef<ListyRef>();
+    const { container } = renderList({
+      ref,
+      virtual: false,
+      sticky: true,
+      group: {
+        key: (item) => item.group,
+        title: (groupKey) => <span>{String(groupKey)}</span>,
+      },
+    });
+
+    const groupHeader = container.querySelector(
+      '.rc-listy-group-header',
+    ) as HTMLElement;
+    Object.defineProperty(groupHeader, 'offsetHeight', {
+      configurable: true,
+      value: 36,
+    });
+    groupHeader.getBoundingClientRect = jest.fn(
+      () => ({ bottom: 36, height: 36, top: 0 }) as DOMRect,
+    );
+
+    const itemNode = container.querySelector('[data-key="1"]') as HTMLElement;
+    itemNode.scrollIntoView = jest.fn();
+
+    act(() => {
+      ref.current?.scrollTo({ key: 1, align: 'auto', offset: 10 });
+    });
+
+    // `auto` can land the item at the top, so the header offset still applies.
+    expect(itemNode.style.scrollMarginTop).toBe('46px');
+  });
+
   it('falls back to zero raw sticky scroll margin without a header', () => {
     const ref = React.createRef<ListyRef>();
     const { container } = renderList({
@@ -511,5 +545,39 @@ describe('Listy behaviors', () => {
 
     expect(holder).toHaveClass('rc-listy-rtl');
     expect(holder).toHaveAttribute('dir', 'rtl');
+  });
+
+  it('offsets sticky virtual scrollTo for auto-aligned items too', () => {
+    const scrollHandler = jest.fn();
+    MockedVirtualList.__setScrollHandler(scrollHandler);
+
+    const ref = React.createRef<ListyRef>();
+    renderList({
+      ref,
+      sticky: true,
+      group: {
+        key: (item) => item.group,
+        title: () => null,
+      },
+    });
+
+    act(() => {
+      ref.current?.scrollTo({ key: 2, align: 'auto', offset: 5 });
+    });
+
+    expect(scrollHandler).toHaveBeenCalledWith({
+      key: 2,
+      align: 'auto',
+      offset: expect.any(Function),
+    });
+
+    const [{ offset }] = scrollHandler.mock.calls[0];
+
+    expect(
+      offset({
+        getSize: (key: React.Key) =>
+          key === 'Group A' ? { top: 10, bottom: 34 } : { top: 0, bottom: 0 },
+      }),
+    ).toBe(29);
   });
 });
