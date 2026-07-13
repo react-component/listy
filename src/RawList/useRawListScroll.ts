@@ -36,17 +36,20 @@ export default function useRawListScroll(
     [prefixCls, stickyGroup],
   );
 
-  const setTargetScrollMargin = React.useCallback(
-    (targetElement: HTMLElement, align: ScrollAlign) => {
-      const marginTop =
-        align === 'top' ? getStickyHeaderHeight(targetElement) : 0;
+  const applyScrollMargin = React.useCallback(
+    (
+      targetElement: HTMLElement,
+      align: ScrollAlign,
+      offset: number,
+      isItem: boolean,
+    ) => {
+      const headerOffset =
+        isItem && align === 'top' ? getStickyHeaderHeight(targetElement) : 0;
 
-      targetElement.style.setProperty(
-        `--${prefixCls}-item-scroll-margin-top`,
-        `${marginTop}px`,
-      );
+      targetElement.style.scrollMarginTop = `${headerOffset + offset}px`;
+      targetElement.style.scrollMarginBottom = `${offset}px`;
     },
-    [getStickyHeaderHeight, prefixCls],
+    [getStickyHeaderHeight],
   );
 
   // ============================== Scroll ==============================
@@ -63,16 +66,15 @@ export default function useRawListScroll(
       }
 
       if ('key' in config || 'groupKey' in config) {
-        const { align = 'top' } = config;
-        const targetKey = 'groupKey' in config ? config.groupKey : config.key;
+        const { align = 'top', offset = 0 } = config;
+        const isItem = 'key' in config;
+        const targetKey = isItem ? config.key : config.groupKey;
         const targetElement = holder.querySelector<HTMLElement>(
           `[data-key="${CSS.escape(String(targetKey))}"]`,
         );
 
         if (targetElement) {
-          if ('key' in config) {
-            setTargetScrollMargin(targetElement, align);
-          }
+          applyScrollMargin(targetElement, align, offset, isItem);
 
           targetElement.scrollIntoView({
             block:
@@ -95,7 +97,7 @@ export default function useRawListScroll(
         holder.scrollTop = top;
       }
     },
-    [setTargetScrollMargin],
+    [applyScrollMargin],
   );
 
   // ============================ Imperative ============================

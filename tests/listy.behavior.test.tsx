@@ -199,6 +199,7 @@ describe('Listy behaviors', () => {
       });
     });
 
+    expect(groupBSection.style.scrollMarginTop).toBe('5px');
     expect(scrollIntoView).toHaveBeenCalledWith({
       block: 'start',
       inline: 'nearest',
@@ -259,6 +260,7 @@ describe('Listy behaviors', () => {
     act(() => {
       ref.current?.scrollTo({ key: 2, align: 'bottom', offset: 4 });
     });
+    expect(secondItem.style.scrollMarginBottom).toBe('4px');
     expect(scrollIntoView).toHaveBeenLastCalledWith({
       block: 'end',
       inline: 'nearest',
@@ -393,20 +395,17 @@ describe('Listy behaviors', () => {
 
     const itemNode = container.querySelector('[data-key="1"]') as HTMLElement;
     const scrollIntoView = jest.fn(() => {
-      expect(
-        itemNode.style.getPropertyValue('--rc-listy-item-scroll-margin-top'),
-      ).toBe('36px');
+      // Header height plus the user offset must be applied before scrolling.
+      expect(itemNode.style.scrollMarginTop).toBe('46px');
     });
     itemNode.scrollIntoView = scrollIntoView;
 
     act(() => {
-      ref.current?.scrollTo({ key: 1, align: 'top' });
+      ref.current?.scrollTo({ key: 1, align: 'top', offset: 10 });
     });
 
     expect(itemNode).toHaveClass('rc-listy-item');
-    expect(itemNode.style.scrollMarginTop).toBe(
-      'var(--rc-listy-item-scroll-margin-top, 0px)',
-    );
+    expect(itemNode.style.scrollMarginTop).toBe('46px');
     expect(scrollIntoView).toHaveBeenCalledWith({
       block: 'start',
       inline: 'nearest',
@@ -434,9 +433,7 @@ describe('Listy behaviors', () => {
       ref.current?.scrollTo({ key: 1, align: 'top' });
     });
 
-    expect(
-      itemNode.style.getPropertyValue('--rc-listy-item-scroll-margin-top'),
-    ).toBe('0px');
+    expect(itemNode.style.scrollMarginTop).toBe('0px');
   });
 
   it('scroll to group', () => {

@@ -52,7 +52,7 @@ function RawList<T, K extends React.Key = React.Key>(
 
   // ============================ Render Item ===========================
   const renderItem = React.useCallback(
-    (item: T, index: number, groupKey?: K) => {
+    (item: T, index: number) => {
       const key = getItemKey(item);
       const scrollTargetProps = getScrollTargetProps(key);
 
@@ -60,14 +60,7 @@ function RawList<T, K extends React.Key = React.Key>(
         <div
           key={key}
           className={clsx(`${prefixCls}-item`, classNames?.item)}
-          style={{
-            ...styles?.item,
-            ...(sticky && groupKey !== undefined
-              ? {
-                  scrollMarginTop: `var(--${prefixCls}-item-scroll-margin-top, 0px)`,
-                }
-              : undefined),
-          }}
+          style={styles?.item}
           {...scrollTargetProps}
         >
           {itemRender(item, index)}
@@ -80,7 +73,6 @@ function RawList<T, K extends React.Key = React.Key>(
       getScrollTargetProps,
       itemRender,
       prefixCls,
-      sticky,
       styles?.item,
     ],
   );
@@ -106,7 +98,7 @@ function RawList<T, K extends React.Key = React.Key>(
               style={styles?.groupHeader}
             />
             {groupItems.map(({ item, index }) => {
-              return renderItem(item, index, groupKey);
+              return renderItem(item, index);
             })}
           </div>
         );

@@ -1,6 +1,6 @@
 import React from 'react';
-import { render } from '@testing-library/react';
-import Listy from '@rc-component/listy';
+import { render, act } from '@testing-library/react';
+import Listy, { type ListyRef } from '@rc-component/listy';
 import GroupHeader from '../src/GroupHeader';
 import useStickyGroupHeader from '../src/VirtualList/useStickyGroupHeader';
 
@@ -121,28 +121,39 @@ describe('semantic DOM (classNames / styles)', () => {
       });
     });
 
-    it('merges item style with the sticky scroll-margin (no overwrite)', () => {
-      const { container } = renderRaw({ sticky: true });
-      const item = container.querySelector('.rc-listy-item') as HTMLElement;
+    it('keeps custom item style while applying the scroll margin on scroll', () => {
+      const ref = React.createRef<ListyRef>();
+      const { container } = renderRaw({ sticky: true, ref });
+      const item = container.querySelector('[data-key="1"]') as HTMLElement;
+      item.scrollIntoView = jest.fn();
       // custom style survives...
       expect(item).toHaveStyle({ color: 'rgb(4, 5, 6)' });
-      // ...alongside the internal sticky scroll margin.
-      expect(item.style.scrollMarginTop).toBe(
-        'var(--rc-listy-item-scroll-margin-top, 0px)',
-      );
+
+      act(() => {
+        ref.current?.scrollTo({ key: 1, align: 'top', offset: 3 });
+      });
+      // ...alongside the internal scroll margin applied to the scroll target.
+      expect(item.style.scrollMarginTop).toBe('3px');
+      expect(item).toHaveStyle({ color: 'rgb(4, 5, 6)' });
     });
 
-    it('does not let styles.item.scrollMarginTop override the internal offset', () => {
+    it('lets the internal scroll offset override styles.item.scrollMarginTop', () => {
+      const ref = React.createRef<ListyRef>();
       const { container } = renderRaw({
         sticky: true,
+        ref,
         styles: { item: { color: 'rgb(4, 5, 6)', scrollMarginTop: 999 } },
       });
-      const item = container.querySelector('.rc-listy-item') as HTMLElement;
-      // the internal scrollTo offset must win, not the user's 999px...
-      expect(item.style.scrollMarginTop).toBe(
-        'var(--rc-listy-item-scroll-margin-top, 0px)',
-      );
-      // ...while the user's other item styles still apply.
+      const item = container.querySelector('[data-key="1"]') as HTMLElement;
+      item.scrollIntoView = jest.fn();
+      // the user's value is present at rest...
+      expect(item.style.scrollMarginTop).toBe('999px');
+
+      act(() => {
+        ref.current?.scrollTo({ key: 1, align: 'top', offset: 7 });
+      });
+      // ...but the internal offset wins on the scroll target.
+      expect(item.style.scrollMarginTop).toBe('7px');
       expect(item).toHaveStyle({ color: 'rgb(4, 5, 6)' });
     });
   });

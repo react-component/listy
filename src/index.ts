@@ -6,6 +6,8 @@ export type {
   ListySemanticName,
   ListyClassNames,
   ListyStyles,
+  ScrollAlign,
+  ListyScrollToConfig,
 } from './List';
 
 export default Listy;
