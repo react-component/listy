@@ -43,8 +43,6 @@ export default function useRawListScroll(
       offset: number,
       isItem: boolean,
     ) => {
-      // `top` and `auto` can both land the item at the container top, where a
-      // sticky header would occlude it; only `bottom` is safe to skip.
       const headerOffset =
         isItem && align !== 'bottom' ? getStickyHeaderHeight(targetElement) : 0;
 
