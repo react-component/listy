@@ -60,6 +60,7 @@ export default () => (
 | `group` | Group configuration. | `{ key: (item: T) => K; title: (groupKey: K, items: T[]) => React.ReactNode }` | - |
 | `sticky` | Enable sticky group headers. | `boolean` | `false` |
 | `virtual` | Enable virtual scrolling. | `boolean` | `true` |
+| `direction` | Layout direction; set `rtl` for right-to-left. | `'ltr' \| 'rtl'` | `'ltr'` |
 | `onScroll` | Triggered when the inner scroll container scrolls. | `React.UIEventHandler<HTMLElement>` | - |
 | `prefixCls` | Component class name prefix. | `string` | `rc-listy` |
 

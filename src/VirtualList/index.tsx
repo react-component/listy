@@ -34,6 +34,7 @@ function VirtualList<T, K extends React.Key = React.Key>(
     prefixCls,
     rowKey,
     sticky,
+    direction,
     classNames,
     styles,
   } = props;
@@ -170,6 +171,7 @@ function VirtualList<T, K extends React.Key = React.Key>(
     <RcVirtualList
       ref={listRef}
       data={rows}
+      direction={direction}
       fullHeight={false}
       height={height}
       itemHeight={itemHeight}

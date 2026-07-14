@@ -500,4 +500,19 @@ describe('Listy behaviors', () => {
       }),
     ).toBe(29);
   });
+
+  it('forwards direction to the virtual list', () => {
+    renderList({ direction: 'rtl' });
+
+    expect(MockedVirtualList.__getLastProps().direction).toBe('rtl');
+  });
+
+  it('applies dir and rtl class on the raw list', () => {
+    const { container } = renderList({ virtual: false, direction: 'rtl' });
+
+    const holder = container.querySelector('.rc-listy') as HTMLDivElement;
+
+    expect(holder).toHaveClass('rc-listy-rtl');
+    expect(holder).toHaveAttribute('dir', 'rtl');
+  });
 });
