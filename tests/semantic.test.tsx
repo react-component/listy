@@ -3,6 +3,7 @@ import { render, act } from '@testing-library/react';
 import Listy, { type ListyRef } from '@rc-component/listy';
 import GroupHeader from '../src/GroupHeader';
 import useStickyGroupHeader from '../src/VirtualList/useStickyGroupHeader';
+import { toTaggedKey } from '../src/util';
 
 jest.mock('@rc-component/virtual-list', () => {
   const ReactMock = require('react');
@@ -124,7 +125,7 @@ describe('semantic DOM (classNames / styles)', () => {
     it('keeps custom item style while applying the scroll margin on scroll', () => {
       const ref = React.createRef<ListyRef>();
       const { container } = renderRaw({ sticky: true, ref });
-      const item = container.querySelector('[data-key="1"]') as HTMLElement;
+      const item = container.querySelector('[data-key="item:1"]') as HTMLElement;
       item.scrollIntoView = jest.fn();
       // custom style survives...
       expect(item).toHaveStyle({ color: 'rgb(4, 5, 6)' });
@@ -144,7 +145,7 @@ describe('semantic DOM (classNames / styles)', () => {
         ref,
         styles: { item: { color: 'rgb(4, 5, 6)', scrollMarginTop: 999 } },
       });
-      const item = container.querySelector('[data-key="1"]') as HTMLElement;
+      const item = container.querySelector('[data-key="item:1"]') as HTMLElement;
       item.scrollIntoView = jest.fn();
       // the user's value is present at rest...
       expect(item.style.scrollMarginTop).toBe('999px');
@@ -279,7 +280,9 @@ describe('semantic DOM (classNames / styles)', () => {
           // A is the active header; B is approaching, so the computed top is a
           // negative push offset: min(0, 100 - 24 - 90) = -14.
           getSize: (key: React.Key) =>
-            key === 'B' ? { top: 100, bottom: 124 } : { top: 0, bottom: 24 },
+            key === toTaggedKey('B', 'group')
+              ? { top: 100, bottom: 124 }
+              : { top: 0, bottom: 24 },
           scrollTop: 90,
           virtual: true,
         }),

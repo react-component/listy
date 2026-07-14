@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { toTaggedKey } from '../util';
 import type { ListyRef, ScrollAlign } from '../List';
 
 export default function useRawListScroll(
@@ -68,9 +69,13 @@ export default function useRawListScroll(
       if ('key' in config || 'groupKey' in config) {
         const { align = 'top', offset = 0 } = config;
         const isItem = 'key' in config;
-        const targetKey = isItem ? config.key : config.groupKey;
+        const targetKey = isItem
+          ? toTaggedKey(config.key, 'item')
+          : toTaggedKey(config.groupKey, 'group');
         const targetElement = holder.querySelector<HTMLElement>(
-          `[data-key="${CSS.escape(String(targetKey))}"]`,
+          `[data-key="${CSS.escape(
+            targetKey
+          )}"]`,
         );
 
         if (targetElement) {

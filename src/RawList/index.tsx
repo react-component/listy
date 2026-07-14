@@ -1,9 +1,10 @@
 import * as React from 'react';
 import clsx from 'clsx';
-import { useEvent } from '@rc-component/util';
 import GroupHeader from '../GroupHeader';
 import useGroupSegments from '../hooks/useGroupSegments';
+import useItemKey from '../hooks/useItemKey';
 import useRawListScroll from './useRawListScroll';
+import { toTaggedKey, type KeyType } from '../util';
 import type { ListComponentProps, ListyRef } from '../List';
 
 // ============================== Types ===============================
@@ -36,16 +37,11 @@ function RawList<T, K extends React.Key = React.Key>(
   const groupData = useGroupSegments<T, K>(data, group);
 
   // ============================== Utils ===============================
-  const getItemKey = useEvent((item: T): React.Key => {
-    if (typeof rowKey === 'function') {
-      return rowKey(item);
-    }
-    return item[rowKey] as React.Key;
-  });
+  const getItemKey = useItemKey(rowKey);
 
   const getScrollTargetProps = React.useCallback(
-    (key: React.Key) => ({
-      'data-key': String(key),
+    (key: React.Key, type: KeyType) => ({
+      'data-key': toTaggedKey(key, type),
     }),
     [],
   );
@@ -54,7 +50,7 @@ function RawList<T, K extends React.Key = React.Key>(
   const renderItem = React.useCallback(
     (item: T, index: number) => {
       const key = getItemKey(item);
-      const scrollTargetProps = getScrollTargetProps(key);
+      const scrollTargetProps = getScrollTargetProps(key, 'item');
 
       return (
         <div
@@ -86,7 +82,7 @@ function RawList<T, K extends React.Key = React.Key>(
           <div
             key={groupKey}
             className={`${prefixCls}-group-section`}
-            {...getScrollTargetProps(groupKey)}
+            {...getScrollTargetProps(groupKey, 'group')}
           >
             <GroupHeader
               group={group}

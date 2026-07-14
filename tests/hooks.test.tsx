@@ -9,6 +9,7 @@ import useGroupSegments from '../src/hooks/useGroupSegments';
 import useFlattenRows from '../src/VirtualList/useFlattenRows';
 import useStickyGroupHeader from '../src/VirtualList/useStickyGroupHeader';
 import type { StickyHeaderParams } from '../src/VirtualList/useStickyGroupHeader';
+import { toTaggedKey } from '../src/util';
 
 const PREFIX_CLS = 'rc-listy';
 
@@ -130,15 +131,15 @@ describe('useFlattenRows', () => {
 
     const { result } = renderHook(() => {
       const groupData = useGroupSegments(items, group);
-      return useFlattenRows(items, groupData, group);
+      return useFlattenRows(items, groupData, (item) => item.id, group);
     });
 
     expect(result.current.rows).toEqual([
-      { type: 'header', groupKey: 'A' },
-      { type: 'item', item: items[0], index: 0 },
-      { type: 'item', item: items[2], index: 2 },
-      { type: 'header', groupKey: 'B' },
-      { type: 'item', item: items[1], index: 1 },
+      { type: 'group', groupKey: 'A', taggedKey: toTaggedKey('A', 'group') },
+      { type: 'item', item: items[0], index: 0, taggedKey: toTaggedKey(0, 'item') },
+      { type: 'item', item: items[2], index: 2, taggedKey: toTaggedKey(2, 'item') },
+      { type: 'group', groupKey: 'B', taggedKey: toTaggedKey('B', 'group') },
+      { type: 'item', item: items[1], index: 1, taggedKey: toTaggedKey(1, 'item') },
     ]);
     expect(result.current.groupKeys).toEqual(['A', 'B']);
     expect(result.current.groupKeyToItems).toEqual(
@@ -157,13 +158,13 @@ describe('useFlattenRows', () => {
 
     const { result } = renderHook(() => {
       const groupData = useGroupSegments(items);
-      return useFlattenRows(items, groupData);
+      return useFlattenRows(items, groupData, (item) => item.id);
     });
 
     expect(result.current).toEqual({
       rows: [
-        { type: 'item', item: items[0], index: 0 },
-        { type: 'item', item: items[1], index: 1 },
+        { type: 'item', item: items[0], index: 0, taggedKey: toTaggedKey(0, 'item') },
+        { type: 'item', item: items[1], index: 1, taggedKey: toTaggedKey(1, 'item') },
       ],
       groupKeys: [],
       groupKeyToItems: new Map(),
@@ -260,7 +261,9 @@ describe('useStickyGroupHeader', () => {
       scrollTop: 80,
       start: 1,
       getSize: (key: React.Key) =>
-        key === 'Group 2' ? { top: 500, bottom: 524 } : { top: 0, bottom: 24 },
+        key === toTaggedKey('Group 2', 'group')
+          ? { top: 500, bottom: 524 }
+          : { top: 0, bottom: 24 },
     });
 
     const container = document.createElement('div');
@@ -295,10 +298,10 @@ describe('useStickyGroupHeader', () => {
       scrollTop: 70,
       start: 3,
       getSize: (key: React.Key) => {
-        if (key === 'Group 1') {
+        if (key === toTaggedKey('Group 1', 'group')) {
           return { top: 0, bottom: 20 };
         }
-        if (key === 'Group 2') {
+        if (key === toTaggedKey('Group 2', 'group')) {
           return { top: 80, bottom: 100 };
         }
         return { top: 0, bottom: 0 };
@@ -328,6 +331,54 @@ describe('useStickyGroupHeader', () => {
     expect(stickyHeader).toHaveTextContent('Group 1');
     expect(stickyHeader).toHaveStyle({ top: '-10px' });  });
 
+  it('pushes the fixed header away even when the next group key is falsy', () => {
+    const title = jest.fn().mockImplementation((key: React.Key) => (
+      <span data-testid="sticky-title">{String(key)}</span>
+    ));
+
+    // Numeric group keys where the incoming group is keyed 0 (falsy).
+    const info = createRenderInfo({
+      scrollTop: 70,
+      start: 0,
+      getSize: (key: React.Key) => {
+        if (key === toTaggedKey(1, 'group')) {
+          return { top: 0, bottom: 20 };
+        }
+        if (key === toTaggedKey(0, 'group')) {
+          return { top: 80, bottom: 100 };
+        }
+        return { top: 0, bottom: 0 };
+      },
+    });
+
+    const container = document.createElement('div');
+    document.body.appendChild(container);
+    const params: StickyHeaderParams<GroupedItem> = {
+      enabled: true,
+      group: {
+        key: (item) => item.group,
+        title,
+      },
+      groupKeys: [1, 0],
+      groupKeyToItems: new Map<React.Key, GroupedItem[]>([
+        [1, baseItems.slice(0, 3)],
+        [0, baseItems.slice(3, 6)],
+      ]),
+      prefixCls: PREFIX_CLS,
+      listRef: createListRef(container),
+    };
+
+    render(<StickyHeaderTester params={params} info={info} />);
+
+    const stickyHeader = container.querySelector(
+      `.${PREFIX_CLS}-group-header-fixed`,
+    );
+    expect(stickyHeader).not.toBeNull();
+    expect(stickyHeader).toHaveTextContent('1');
+    // Group 0's header is approaching: min(0, 80 - 20 - 70) = -10.
+    expect(stickyHeader).toHaveStyle({ top: '-10px' });
+  });
+
   it('activates the current group, not the previous one, when its header sits flush at the top', () => {
     const title = jest.fn().mockImplementation((key: React.Key) => (
       <span data-testid="sticky-title">{String(key)}</span>
@@ -340,7 +391,9 @@ describe('useStickyGroupHeader', () => {
       scrollTop: 200,
       start: 3,
       getSize: (key: React.Key) =>
-        key === 'Group 2' ? { top: 200, bottom: 220 } : { top: 0, bottom: 20 },
+        key === toTaggedKey('Group 2', 'group')
+          ? { top: 200, bottom: 220 }
+          : { top: 0, bottom: 20 },
     });
 
     const container = document.createElement('div');
@@ -381,7 +434,9 @@ describe('useStickyGroupHeader', () => {
       scrollTop: 199.5,
       start: 3,
       getSize: (key: React.Key) =>
-        key === 'Group 2' ? { top: 200, bottom: 220 } : { top: 0, bottom: 20 },
+        key === toTaggedKey('Group 2', 'group')
+          ? { top: 200, bottom: 220 }
+          : { top: 0, bottom: 20 },
     });
 
     const container = document.createElement('div');

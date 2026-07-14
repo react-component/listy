@@ -123,7 +123,7 @@ describe('Listy behaviors', () => {
       ref.current?.scrollTo({ key: 2 });
     });
 
-    expect(scrollHandler).toHaveBeenCalledWith({ key: 2 });
+    expect(scrollHandler).toHaveBeenCalledWith({ key: 'item:2' });
   });
 
   it('treats missing items prop as empty array', () => {
@@ -166,7 +166,7 @@ describe('Listy behaviors', () => {
     expect(stickyHeader).toHaveTextContent('Group Group A');
     expect(groupSections).toHaveLength(1);
     expect(groupSections[0]).toContainElement(stickyHeader as HTMLElement);
-    expect(groupSections[0]).toHaveAttribute('data-key', 'Group A');
+    expect(groupSections[0]).toHaveAttribute('data-key', 'group:Group A');
     expect(title).toHaveBeenCalled();
   });
 
@@ -335,7 +335,7 @@ describe('Listy behaviors', () => {
 
     const itemNode = container.querySelector('.rc-listy-item');
 
-    expect(itemNode).toHaveAttribute('data-key', 'item-1');
+    expect(itemNode).toHaveAttribute('data-key', 'item:item-1');
   });
 
   it('wraps raw list items with item class', () => {
@@ -355,7 +355,7 @@ describe('Listy behaviors', () => {
 
     const itemNode = container.querySelector('.rc-listy-item');
 
-    expect(itemNode).toHaveAttribute('data-key', '1');
+    expect(itemNode).toHaveAttribute('data-key', 'item:1');
     expect(itemNode).toContainElement(container.querySelector('span'));
   });
 
@@ -393,7 +393,7 @@ describe('Listy behaviors', () => {
         }) as DOMRect,
     );
 
-    const itemNode = container.querySelector('[data-key="1"]') as HTMLElement;
+    const itemNode = container.querySelector('[data-key="item:1"]') as HTMLElement;
     const scrollIntoView = jest.fn(() => {
       // Header height plus the user offset must be applied before scrolling.
       expect(itemNode.style.scrollMarginTop).toBe('46px');
@@ -435,7 +435,7 @@ describe('Listy behaviors', () => {
       () => ({ bottom: 36, height: 36, top: 0 }) as DOMRect,
     );
 
-    const itemNode = container.querySelector('[data-key="1"]') as HTMLElement;
+    const itemNode = container.querySelector('[data-key="item:1"]') as HTMLElement;
     itemNode.scrollIntoView = jest.fn();
 
     act(() => {
@@ -460,7 +460,7 @@ describe('Listy behaviors', () => {
 
     container.querySelector('.rc-listy-group-header')?.remove();
 
-    const itemNode = container.querySelector('[data-key="1"]') as HTMLElement;
+    const itemNode = container.querySelector('[data-key="item:1"]') as HTMLElement;
     itemNode.scrollIntoView = jest.fn();
 
     act(() => {
@@ -492,7 +492,7 @@ describe('Listy behaviors', () => {
     });
 
     expect(scrollHandler).toHaveBeenCalledWith({
-      key: 'Group A',
+      key: 'group:Group A',
       align: 'bottom',
       offset: 12,
     });
@@ -517,7 +517,7 @@ describe('Listy behaviors', () => {
     });
 
     expect(scrollHandler).toHaveBeenCalledWith({
-      key: 2,
+      key: 'item:2',
       align: 'top',
       offset: expect.any(Function),
     });
@@ -527,7 +527,7 @@ describe('Listy behaviors', () => {
     expect(
       offset({
         getSize: (key: React.Key) =>
-          key === 'Group A' ? { top: 10, bottom: 34 } : { top: 0, bottom: 0 },
+          key === 'group:Group A' ? { top: 10, bottom: 34 } : { top: 0, bottom: 0 },
       }),
     ).toBe(29);
   });
@@ -566,7 +566,7 @@ describe('Listy behaviors', () => {
     });
 
     expect(scrollHandler).toHaveBeenCalledWith({
-      key: 2,
+      key: 'item:2',
       align: 'auto',
       offset: expect.any(Function),
     });
@@ -576,8 +576,94 @@ describe('Listy behaviors', () => {
     expect(
       offset({
         getSize: (key: React.Key) =>
-          key === 'Group A' ? { top: 10, bottom: 34 } : { top: 0, bottom: 0 },
+          key === 'group:Group A' ? { top: 10, bottom: 34 } : { top: 0, bottom: 0 },
       }),
     ).toBe(29);
+  });
+
+  it('applies the sticky offset when the scroll key type differs from the rowKey type', () => {
+    const scrollHandler = jest.fn();
+    MockedVirtualList.__setScrollHandler(scrollHandler);
+
+    const ref = React.createRef<ListyRef>();
+    renderList({
+      ref,
+      sticky: true,
+      group: {
+        key: (item) => item.group,
+        title: () => null,
+      },
+    });
+
+    act(() => {
+      ref.current?.scrollTo({ key: '2', align: 'top', offset: 5 });
+    });
+
+    expect(scrollHandler).toHaveBeenCalledWith({
+      key: 'item:2',
+      align: 'top',
+      offset: expect.any(Function),
+    });
+  });
+
+  it('keeps virtual item and group scroll distinct when their keys collide', () => {
+    const scrollHandler = jest.fn();
+    MockedVirtualList.__setScrollHandler(scrollHandler);
+
+    const ref = React.createRef<ListyRef>();
+    renderList({
+      ref,
+      // Item id and group key both stringify to 'x'.
+      items: [{ id: 'x', group: 'x' }],
+      group: {
+        key: (item) => item.group,
+        title: () => null,
+      },
+    });
+
+    act(() => {
+      ref.current?.scrollTo({ key: 'x' });
+      ref.current?.scrollTo({ groupKey: 'x' });
+    });
+
+    // Type-tagged row keys stop the shared raw key from mapping to one row.
+    expect(scrollHandler).toHaveBeenNthCalledWith(1, { key: 'item:x' });
+    expect(scrollHandler).toHaveBeenNthCalledWith(2, { key: 'group:x' });
+  });
+
+  it('scrolls the item, not the colliding group section, in a raw list', () => {
+    const ref = React.createRef<ListyRef>();
+    const { container } = renderList({
+      ref,
+      virtual: false,
+      // Item id and group key both stringify to 'x'.
+      items: [{ id: 'x', group: 'x' }],
+      group: {
+        key: (item) => item.group,
+        title: () => null,
+      },
+    });
+
+    const groupSection = container.querySelector(
+      '.rc-listy-group-section',
+    ) as HTMLElement;
+    const itemNode = container.querySelector('.rc-listy-item') as HTMLElement;
+    const groupScroll = jest.fn();
+    const itemScroll = jest.fn();
+    groupSection.scrollIntoView = groupScroll;
+    itemNode.scrollIntoView = itemScroll;
+
+    act(() => {
+      ref.current?.scrollTo({ key: 'x' });
+    });
+    // The item — not the group section sharing the key — is the target.
+    expect(itemScroll).toHaveBeenCalledTimes(1);
+    expect(groupScroll).not.toHaveBeenCalled();
+
+    act(() => {
+      ref.current?.scrollTo({ groupKey: 'x' });
+    });
+    expect(groupScroll).toHaveBeenCalledTimes(1);
+    expect(itemScroll).toHaveBeenCalledTimes(1);
   });
 });

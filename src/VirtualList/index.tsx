@@ -8,7 +8,9 @@ import RcVirtualList, {
 import { useEvent } from '@rc-component/util';
 import GroupHeader from '../GroupHeader';
 import type { ListComponentProps, ListyRef } from '../List';
+import { toTaggedKey } from '../util';
 import useGroupSegments from '../hooks/useGroupSegments';
+import useItemKey from '../hooks/useItemKey';
 import useFlattenRows from './useFlattenRows';
 import type { Row } from './useFlattenRows';
 import useStickyGroupHeader from './useStickyGroupHeader';
@@ -46,86 +48,75 @@ function VirtualList<T, K extends React.Key = React.Key>(
   const groupData = useGroupSegments<T, K>(data, group);
 
   // =============================== Keys ===============================
-  const getItemKey = useEvent((item: T): React.Key => {
-    if (typeof rowKey === 'function') {
-      return rowKey(item);
-    }
-    return item[rowKey] as React.Key;
-  });
-
-  const getKey = useEvent((row: Row<T, K>): React.Key => {
-    if (row.type === 'header') {
-      return row.groupKey;
-    }
-
-    return getItemKey(row.item);
-  });
+  const getItemKey = useItemKey(rowKey);
 
   // ============================== Rows ================================
   const { rows, groupKeys, groupKeyToItems } = useFlattenRows<T, K>(
     data,
     groupData,
+    getItemKey,
     group,
   );
 
   // ============================== Lookup ==============================
   const itemKeyToGroupKey = React.useMemo(() => {
-    const itemGroupMap = new Map<React.Key, K>();
+    const itemGroupMap = new Map<string, K>();
+    let currentGroupKey: K | undefined;
 
-    groupData.forEach((groupItems, groupKey) => {
-      groupItems.forEach(({ item }) => {
-        itemGroupMap.set(getItemKey(item), groupKey);
-      });
+    rows.forEach((row) => {
+      if (row.type === 'group') {
+        currentGroupKey = row.groupKey;
+      } else if (currentGroupKey !== undefined) {
+        itemGroupMap.set(row.taggedKey, currentGroupKey);
+      }
     });
 
     return itemGroupMap;
-  }, [getItemKey, groupData]);
+  }, [rows]);
 
   // ============================== Scroll ==============================
   const scrollTo = useEvent<ListyRef['scrollTo']>((config) => {
-    // Group headers are rows in the virtual data, so group scroll maps to key scroll.
-    if (config && typeof config === 'object' && 'groupKey' in config) {
+    if (!config || typeof config !== 'object') {
+      listRef.current?.scrollTo(config as number | ScrollConfig | null);
+      return;
+    }
+
+    if ('groupKey' in config) {
       const { groupKey, align, offset } = config;
       listRef.current?.scrollTo({
-        key: groupKey,
+        key: toTaggedKey(groupKey, 'group'),
         align,
         offset,
       });
       return;
     }
 
-    // For sticky grouped lists, any scroll that can land the item at the top
-    // (`top`, `auto`, or the default) must sit below its header; only explicit
-    // `bottom` alignment is safe to skip.
-    if (
-      config &&
-      typeof config === 'object' &&
-      'key' in config &&
-      sticky &&
-      group &&
-      config.align !== 'bottom'
-    ) {
-      const groupKey = itemKeyToGroupKey.get(config.key);
+    if ('key' in config) {
+      const stickyGroupKey =
+        sticky && group && config.align !== 'bottom'
+          ? itemKeyToGroupKey.get(toTaggedKey(config.key, 'item'))
+          : undefined;
 
-      if (groupKey !== undefined) {
-        const { offset = 0 } = config;
-
-        listRef.current?.scrollTo({
-          ...config,
+      listRef.current?.scrollTo({
+        ...config,
+        key: toTaggedKey(config.key, 'item'),
+        ...(stickyGroupKey !== undefined && {
           // Use the measured header height so top-aligned items stay below it.
           offset: ({ getSize }: ScrollOffsetInfo) => {
-            const headerSize = getSize(groupKey);
+            const headerSize = getSize(toTaggedKey(stickyGroupKey, 'group'));
             const headerHeight = headerSize.bottom - headerSize.top;
 
-            return offset + (Number.isFinite(headerHeight) ? headerHeight : 0);
+            return (
+              (config.offset ?? 0) +
+              (Number.isFinite(headerHeight) ? headerHeight : 0)
+            );
           },
-        });
-        return;
-      }
+        }),
+      });
+      return;
     }
 
-    // Other scroll shapes are already supported by the underlying virtual list.
-    listRef.current?.scrollTo(config as number | ScrollConfig | null);
+    listRef.current?.scrollTo(config);
   });
 
   // ============================ Imperative ============================
@@ -177,7 +168,7 @@ function VirtualList<T, K extends React.Key = React.Key>(
       fullHeight={false}
       height={height}
       itemHeight={itemHeight}
-      itemKey={getKey}
+      itemKey="taggedKey"
       onScroll={onScroll}
       prefixCls={prefixCls}
       virtual
@@ -186,7 +177,7 @@ function VirtualList<T, K extends React.Key = React.Key>(
       style={styles?.root}
     >
       {(row: Row<T, K>) =>
-        row.type === 'header'
+        row.type === 'group'
           ? renderHeaderRow(row.groupKey)
           : (
               <div
