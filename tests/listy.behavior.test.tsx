@@ -581,6 +581,23 @@ describe('Listy behaviors', () => {
     ).toBe(29);
   });
 
+  it('forwards non-key scroll configs to the virtual list untouched', () => {
+    const scrollHandler = jest.fn();
+    MockedVirtualList.__setScrollHandler(scrollHandler);
+
+    const ref = React.createRef<ListyRef>();
+    renderList({ ref });
+
+    act(() => {
+      ref.current?.scrollTo(120);
+      ref.current?.scrollTo({ top: 40, left: 4 });
+    });
+
+    // Plain offsets and position configs carry no keys to tag: pass through.
+    expect(scrollHandler).toHaveBeenNthCalledWith(1, 120);
+    expect(scrollHandler).toHaveBeenNthCalledWith(2, { top: 40, left: 4 });
+  });
+
   it('applies the sticky offset when the scroll key type differs from the rowKey type', () => {
     const scrollHandler = jest.fn();
     MockedVirtualList.__setScrollHandler(scrollHandler);
