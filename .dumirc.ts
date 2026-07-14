@@ -3,8 +3,8 @@ import path from 'path';
 
 export default defineConfig({
   alias: {
-    'rc-listy$': path.resolve('src'),
-    'rc-listy/es': path.resolve('src'),
+    '@rc-component/listy$': path.resolve('src'),
+    '@rc-component/listy/es': path.resolve('src'),
   },
   mfsu: false,
   favicons: ['https://avatars0.githubusercontent.com/u/9441414?s=200&v=4'],

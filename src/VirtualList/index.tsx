@@ -92,26 +92,33 @@ function VirtualList<T, K extends React.Key = React.Key>(
     }
 
     if ('key' in config) {
+      const taggedItemKey = toTaggedKey(config.key, 'item');
       const stickyGroupKey =
         sticky && group && config.align !== 'bottom'
-          ? itemKeyToGroupKey.get(toTaggedKey(config.key, 'item'))
+          ? itemKeyToGroupKey.get(taggedItemKey)
           : undefined;
+
+      if (stickyGroupKey === undefined) {
+        listRef.current?.scrollTo({ ...config, key: taggedItemKey });
+        return;
+      }
 
       listRef.current?.scrollTo({
         ...config,
-        key: toTaggedKey(config.key, 'item'),
-        ...(stickyGroupKey !== undefined && {
-          // Use the measured header height so top-aligned items stay below it.
-          offset: ({ getSize }: ScrollOffsetInfo) => {
-            const headerSize = getSize(toTaggedKey(stickyGroupKey, 'group'));
-            const headerHeight = headerSize.bottom - headerSize.top;
+        key: taggedItemKey,
+        offset: ({ getSize, align }: ScrollOffsetInfo) => {
+          const baseOffset = config.offset ?? 0;
 
-            return (
-              (config.offset ?? 0) +
-              (Number.isFinite(headerHeight) ? headerHeight : 0)
-            );
-          },
-        }),
+          if (align !== 'top') {
+            return baseOffset;
+          }
+
+          // Use the measured header height so the item stays below it.
+          const headerSize = getSize(toTaggedKey(stickyGroupKey, 'group'));
+          const headerHeight = headerSize.bottom - headerSize.top;
+
+          return baseOffset + (Number.isFinite(headerHeight) ? headerHeight : 0);
+        },
       });
       return;
     }

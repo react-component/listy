@@ -122,23 +122,28 @@ describe('semantic DOM (classNames / styles)', () => {
       });
     });
 
-    it('keeps custom item style while applying the scroll margin on scroll', () => {
+    it('applies the scroll margin only during scroll and restores the item afterward', () => {
       const ref = React.createRef<ListyRef>();
       const { container } = renderRaw({ sticky: true, ref });
       const item = container.querySelector('[data-key="item:1"]') as HTMLElement;
-      item.scrollIntoView = jest.fn();
+      let marginDuringScroll: string | undefined;
+      item.scrollIntoView = jest.fn(() => {
+        marginDuringScroll = item.style.scrollMarginTop;
+      });
       // custom style survives...
       expect(item).toHaveStyle({ color: 'rgb(4, 5, 6)' });
 
       act(() => {
         ref.current?.scrollTo({ key: 1, align: 'top', offset: 3 });
       });
-      // ...alongside the internal scroll margin applied to the scroll target.
-      expect(item.style.scrollMarginTop).toBe('3px');
+      // ...the internal margin is applied for the scrollIntoView call...
+      expect(marginDuringScroll).toBe('3px');
+      // ...then restored (the user set no scroll margin, so back to empty).
+      expect(item.style.scrollMarginTop).toBe('');
       expect(item).toHaveStyle({ color: 'rgb(4, 5, 6)' });
     });
 
-    it('lets the internal scroll offset override styles.item.scrollMarginTop', () => {
+    it('restores styles.item.scrollMarginTop after applying the internal offset for the scroll', () => {
       const ref = React.createRef<ListyRef>();
       const { container } = renderRaw({
         sticky: true,
@@ -146,15 +151,20 @@ describe('semantic DOM (classNames / styles)', () => {
         styles: { item: { color: 'rgb(4, 5, 6)', scrollMarginTop: 999 } },
       });
       const item = container.querySelector('[data-key="item:1"]') as HTMLElement;
-      item.scrollIntoView = jest.fn();
+      let marginDuringScroll: string | undefined;
+      item.scrollIntoView = jest.fn(() => {
+        marginDuringScroll = item.style.scrollMarginTop;
+      });
       // the user's value is present at rest...
       expect(item.style.scrollMarginTop).toBe('999px');
 
       act(() => {
         ref.current?.scrollTo({ key: 1, align: 'top', offset: 7 });
       });
-      // ...but the internal offset wins on the scroll target.
-      expect(item.style.scrollMarginTop).toBe('7px');
+      // ...the internal offset is applied only for the scroll...
+      expect(marginDuringScroll).toBe('7px');
+      // ...and the user's value is restored afterward, not clobbered.
+      expect(item.style.scrollMarginTop).toBe('999px');
       expect(item).toHaveStyle({ color: 'rgb(4, 5, 6)' });
     });
   });

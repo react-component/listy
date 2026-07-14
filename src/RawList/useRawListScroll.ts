@@ -37,7 +37,7 @@ export default function useRawListScroll(
     [prefixCls, stickyGroup],
   );
 
-  const applyScrollMargin = React.useCallback(
+  const scrollTargetIntoView = React.useCallback(
     (
       targetElement: HTMLElement,
       align: ScrollAlign,
@@ -47,8 +47,20 @@ export default function useRawListScroll(
       const headerOffset =
         isItem && align !== 'bottom' ? getStickyHeaderHeight(targetElement) : 0;
 
+      const prevTop = targetElement.style.scrollMarginTop;
+      const prevBottom = targetElement.style.scrollMarginBottom;
+
       targetElement.style.scrollMarginTop = `${headerOffset + offset}px`;
       targetElement.style.scrollMarginBottom = `${offset}px`;
+
+      targetElement.scrollIntoView({
+        block:
+          align === 'bottom' ? 'end' : align === 'auto' ? 'nearest' : 'start',
+        inline: 'nearest',
+      });
+
+      targetElement.style.scrollMarginTop = prevTop;
+      targetElement.style.scrollMarginBottom = prevBottom;
     },
     [getStickyHeaderHeight],
   );
@@ -79,17 +91,7 @@ export default function useRawListScroll(
         );
 
         if (targetElement) {
-          applyScrollMargin(targetElement, align, offset, isItem);
-
-          targetElement.scrollIntoView({
-            block:
-              align === 'bottom'
-                ? 'end'
-                : align === 'auto'
-                  ? 'nearest'
-                  : 'start',
-            inline: 'nearest',
-          });
+          scrollTargetIntoView(targetElement, align, offset, isItem);
         }
         return;
       }
@@ -102,7 +104,7 @@ export default function useRawListScroll(
         holder.scrollTop = top;
       }
     },
-    [applyScrollMargin],
+    [scrollTargetIntoView],
   );
 
   // ============================ Imperative ============================

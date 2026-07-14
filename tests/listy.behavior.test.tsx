@@ -24,10 +24,13 @@ jest.mock('@rc-component/virtual-list', () => {
   };
   let scrollHandler = (config: any) => {};
   let lastProps: any = null;
+  // Stand-in for rc-virtual-list's scroll offset, mutable per test.
+  const scrollInfo = { x: 0, y: 0 };
 
   const MockVirtualList = React.forwardRef((props: any, ref: any) => {
     lastProps = props;
     React.useImperativeHandle(ref, () => ({
+      getScrollInfo: () => ({ ...scrollInfo }),
       scrollTo: (config: any) => {
         scrollHandler(config);
       },
@@ -57,6 +60,9 @@ jest.mock('@rc-component/virtual-list', () => {
     scrollHandler = handler;
   };
   (MockVirtualList as any).__getLastProps = () => lastProps;
+  (MockVirtualList as any).__setScrollTop = (scrollTop: number) => {
+    scrollInfo.y = scrollTop;
+  };
 
   return {
     __esModule: true,
@@ -68,6 +74,7 @@ type MockedVirtualListComponent = React.ForwardRefExoticComponent<any> & {
   __setExtraInfo(info: Partial<ExtraRenderInfo>): void;
   __setScrollHandler(handler: (config: any) => void): void;
   __getLastProps(): any;
+  __setScrollTop(scrollTop: number): void;
 };
 
 const MockedVirtualList = require('@rc-component/virtual-list')
@@ -81,6 +88,7 @@ describe('Listy behaviors', () => {
       virtual: true,
     });
     MockedVirtualList.__setScrollHandler(() => {});
+    MockedVirtualList.__setScrollTop(0);
   });
 
   const renderList = (
@@ -188,7 +196,10 @@ describe('Listy behaviors', () => {
 
     const groupSections = container.querySelectorAll('.rc-listy-group-section');
     const groupBSection = groupSections[1] as HTMLElement;
-    const scrollIntoView = jest.fn();
+    let marginDuringScroll: string | undefined;
+    const scrollIntoView = jest.fn(() => {
+      marginDuringScroll = groupBSection.style.scrollMarginTop;
+    });
     groupBSection.scrollIntoView = scrollIntoView;
 
     act(() => {
@@ -199,7 +210,9 @@ describe('Listy behaviors', () => {
       });
     });
 
-    expect(groupBSection.style.scrollMarginTop).toBe('5px');
+    // Margin is applied for the scroll, then restored (no user value here).
+    expect(marginDuringScroll).toBe('5px');
+    expect(groupBSection.style.scrollMarginTop).toBe('');
     expect(scrollIntoView).toHaveBeenCalledWith({
       block: 'start',
       inline: 'nearest',
@@ -221,7 +234,10 @@ describe('Listy behaviors', () => {
     const holder = container.querySelector('.rc-listy') as HTMLDivElement;
     const itemNodes = container.querySelectorAll('.rc-listy-item');
     const secondItem = itemNodes[1] as HTMLElement;
-    const scrollIntoView = jest.fn();
+    let bottomMarginDuringScroll: string | undefined;
+    const scrollIntoView = jest.fn(() => {
+      bottomMarginDuringScroll = secondItem.style.scrollMarginBottom;
+    });
     secondItem.scrollIntoView = scrollIntoView;
 
     act(() => {
@@ -260,7 +276,9 @@ describe('Listy behaviors', () => {
     act(() => {
       ref.current?.scrollTo({ key: 2, align: 'bottom', offset: 4 });
     });
-    expect(secondItem.style.scrollMarginBottom).toBe('4px');
+    // Margin is applied for the scroll, then restored (no user value here).
+    expect(bottomMarginDuringScroll).toBe('4px');
+    expect(secondItem.style.scrollMarginBottom).toBe('');
     expect(scrollIntoView).toHaveBeenLastCalledWith({
       block: 'end',
       inline: 'nearest',
@@ -405,7 +423,8 @@ describe('Listy behaviors', () => {
     });
 
     expect(itemNode).toHaveClass('rc-listy-item');
-    expect(itemNode.style.scrollMarginTop).toBe('46px');
+    // Restored after the scroll (the user set no scroll margin).
+    expect(itemNode.style.scrollMarginTop).toBe('');
     expect(scrollIntoView).toHaveBeenCalledWith({
       block: 'start',
       inline: 'nearest',
@@ -436,14 +455,19 @@ describe('Listy behaviors', () => {
     );
 
     const itemNode = container.querySelector('[data-key="item:1"]') as HTMLElement;
-    itemNode.scrollIntoView = jest.fn();
+    let marginDuringScroll: string | undefined;
+    itemNode.scrollIntoView = jest.fn(() => {
+      marginDuringScroll = itemNode.style.scrollMarginTop;
+    });
 
     act(() => {
       ref.current?.scrollTo({ key: 1, align: 'auto', offset: 10 });
     });
 
-    // `auto` can land the item at the top, so the header offset still applies.
-    expect(itemNode.style.scrollMarginTop).toBe('46px');
+    // `auto` can land the item at the top, so the header offset still applies
+    // during the scroll (and is restored afterward).
+    expect(marginDuringScroll).toBe('46px');
+    expect(itemNode.style.scrollMarginTop).toBe('');
   });
 
   it('falls back to zero raw sticky scroll margin without a header', () => {
@@ -461,13 +485,18 @@ describe('Listy behaviors', () => {
     container.querySelector('.rc-listy-group-header')?.remove();
 
     const itemNode = container.querySelector('[data-key="item:1"]') as HTMLElement;
-    itemNode.scrollIntoView = jest.fn();
+    let marginDuringScroll: string | undefined;
+    itemNode.scrollIntoView = jest.fn(() => {
+      marginDuringScroll = itemNode.style.scrollMarginTop;
+    });
 
     act(() => {
       ref.current?.scrollTo({ key: 1, align: 'top' });
     });
 
-    expect(itemNode.style.scrollMarginTop).toBe('0px');
+    // No header, no offset -> zero margin during the scroll, restored after.
+    expect(marginDuringScroll).toBe('0px');
+    expect(itemNode.style.scrollMarginTop).toBe('');
   });
 
   it('scroll to group', () => {
@@ -528,6 +557,7 @@ describe('Listy behaviors', () => {
       offset({
         getSize: (key: React.Key) =>
           key === 'group:Group A' ? { top: 10, bottom: 34 } : { top: 0, bottom: 0 },
+        align: 'top',
       }),
     ).toBe(29);
   });
@@ -547,7 +577,7 @@ describe('Listy behaviors', () => {
     expect(holder).toHaveAttribute('dir', 'rtl');
   });
 
-  it('offsets sticky virtual scrollTo for auto-aligned items too', () => {
+  it('offsets auto-aligned scrollTo when it resolves to a top landing', () => {
     const scrollHandler = jest.fn();
     MockedVirtualList.__setScrollHandler(scrollHandler);
 
@@ -572,13 +602,40 @@ describe('Listy behaviors', () => {
     });
 
     const [{ offset }] = scrollHandler.mock.calls[0];
+    const getSize = (key: React.Key) =>
+      key === 'group:Group A' ? { top: 10, bottom: 34 } : { top: 0, bottom: 0 };
+
+    expect(offset({ getSize, align: 'auto' })).toBe(5);
+    expect(offset({ getSize, align: 'top' })).toBe(29);
+  });
+
+  it('skips the sticky offset when auto-aligned scrollTo lands at the bottom', () => {
+    const scrollHandler = jest.fn();
+    MockedVirtualList.__setScrollHandler(scrollHandler);
+
+    const ref = React.createRef<ListyRef>();
+    renderList({
+      ref,
+      sticky: true,
+      group: {
+        key: (item) => item.group,
+        title: () => null,
+      },
+    });
+
+    act(() => {
+      ref.current?.scrollTo({ key: 2, align: 'auto', offset: 5 });
+    });
+
+    const [{ offset }] = scrollHandler.mock.calls[0];
 
     expect(
       offset({
         getSize: (key: React.Key) =>
           key === 'group:Group A' ? { top: 10, bottom: 34 } : { top: 0, bottom: 0 },
+        align: 'bottom',
       }),
-    ).toBe(29);
+    ).toBe(5);
   });
 
   it('forwards non-key scroll configs to the virtual list untouched', () => {
