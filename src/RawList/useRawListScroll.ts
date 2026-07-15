@@ -79,15 +79,13 @@ export default function useRawListScroll(
       }
 
       if ('key' in config || 'groupKey' in config) {
-        const { align = 'top', offset = 0 } = config;
+        const { align = 'auto', offset = 0 } = config;
         const isItem = 'key' in config;
         const targetKey = isItem
           ? toTaggedKey(config.key, 'item')
           : toTaggedKey(config.groupKey, 'group');
         const targetElement = holder.querySelector<HTMLElement>(
-          `[data-key="${CSS.escape(
-            targetKey
-          )}"]`,
+          `[data-key="${CSS.escape(targetKey)}"]`,
         );
 
         if (targetElement) {

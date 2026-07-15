@@ -4,8 +4,7 @@ import type { Group, GroupSegmentItem } from '../hooks/useGroupSegments';
 
 // ============================== Types ===============================
 export type Row<T, K extends React.Key = React.Key> = (
-  | { type: 'group'; groupKey: K }
-  | { type: 'item'; item: T; index: number }
+  { type: 'group'; groupKey: K } | { type: 'item'; item: T; index: number }
 ) & {
   taggedKey: string;
 };

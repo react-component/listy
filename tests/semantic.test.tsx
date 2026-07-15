@@ -48,7 +48,11 @@ const group = {
   title: (key: React.Key) => <span>Group {String(key)}</span>,
 };
 
-const CLASSNAMES = { root: 'my-root', item: 'my-item', groupHeader: 'my-header' };
+const CLASSNAMES = {
+  root: 'my-root',
+  item: 'my-item',
+  groupHeader: 'my-header',
+};
 const STYLES = {
   root: { background: 'rgb(1, 2, 3)' },
   item: { color: 'rgb(4, 5, 6)' },
@@ -71,7 +75,9 @@ describe('semantic DOM (classNames / styles)', () => {
         />,
       );
 
-      const node = container.querySelector('.rc-listy-group-header') as HTMLElement;
+      const node = container.querySelector(
+        '.rc-listy-group-header',
+      ) as HTMLElement;
       expect(node).toHaveClass('rc-listy-group-header-fixed');
       expect(node).toHaveClass('my-header');
       expect(node).toHaveStyle({ color: 'rgb(7, 8, 9)' });
@@ -125,7 +131,9 @@ describe('semantic DOM (classNames / styles)', () => {
     it('applies the scroll margin only during scroll and restores the item afterward', () => {
       const ref = React.createRef<ListyRef>();
       const { container } = renderRaw({ sticky: true, ref });
-      const item = container.querySelector('[data-key="item:1"]') as HTMLElement;
+      const item = container.querySelector(
+        '[data-key="item:1"]',
+      ) as HTMLElement;
       let marginDuringScroll: string | undefined;
       item.scrollIntoView = jest.fn(() => {
         marginDuringScroll = item.style.scrollMarginTop;
@@ -150,7 +158,9 @@ describe('semantic DOM (classNames / styles)', () => {
         ref,
         styles: { item: { color: 'rgb(4, 5, 6)', scrollMarginTop: 999 } },
       });
-      const item = container.querySelector('[data-key="item:1"]') as HTMLElement;
+      const item = container.querySelector(
+        '[data-key="item:1"]',
+      ) as HTMLElement;
       let marginDuringScroll: string | undefined;
       item.scrollIntoView = jest.fn(() => {
         marginDuringScroll = item.style.scrollMarginTop;

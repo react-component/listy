@@ -50,9 +50,9 @@ const StickyHeaderTester = ({
 const createListRef = (
   nativeElement: HTMLElement,
 ): React.RefObject<RcVirtualListRef | null> =>
-  ({ current: { nativeElement } } as unknown as React.RefObject<
-    RcVirtualListRef | null
-  >);
+  ({
+    current: { nativeElement },
+  }) as unknown as React.RefObject<RcVirtualListRef | null>;
 
 describe('useGroupSegments', () => {
   it('groups items by key across the full data set', () => {
@@ -136,10 +136,25 @@ describe('useFlattenRows', () => {
 
     expect(result.current.rows).toEqual([
       { type: 'group', groupKey: 'A', taggedKey: toTaggedKey('A', 'group') },
-      { type: 'item', item: items[0], index: 0, taggedKey: toTaggedKey(0, 'item') },
-      { type: 'item', item: items[2], index: 2, taggedKey: toTaggedKey(2, 'item') },
+      {
+        type: 'item',
+        item: items[0],
+        index: 0,
+        taggedKey: toTaggedKey(0, 'item'),
+      },
+      {
+        type: 'item',
+        item: items[2],
+        index: 2,
+        taggedKey: toTaggedKey(2, 'item'),
+      },
       { type: 'group', groupKey: 'B', taggedKey: toTaggedKey('B', 'group') },
-      { type: 'item', item: items[1], index: 1, taggedKey: toTaggedKey(1, 'item') },
+      {
+        type: 'item',
+        item: items[1],
+        index: 1,
+        taggedKey: toTaggedKey(1, 'item'),
+      },
     ]);
     expect(result.current.groupKeys).toEqual(['A', 'B']);
     expect(result.current.groupKeyToItems).toEqual(
@@ -163,8 +178,18 @@ describe('useFlattenRows', () => {
 
     expect(result.current).toEqual({
       rows: [
-        { type: 'item', item: items[0], index: 0, taggedKey: toTaggedKey(0, 'item') },
-        { type: 'item', item: items[1], index: 1, taggedKey: toTaggedKey(1, 'item') },
+        {
+          type: 'item',
+          item: items[0],
+          index: 0,
+          taggedKey: toTaggedKey(0, 'item'),
+        },
+        {
+          type: 'item',
+          item: items[1],
+          index: 1,
+          taggedKey: toTaggedKey(1, 'item'),
+        },
       ],
       groupKeys: [],
       groupKeyToItems: new Map(),
@@ -226,7 +251,8 @@ describe('useStickyGroupHeader', () => {
     expect(stickyHeader).toHaveTextContent('Group 2-3');
     // Last group, nothing to push it: pinned at the container top.
     expect(stickyHeader).toHaveStyle({ top: '0px' });
-    expect(title).toHaveBeenCalledWith('Group 2', baseItems.slice(3, 6));  });
+    expect(title).toHaveBeenCalledWith('Group 2', baseItems.slice(3, 6));
+  });
 
   it('skips sticky header rendering when virtual list is disabled', () => {
     const info = createRenderInfo({ virtual: false });
@@ -249,12 +275,15 @@ describe('useStickyGroupHeader', () => {
     const stickyHeader = container.querySelector(
       `.${PREFIX_CLS}-group-header-fixed`,
     );
-    expect(stickyHeader).toBeNull();  });
+    expect(stickyHeader).toBeNull();
+  });
 
   it('keeps the fixed header pinned at 0 within a group regardless of scroll', () => {
-    const title = jest.fn().mockImplementation((key: React.Key) => (
-      <span data-testid="sticky-title">{String(key)}</span>
-    ));
+    const title = jest
+      .fn()
+      .mockImplementation((key: React.Key) => (
+        <span data-testid="sticky-title">{String(key)}</span>
+      ));
 
     // Active group is Group 1, with Group 2's header far below the viewport.
     const info = createRenderInfo({
@@ -287,12 +316,15 @@ describe('useStickyGroupHeader', () => {
     );
     expect(stickyHeader).not.toBeNull();
     expect(stickyHeader).toHaveTextContent('Group 1');
-    expect(stickyHeader).toHaveStyle({ top: '0px' });  });
+    expect(stickyHeader).toHaveStyle({ top: '0px' });
+  });
 
   it('pushes the fixed header away when the next group reaches the top', () => {
-    const title = jest.fn().mockImplementation((key: React.Key) => (
-      <span data-testid="sticky-title">{String(key)}</span>
-    ));
+    const title = jest
+      .fn()
+      .mockImplementation((key: React.Key) => (
+        <span data-testid="sticky-title">{String(key)}</span>
+      ));
 
     const info = createRenderInfo({
       scrollTop: 70,
@@ -329,12 +361,15 @@ describe('useStickyGroupHeader', () => {
     );
     expect(stickyHeader).not.toBeNull();
     expect(stickyHeader).toHaveTextContent('Group 1');
-    expect(stickyHeader).toHaveStyle({ top: '-10px' });  });
+    expect(stickyHeader).toHaveStyle({ top: '-10px' });
+  });
 
   it('pushes the fixed header away even when the next group key is falsy', () => {
-    const title = jest.fn().mockImplementation((key: React.Key) => (
-      <span data-testid="sticky-title">{String(key)}</span>
-    ));
+    const title = jest
+      .fn()
+      .mockImplementation((key: React.Key) => (
+        <span data-testid="sticky-title">{String(key)}</span>
+      ));
 
     // Numeric group keys where the incoming group is keyed 0 (falsy).
     const info = createRenderInfo({
@@ -380,9 +415,11 @@ describe('useStickyGroupHeader', () => {
   });
 
   it('activates the current group, not the previous one, when its header sits flush at the top', () => {
-    const title = jest.fn().mockImplementation((key: React.Key) => (
-      <span data-testid="sticky-title">{String(key)}</span>
-    ));
+    const title = jest
+      .fn()
+      .mockImplementation((key: React.Key) => (
+        <span data-testid="sticky-title">{String(key)}</span>
+      ));
 
     // Group 2's header sits exactly at the viewport top (scrollTop === its top),
     // while `start` is Group 1's last item row (3) — the row before Group 2's
@@ -423,9 +460,11 @@ describe('useStickyGroupHeader', () => {
   });
 
   it('tolerates a sub-pixel scroll offset just short of the header top', () => {
-    const title = jest.fn().mockImplementation((key: React.Key) => (
-      <span data-testid="sticky-title">{String(key)}</span>
-    ));
+    const title = jest
+      .fn()
+      .mockImplementation((key: React.Key) => (
+        <span data-testid="sticky-title">{String(key)}</span>
+      ));
 
     // On a HiDPI screen the scroll offset can rest a fraction of a pixel below
     // a header's true top (here 199.5 vs 200). Without tolerance the strict

@@ -1,0 +1,15 @@
+#!/bin/sh
+# Mirrors CI (lint + tsc + test) and adds the fmt check CI lacks.
+set -e
+
+# ponytail: prettier checks working-tree content of staged files, not the
+# staged blobs — partial staging can slip through; lint-staged if that bites.
+# Staged-files-only because the repo has pre-existing unformatted files.
+files=$(git diff --cached --name-only --diff-filter=ACMR | grep -E '\.(ts|tsx|js|jsx|json|less|md)$' || true)
+if [ -n "$files" ]; then
+  echo "$files" | xargs npx prettier --check --ignore-unknown
+fi
+
+npm run lint
+npx tsc --noEmit
+npm test

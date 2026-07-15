@@ -117,7 +117,9 @@ function VirtualList<T, K extends React.Key = React.Key>(
           const headerSize = getSize(toTaggedKey(stickyGroupKey, 'group'));
           const headerHeight = headerSize.bottom - headerSize.top;
 
-          return baseOffset + (Number.isFinite(headerHeight) ? headerHeight : 0);
+          return (
+            baseOffset + (Number.isFinite(headerHeight) ? headerHeight : 0)
+          );
         },
       });
       return;
@@ -163,7 +165,13 @@ function VirtualList<T, K extends React.Key = React.Key>(
         />
       );
     },
-    [classNames?.groupHeader, group, groupKeyToItems, prefixCls, styles?.groupHeader],
+    [
+      classNames?.groupHeader,
+      group,
+      groupKeyToItems,
+      prefixCls,
+      styles?.groupHeader,
+    ],
   );
 
   // ============================== Render ==============================
@@ -184,16 +192,16 @@ function VirtualList<T, K extends React.Key = React.Key>(
       style={styles?.root}
     >
       {(row: Row<T, K>) =>
-        row.type === 'group'
-          ? renderHeaderRow(row.groupKey)
-          : (
-              <div
-                className={clsx(`${prefixCls}-item`, classNames?.item)}
-                style={styles?.item}
-              >
-                {itemRender(row.item, row.index)}
-              </div>
-            )
+        row.type === 'group' ? (
+          renderHeaderRow(row.groupKey)
+        ) : (
+          <div
+            className={clsx(`${prefixCls}-item`, classNames?.item)}
+            style={styles?.item}
+          >
+            {itemRender(row.item, row.index)}
+          </div>
+        )
       }
     </RcVirtualList>
   );

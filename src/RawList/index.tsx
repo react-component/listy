@@ -8,8 +8,10 @@ import { toTaggedKey, type KeyType } from '../util';
 import type { ListComponentProps, ListyRef } from '../List';
 
 // ============================== Types ===============================
-export type RawListProps<T, K extends React.Key = React.Key> =
-  ListComponentProps<T, K>;
+export type RawListProps<
+  T,
+  K extends React.Key = React.Key,
+> = ListComponentProps<T, K>;
 
 function RawList<T, K extends React.Key = React.Key>(
   props: RawListProps<T, K>,

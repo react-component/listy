@@ -34,6 +34,7 @@
     "prepublishOnly": "npm run compile && rc-np",
     "lint": "eslint src/ docs/examples/ --ext .tsx,.ts,.jsx,.js",
     "test": "rc-test",
+    "prepare": "git config core.hooksPath .githooks",
     "prettier": "prettier --write .",
     "coverage": "rc-test --coverage"
   },

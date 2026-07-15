@@ -117,7 +117,10 @@ export default () => {
         {/* { groupKey, align, offset } — scroll to a group header */}
         <label>
           group{' '}
-          <select value={groupKey} onChange={(e) => setGroupKey(e.target.value)}>
+          <select
+            value={groupKey}
+            onChange={(e) => setGroupKey(e.target.value)}
+          >
             {GROUP_KEYS.map((key) => (
               <option key={key} value={key}>
                 {key}
@@ -125,17 +128,16 @@ export default () => {
             ))}
           </select>
         </label>
-        <button
-          type="button"
-          onClick={() => run({ groupKey, align, offset })}
-        >
+        <button type="button" onClick={() => run({ groupKey, align, offset })}>
           scrollTo group
         </button>
       </div>
 
       <div>
         last config:{' '}
-        <code>{lastConfig === undefined ? '—' : JSON.stringify(lastConfig)}</code>
+        <code>
+          {lastConfig === undefined ? '—' : JSON.stringify(lastConfig)}
+        </code>
       </div>
 
       <Listy
