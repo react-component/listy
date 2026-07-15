@@ -32,7 +32,7 @@
     "build": "dumi build",
     "compile": "father build && lessc assets/index.less assets/index.css",
     "prepublishOnly": "npm run compile && rc-np",
-    "lint": "eslint src/ docs/examples/ --ext .tsx,.ts,.jsx,.js",
+    "lint": "eslint src/ tests/ docs/examples/ --ext .tsx,.ts,.jsx,.js",
     "test": "rc-test",
     "prepare": "git config core.hooksPath .githooks",
     "prettier": "prettier --write .",

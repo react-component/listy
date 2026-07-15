@@ -101,6 +101,7 @@ export default defineConfig([
     files: ['tests/**/*.{js,jsx,ts,tsx}', '**/*.{test,spec}.{js,jsx,ts,tsx}'],
     extends: [jest.configs['flat/recommended']],
     rules: {
+      '@typescript-eslint/no-require-imports': 'off',
       'jest/no-disabled-tests': 'off',
       'jest/no-done-callback': 'off',
       'jest/no-identical-title': 'off',
