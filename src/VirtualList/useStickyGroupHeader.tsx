@@ -6,6 +6,7 @@ import type {
 } from '@rc-component/virtual-list';
 import type { Group } from '../hooks/useGroupSegments';
 import GroupHeader from '../GroupHeader';
+import { toTaggedKey } from '../util';
 
 // ============================== Types ===============================
 type ExtraRenderInfo = Parameters<
@@ -80,22 +81,30 @@ export default function useStickyGroupHeader<
         return null;
       }
 
+      const getGroupSize = (groupKey: K) =>
+        getSize(toTaggedKey(groupKey, 'group'));
+
       // The sticky header is the group whose section the viewport top sits in.
       const activeHeaderIdx = findActiveHeaderIndex(
         groupKeys,
-        (groupKey) => getSize(groupKey).top,
+        (groupKey) => getGroupSize(groupKey).top,
         scrollTop,
       );
       const currGroupKey = groupKeys[activeHeaderIdx];
 
       const groupItems = groupKeyToItems.get(currGroupKey) || [];
-      const currentSize = getSize(currGroupKey);
+      const currentSize = getGroupSize(currGroupKey);
       const headerHeight = currentSize.bottom - currentSize.top;
 
       const nextGroupKey = groupKeys[activeHeaderIdx + 1];
-      const top = nextGroupKey
-        ? Math.min(0, getSize(nextGroupKey).top - headerHeight - scrollTop)
-        : 0;
+      // Explicit undefined check: a falsy group key (0, '') is still a group.
+      const top =
+        nextGroupKey !== undefined
+          ? Math.min(
+              0,
+              getGroupSize(nextGroupKey).top - headerHeight - scrollTop,
+            )
+          : 0;
 
       // Render a cloned header pinned over the virtual list.
       return (

@@ -1,8 +1,6 @@
 import React from 'react';
 import { act, render } from '@testing-library/react';
-import type {
-  ListProps as VirtualListProps,
-} from '@rc-component/virtual-list';
+import type { ListProps as VirtualListProps } from '@rc-component/virtual-list';
 import Listy, { type ListyRef, type ListyProps } from '@rc-component/listy';
 import RawList from '../src/RawList';
 
@@ -123,7 +121,7 @@ describe('Listy behaviors', () => {
       ref.current?.scrollTo({ key: 2 });
     });
 
-    expect(scrollHandler).toHaveBeenCalledWith({ key: 2 });
+    expect(scrollHandler).toHaveBeenCalledWith({ key: 'item:2' });
   });
 
   it('treats missing items prop as empty array', () => {
@@ -160,13 +158,15 @@ describe('Listy behaviors', () => {
     );
     const groupSections = container.querySelectorAll('.rc-listy-group-section');
 
-    expect(container.querySelector('[data-testid="mock-virtual-list"]')).toBeNull();
+    expect(
+      container.querySelector('[data-testid="mock-virtual-list"]'),
+    ).toBeNull();
     expect(stickyHeader).not.toBeNull();
     expect(stickyHeader).toHaveClass('rc-listy-group-header');
     expect(stickyHeader).toHaveTextContent('Group Group A');
     expect(groupSections).toHaveLength(1);
     expect(groupSections[0]).toContainElement(stickyHeader as HTMLElement);
-    expect(groupSections[0]).toHaveAttribute('data-key', 'Group A');
+    expect(groupSections[0]).toHaveAttribute('data-key', 'group:Group A');
     expect(title).toHaveBeenCalled();
   });
 
@@ -188,7 +188,10 @@ describe('Listy behaviors', () => {
 
     const groupSections = container.querySelectorAll('.rc-listy-group-section');
     const groupBSection = groupSections[1] as HTMLElement;
-    const scrollIntoView = jest.fn();
+    let marginDuringScroll: string | undefined;
+    const scrollIntoView = jest.fn(() => {
+      marginDuringScroll = groupBSection.style.scrollMarginTop;
+    });
     groupBSection.scrollIntoView = scrollIntoView;
 
     act(() => {
@@ -199,6 +202,9 @@ describe('Listy behaviors', () => {
       });
     });
 
+    // Margin is applied for the scroll, then restored (no user value here).
+    expect(marginDuringScroll).toBe('5px');
+    expect(groupBSection.style.scrollMarginTop).toBe('');
     expect(scrollIntoView).toHaveBeenCalledWith({
       block: 'start',
       inline: 'nearest',
@@ -220,7 +226,10 @@ describe('Listy behaviors', () => {
     const holder = container.querySelector('.rc-listy') as HTMLDivElement;
     const itemNodes = container.querySelectorAll('.rc-listy-item');
     const secondItem = itemNodes[1] as HTMLElement;
-    const scrollIntoView = jest.fn();
+    let bottomMarginDuringScroll: string | undefined;
+    const scrollIntoView = jest.fn(() => {
+      bottomMarginDuringScroll = secondItem.style.scrollMarginBottom;
+    });
     secondItem.scrollIntoView = scrollIntoView;
 
     act(() => {
@@ -251,14 +260,18 @@ describe('Listy behaviors', () => {
     act(() => {
       ref.current?.scrollTo({ key: 2 });
     });
+    // Omitted align defaults to nearest, matching virtual mode's auto.
     expect(scrollIntoView).toHaveBeenLastCalledWith({
-      block: 'start',
+      block: 'nearest',
       inline: 'nearest',
     });
 
     act(() => {
       ref.current?.scrollTo({ key: 2, align: 'bottom', offset: 4 });
     });
+    // Margin is applied for the scroll, then restored (no user value here).
+    expect(bottomMarginDuringScroll).toBe('4px');
+    expect(secondItem.style.scrollMarginBottom).toBe('');
     expect(scrollIntoView).toHaveBeenLastCalledWith({
       block: 'end',
       inline: 'nearest',
@@ -333,7 +346,7 @@ describe('Listy behaviors', () => {
 
     const itemNode = container.querySelector('.rc-listy-item');
 
-    expect(itemNode).toHaveAttribute('data-key', 'item-1');
+    expect(itemNode).toHaveAttribute('data-key', 'item:item-1');
   });
 
   it('wraps raw list items with item class', () => {
@@ -353,7 +366,7 @@ describe('Listy behaviors', () => {
 
     const itemNode = container.querySelector('.rc-listy-item');
 
-    expect(itemNode).toHaveAttribute('data-key', '1');
+    expect(itemNode).toHaveAttribute('data-key', 'item:1');
     expect(itemNode).toContainElement(container.querySelector('span'));
   });
 
@@ -391,26 +404,67 @@ describe('Listy behaviors', () => {
         }) as DOMRect,
     );
 
-    const itemNode = container.querySelector('[data-key="1"]') as HTMLElement;
+    const itemNode = container.querySelector(
+      '[data-key="item:1"]',
+    ) as HTMLElement;
     const scrollIntoView = jest.fn(() => {
-      expect(
-        itemNode.style.getPropertyValue('--rc-listy-item-scroll-margin-top'),
-      ).toBe('36px');
+      // Header height plus the user offset must be applied before scrolling.
+      expect(itemNode.style.scrollMarginTop).toBe('46px');
     });
     itemNode.scrollIntoView = scrollIntoView;
 
     act(() => {
-      ref.current?.scrollTo({ key: 1, align: 'top' });
+      ref.current?.scrollTo({ key: 1, align: 'top', offset: 10 });
     });
 
     expect(itemNode).toHaveClass('rc-listy-item');
-    expect(itemNode.style.scrollMarginTop).toBe(
-      'var(--rc-listy-item-scroll-margin-top, 0px)',
-    );
+    // Restored after the scroll (the user set no scroll margin).
+    expect(itemNode.style.scrollMarginTop).toBe('');
     expect(scrollIntoView).toHaveBeenCalledWith({
       block: 'start',
       inline: 'nearest',
     });
+  });
+
+  it('adds the sticky header offset for auto-aligned raw items', () => {
+    const ref = React.createRef<ListyRef>();
+    const { container } = renderList({
+      ref,
+      virtual: false,
+      sticky: true,
+      group: {
+        key: (item) => item.group,
+        title: (groupKey) => <span>{String(groupKey)}</span>,
+      },
+    });
+
+    const groupHeader = container.querySelector(
+      '.rc-listy-group-header',
+    ) as HTMLElement;
+    Object.defineProperty(groupHeader, 'offsetHeight', {
+      configurable: true,
+      value: 36,
+    });
+    groupHeader.getBoundingClientRect = jest.fn(
+      () => ({ bottom: 36, height: 36, top: 0 }) as DOMRect,
+    );
+
+    const itemNode = container.querySelector(
+      '[data-key="item:1"]',
+    ) as HTMLElement;
+    let marginDuringScroll: string | undefined;
+    itemNode.scrollIntoView = jest.fn(() => {
+      marginDuringScroll = itemNode.style.scrollMarginTop;
+    });
+
+    act(() => {
+      ref.current?.scrollTo({ key: 1, align: 'auto', offset: 10 });
+    });
+
+    // `auto` can land the item at the top, so the header offset still applies
+    // during the scroll (and is restored afterward).
+    expect(marginDuringScroll).toBe('46px');
+    expect(itemNode.style.scrollMarginTop).toBe('');
   });
 
   it('falls back to zero raw sticky scroll margin without a header', () => {
@@ -427,16 +481,21 @@ describe('Listy behaviors', () => {
 
     container.querySelector('.rc-listy-group-header')?.remove();
 
-    const itemNode = container.querySelector('[data-key="1"]') as HTMLElement;
-    itemNode.scrollIntoView = jest.fn();
+    const itemNode = container.querySelector(
+      '[data-key="item:1"]',
+    ) as HTMLElement;
+    let marginDuringScroll: string | undefined;
+    itemNode.scrollIntoView = jest.fn(() => {
+      marginDuringScroll = itemNode.style.scrollMarginTop;
+    });
 
     act(() => {
       ref.current?.scrollTo({ key: 1, align: 'top' });
     });
 
-    expect(
-      itemNode.style.getPropertyValue('--rc-listy-item-scroll-margin-top'),
-    ).toBe('0px');
+    // No header, no offset -> zero margin during the scroll, restored after.
+    expect(marginDuringScroll).toBe('0px');
+    expect(itemNode.style.scrollMarginTop).toBe('');
   });
 
   it('scroll to group', () => {
@@ -461,7 +520,7 @@ describe('Listy behaviors', () => {
     });
 
     expect(scrollHandler).toHaveBeenCalledWith({
-      key: 'Group A',
+      key: 'group:Group A',
       align: 'bottom',
       offset: 12,
     });
@@ -486,7 +545,7 @@ describe('Listy behaviors', () => {
     });
 
     expect(scrollHandler).toHaveBeenCalledWith({
-      key: 2,
+      key: 'item:2',
       align: 'top',
       offset: expect.any(Function),
     });
@@ -496,7 +555,10 @@ describe('Listy behaviors', () => {
     expect(
       offset({
         getSize: (key: React.Key) =>
-          key === 'Group A' ? { top: 10, bottom: 34 } : { top: 0, bottom: 0 },
+          key === 'group:Group A'
+            ? { top: 10, bottom: 34 }
+            : { top: 0, bottom: 0 },
+        align: 'top',
       }),
     ).toBe(29);
   });
@@ -514,5 +576,176 @@ describe('Listy behaviors', () => {
 
     expect(holder).toHaveClass('rc-listy-rtl');
     expect(holder).toHaveAttribute('dir', 'rtl');
+  });
+
+  it('offsets auto-aligned scrollTo when it resolves to a top landing', () => {
+    const scrollHandler = jest.fn();
+    MockedVirtualList.__setScrollHandler(scrollHandler);
+
+    const ref = React.createRef<ListyRef>();
+    renderList({
+      ref,
+      sticky: true,
+      group: {
+        key: (item) => item.group,
+        title: () => null,
+      },
+    });
+
+    act(() => {
+      ref.current?.scrollTo({ key: 2, align: 'auto', offset: 5 });
+    });
+
+    expect(scrollHandler).toHaveBeenCalledWith({
+      key: 'item:2',
+      align: 'auto',
+      offset: expect.any(Function),
+    });
+
+    const [{ offset }] = scrollHandler.mock.calls[0];
+    const getSize = (key: React.Key) =>
+      key === 'group:Group A' ? { top: 10, bottom: 34 } : { top: 0, bottom: 0 };
+
+    expect(offset({ getSize, align: 'auto' })).toBe(5);
+    expect(offset({ getSize, align: 'top' })).toBe(29);
+  });
+
+  it('skips the sticky offset when auto-aligned scrollTo lands at the bottom', () => {
+    const scrollHandler = jest.fn();
+    MockedVirtualList.__setScrollHandler(scrollHandler);
+
+    const ref = React.createRef<ListyRef>();
+    renderList({
+      ref,
+      sticky: true,
+      group: {
+        key: (item) => item.group,
+        title: () => null,
+      },
+    });
+
+    act(() => {
+      ref.current?.scrollTo({ key: 2, align: 'auto', offset: 5 });
+    });
+
+    const [{ offset }] = scrollHandler.mock.calls[0];
+
+    expect(
+      offset({
+        getSize: (key: React.Key) =>
+          key === 'group:Group A'
+            ? { top: 10, bottom: 34 }
+            : { top: 0, bottom: 0 },
+        align: 'bottom',
+      }),
+    ).toBe(5);
+  });
+
+  it('forwards non-key scroll configs to the virtual list untouched', () => {
+    const scrollHandler = jest.fn();
+    MockedVirtualList.__setScrollHandler(scrollHandler);
+
+    const ref = React.createRef<ListyRef>();
+    renderList({ ref });
+
+    act(() => {
+      ref.current?.scrollTo(120);
+      ref.current?.scrollTo({ top: 40, left: 4 });
+    });
+
+    // Plain offsets and position configs carry no keys to tag: pass through.
+    expect(scrollHandler).toHaveBeenNthCalledWith(1, 120);
+    expect(scrollHandler).toHaveBeenNthCalledWith(2, { top: 40, left: 4 });
+  });
+
+  it('applies the sticky offset when the scroll key type differs from the rowKey type', () => {
+    const scrollHandler = jest.fn();
+    MockedVirtualList.__setScrollHandler(scrollHandler);
+
+    const ref = React.createRef<ListyRef>();
+    renderList({
+      ref,
+      sticky: true,
+      group: {
+        key: (item) => item.group,
+        title: () => null,
+      },
+    });
+
+    act(() => {
+      ref.current?.scrollTo({ key: '2', align: 'top', offset: 5 });
+    });
+
+    expect(scrollHandler).toHaveBeenCalledWith({
+      key: 'item:2',
+      align: 'top',
+      offset: expect.any(Function),
+    });
+  });
+
+  it('keeps virtual item and group scroll distinct when their keys collide', () => {
+    const scrollHandler = jest.fn();
+    MockedVirtualList.__setScrollHandler(scrollHandler);
+
+    const ref = React.createRef<ListyRef>();
+    renderList({
+      ref,
+      // Item id and group key both stringify to 'x'.
+      items: [{ id: 'x', group: 'x' }],
+      group: {
+        key: (item) => item.group,
+        title: () => null,
+      },
+    });
+
+    act(() => {
+      ref.current?.scrollTo({ key: 'x' });
+      ref.current?.scrollTo({ groupKey: 'x' });
+    });
+
+    // Type-tagged row keys stop the shared raw key from mapping to one row.
+    expect(scrollHandler).toHaveBeenNthCalledWith(1, { key: 'item:x' });
+    expect(scrollHandler).toHaveBeenNthCalledWith(2, { key: 'group:x' });
+  });
+
+  it('scrolls the item, not the colliding group section, in a raw list', () => {
+    const ref = React.createRef<ListyRef>();
+    const { container } = renderList({
+      ref,
+      virtual: false,
+      // Item id and group key both stringify to 'x'.
+      items: [{ id: 'x', group: 'x' }],
+      group: {
+        key: (item) => item.group,
+        title: () => null,
+      },
+    });
+
+    const groupSection = container.querySelector(
+      '.rc-listy-group-section',
+    ) as HTMLElement;
+    const itemNode = container.querySelector('.rc-listy-item') as HTMLElement;
+    const groupScroll = jest.fn();
+    const itemScroll = jest.fn();
+    groupSection.scrollIntoView = groupScroll;
+    itemNode.scrollIntoView = itemScroll;
+
+    act(() => {
+      ref.current?.scrollTo({ key: 'x' });
+    });
+    // The item — not the group section sharing the key — is the target.
+    expect(itemScroll).toHaveBeenCalledTimes(1);
+    expect(groupScroll).not.toHaveBeenCalled();
+    // Omitted align defaults to nearest, matching virtual mode's auto.
+    expect(itemScroll).toHaveBeenCalledWith({
+      block: 'nearest',
+      inline: 'nearest',
+    });
+
+    act(() => {
+      ref.current?.scrollTo({ groupKey: 'x' });
+    });
+    expect(groupScroll).toHaveBeenCalledTimes(1);
+    expect(itemScroll).toHaveBeenCalledTimes(1);
   });
 });

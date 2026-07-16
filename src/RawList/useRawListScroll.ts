@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { toTaggedKey } from '../util';
 import type { ListyRef, ScrollAlign } from '../List';
 
 export default function useRawListScroll(
@@ -36,17 +37,32 @@ export default function useRawListScroll(
     [prefixCls, stickyGroup],
   );
 
-  const setTargetScrollMargin = React.useCallback(
-    (targetElement: HTMLElement, align: ScrollAlign) => {
-      const marginTop =
-        align === 'top' ? getStickyHeaderHeight(targetElement) : 0;
+  const scrollTargetIntoView = React.useCallback(
+    (
+      targetElement: HTMLElement,
+      align: ScrollAlign,
+      offset: number,
+      isItem: boolean,
+    ) => {
+      const headerOffset =
+        isItem && align !== 'bottom' ? getStickyHeaderHeight(targetElement) : 0;
 
-      targetElement.style.setProperty(
-        `--${prefixCls}-item-scroll-margin-top`,
-        `${marginTop}px`,
-      );
+      const prevTop = targetElement.style.scrollMarginTop;
+      const prevBottom = targetElement.style.scrollMarginBottom;
+
+      targetElement.style.scrollMarginTop = `${headerOffset + offset}px`;
+      targetElement.style.scrollMarginBottom = `${offset}px`;
+
+      targetElement.scrollIntoView({
+        block:
+          align === 'bottom' ? 'end' : align === 'auto' ? 'nearest' : 'start',
+        inline: 'nearest',
+      });
+
+      targetElement.style.scrollMarginTop = prevTop;
+      targetElement.style.scrollMarginBottom = prevBottom;
     },
-    [getStickyHeaderHeight, prefixCls],
+    [getStickyHeaderHeight],
   );
 
   // ============================== Scroll ==============================
@@ -63,26 +79,17 @@ export default function useRawListScroll(
       }
 
       if ('key' in config || 'groupKey' in config) {
-        const { align = 'top' } = config;
-        const targetKey = 'groupKey' in config ? config.groupKey : config.key;
+        const { align = 'auto', offset = 0 } = config;
+        const isItem = 'key' in config;
+        const targetKey = isItem
+          ? toTaggedKey(config.key, 'item')
+          : toTaggedKey(config.groupKey, 'group');
         const targetElement = holder.querySelector<HTMLElement>(
-          `[data-key="${CSS.escape(String(targetKey))}"]`,
+          `[data-key="${CSS.escape(targetKey)}"]`,
         );
 
         if (targetElement) {
-          if ('key' in config) {
-            setTargetScrollMargin(targetElement, align);
-          }
-
-          targetElement.scrollIntoView({
-            block:
-              align === 'bottom'
-                ? 'end'
-                : align === 'auto'
-                  ? 'nearest'
-                  : 'start',
-            inline: 'nearest',
-          });
+          scrollTargetIntoView(targetElement, align, offset, isItem);
         }
         return;
       }
@@ -95,7 +102,7 @@ export default function useRawListScroll(
         holder.scrollTop = top;
       }
     },
-    [setTargetScrollMargin],
+    [scrollTargetIntoView],
   );
 
   // ============================ Imperative ============================

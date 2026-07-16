@@ -1,10 +1,13 @@
 import * as React from 'react';
+import { toTaggedKey } from '../util';
 import type { Group, GroupSegmentItem } from '../hooks/useGroupSegments';
 
 // ============================== Types ===============================
-export type Row<T, K extends React.Key = React.Key> =
-  | { type: 'header'; groupKey: K }
-  | { type: 'item'; item: T; index: number };
+export type Row<T, K extends React.Key = React.Key> = (
+  { type: 'group'; groupKey: K } | { type: 'item'; item: T; index: number }
+) & {
+  taggedKey: string;
+};
 
 export interface FlattenRowsResult<T, K extends React.Key = React.Key> {
   rows: Row<T, K>[];
@@ -20,6 +23,7 @@ export interface FlattenRowsResult<T, K extends React.Key = React.Key> {
 export default function useFlattenRows<T, K extends React.Key = React.Key>(
   data: T[],
   groupData: Map<K, GroupSegmentItem<T>[]>,
+  getItemKey: (item: T) => React.Key,
   group?: Group<T, K>,
 ): FlattenRowsResult<T, K> {
   return React.useMemo(() => {
@@ -28,10 +32,17 @@ export default function useFlattenRows<T, K extends React.Key = React.Key>(
     const groupKeys: K[] = [];
     const groupKeyToItems = new Map<K, T[]>();
 
+    const itemRow = (item: T, index: number): Row<T, K> => ({
+      type: 'item',
+      item,
+      index,
+      taggedKey: toTaggedKey(getItemKey(item), 'item'),
+    });
+
     // ============================ No Group ==============================
     if (!group) {
       data.forEach((item, index) => {
-        flatRows.push({ type: 'item', item, index });
+        flatRows.push(itemRow(item, index));
       });
 
       return { rows: flatRows, groupKeys, groupKeyToItems };
@@ -45,14 +56,18 @@ export default function useFlattenRows<T, K extends React.Key = React.Key>(
       );
 
       groupKeys.push(groupKey);
-      flatRows.push({ type: 'header', groupKey });
+      flatRows.push({
+        type: 'group',
+        groupKey,
+        taggedKey: toTaggedKey(groupKey, 'group'),
+      });
 
       groupItems.forEach(({ item, index }) => {
-        flatRows.push({ type: 'item', item, index });
+        flatRows.push(itemRow(item, index));
       });
     });
 
     // ============================== Return ==============================
     return { rows: flatRows, groupKeys, groupKeyToItems };
-  }, [data, group, groupData]);
+  }, [data, group, groupData, getItemKey]);
 }
