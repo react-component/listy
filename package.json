@@ -34,7 +34,7 @@
     "prepublishOnly": "npm run compile && rc-np",
     "lint": "eslint src/ tests/ docs/examples/ --ext .tsx,.ts,.jsx,.js",
     "test": "rc-test",
-    "prepare": "git config core.hooksPath .githooks",
+    "prepare": "husky",
     "prettier": "prettier --write .",
     "coverage": "rc-test --coverage"
   },
@@ -70,6 +70,7 @@
     "eslint-plugin-react-hooks": "^7.1.1",
     "father": "^4.6.24",
     "globals": "^17.7.0",
+    "husky": "^9.1.7",
     "less": "^4.6.7",
     "lint-staged": "^17.0.8",
     "prettier": "^3.9.4",
