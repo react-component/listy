@@ -1,6 +1,6 @@
 {
   "name": "@rc-component/listy",
-  "version": "1.2.2",
+  "version": "1.2.3",
   "description": "📜 Virtualized React list component with grouping and sticky header support.",
   "keywords": [
     "react",
