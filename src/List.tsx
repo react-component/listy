@@ -13,7 +13,9 @@ export type ListySemanticName = 'root' | 'item' | 'groupHeader';
 
 export type ListyClassNames = Partial<Record<ListySemanticName, string>>;
 
-export type ListyStyles = Partial<Record<ListySemanticName, React.CSSProperties>>;
+export type ListyStyles = Partial<
+  Record<ListySemanticName, React.CSSProperties>
+>;
 
 export interface GroupScrollToConfig {
   groupKey: React.Key;
@@ -92,12 +94,11 @@ function Listy<T, K extends React.Key = React.Key>(
     ref,
   };
 
-  const listNode =
-    virtual ? (
-      <VirtualList {...sharedListProps} />
-    ) : (
-      <RawList {...sharedListProps} />
-    );
+  const listNode = virtual ? (
+    <VirtualList {...sharedListProps} />
+  ) : (
+    <RawList {...sharedListProps} />
+  );
 
   return listNode;
 }
