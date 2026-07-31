@@ -30,7 +30,7 @@
   "scripts": {
     "start": "dumi dev",
     "build": "dumi build",
-    "compile": "father build && lessc assets/index.less assets/index.css",
+    "compile": "cross-env FATHER_TSCONFIG_NAME=tsconfig.build.json father build && lessc assets/index.less assets/index.css",
     "prepublishOnly": "npm run compile && rc-np",
     "lint": "eslint src/ tests/ docs/examples/ --ext .tsx,.ts,.jsx,.js",
     "test": "rc-test",
@@ -61,6 +61,7 @@
     "@types/node": "^26.0.1",
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
+    "@typescript/native-preview": "7.0.0-dev.20260707.2",
     "cross-env": "^10.1.0",
     "dumi": "^2.4.38",
     "eslint": "^10.6.0",
