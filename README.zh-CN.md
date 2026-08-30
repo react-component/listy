@@ -60,7 +60,7 @@ export default () => (
 | `group` | 分组配置。 | `{ key: (item: T) => K; title: (groupKey: K, items: T[]) => React.ReactNode }` | - |
 | `sticky` | 启用粘性组头。 | `boolean` | `false` |
 | `virtual` | 启用虚拟滚动。 | `boolean` | `true` |
-| `scrollWidth` | 内容实际宽度，仅用于虚拟滚动。设置后会展示横向滚动条，并强制启用虚拟滚动。 | `number` | - |
+| `scrollWidth` | 内容实际宽度，仅在 `virtual` 开启时生效。设置后会展示横向滚动条。 | `number` | - |
 | `direction` | 布局方向，设为 `rtl` 时启用从右到左布局。 | `'ltr' \| 'rtl'` | `'ltr'` |
 | `onScroll` | 内部滚动容器滚动时触发。 | `React.UIEventHandler<HTMLElement>` | - |
 | `prefixCls` | 组件样式前缀。 | `string` | `rc-listy` |
