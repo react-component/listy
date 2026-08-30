@@ -52,6 +52,7 @@ export interface ListyProps<T, K extends React.Key = React.Key> {
   height?: number;
   group?: Group<T, K>;
   virtual?: boolean;
+  scrollWidth?: number;
   direction?: 'ltr' | 'rtl';
   prefixCls?: string;
   rowKey: RowKey<T>;
@@ -67,6 +68,7 @@ export interface ListComponentProps<T, K extends React.Key = React.Key> {
   itemHeight?: number;
   height?: number;
   group?: Group<T, K>;
+  scrollWidth?: number;
   direction?: 'ltr' | 'rtl';
   prefixCls: string;
   rowKey: RowKey<T>;

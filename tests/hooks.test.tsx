@@ -500,4 +500,91 @@ describe('useStickyGroupHeader', () => {
     expect(stickyHeader).not.toBeNull();
     expect(stickyHeader).toHaveTextContent('Group 2');
   });
+
+  it('offsets the fixed header horizontally to track scrollWidth scrolling', () => {
+    const info = createRenderInfo({ offsetX: 120 });
+    const container = document.createElement('div');
+    document.body.appendChild(container);
+    const params: StickyHeaderParams<GroupedItem> = {
+      enabled: true,
+      group: {
+        key: (item) => item.group,
+        title: () => <span>title</span>,
+      },
+      groupKeys,
+      groupKeyToItems: baseItemsMap,
+      prefixCls: PREFIX_CLS,
+      listRef: createListRef(container),
+      scrollWidth: 800,
+    };
+
+    render(<StickyHeaderTester params={params} info={info} />);
+
+    const stickyHeader = container.querySelector(
+      `.${PREFIX_CLS}-group-header-fixed`,
+    ) as HTMLElement;
+
+    expect(stickyHeader).toHaveStyle({
+      width: '800px',
+      left: '0px',
+      right: 'auto',
+      transform: 'translateX(-120px)',
+    });
+  });
+
+  it('mirrors the horizontal offset from the other edge in rtl', () => {
+    const info = createRenderInfo({ offsetX: 120, rtl: true });
+    const container = document.createElement('div');
+    document.body.appendChild(container);
+    const params: StickyHeaderParams<GroupedItem> = {
+      enabled: true,
+      group: {
+        key: (item) => item.group,
+        title: () => <span>title</span>,
+      },
+      groupKeys,
+      groupKeyToItems: baseItemsMap,
+      prefixCls: PREFIX_CLS,
+      listRef: createListRef(container),
+      scrollWidth: 800,
+    };
+
+    render(<StickyHeaderTester params={params} info={info} />);
+
+    const stickyHeader = container.querySelector(
+      `.${PREFIX_CLS}-group-header-fixed`,
+    ) as HTMLElement;
+    expect(stickyHeader).toHaveStyle({
+      left: 'auto',
+      right: '0px',
+      transform: 'translateX(120px)',
+    });
+  });
+
+  it('leaves header positioning untouched without scrollWidth', () => {
+    const info = createRenderInfo({ offsetX: 120 });
+    const container = document.createElement('div');
+    document.body.appendChild(container);
+    const params: StickyHeaderParams<GroupedItem> = {
+      enabled: true,
+      group: {
+        key: (item) => item.group,
+        title: () => <span>title</span>,
+      },
+      groupKeys,
+      groupKeyToItems: baseItemsMap,
+      prefixCls: PREFIX_CLS,
+      listRef: createListRef(container),
+      headerStyle: { width: 42 },
+    };
+
+    render(<StickyHeaderTester params={params} info={info} />);
+
+    const stickyHeader = container.querySelector(
+      `.${PREFIX_CLS}-group-header-fixed`,
+    ) as HTMLElement;
+    // No horizontal scroll: the stylesheet stays in charge and a user width survives.
+    expect(stickyHeader.style.transform).toBe('');
+    expect(stickyHeader).toHaveStyle({ width: '42px' });
+  });
 });

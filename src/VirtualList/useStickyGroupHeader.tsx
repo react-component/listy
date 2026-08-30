@@ -47,6 +47,7 @@ export interface StickyHeaderParams<T, K extends React.Key = React.Key> {
   groupKeyToItems: Map<K, T[]>;
   prefixCls: string;
   listRef: React.RefObject<RcVirtualListRef | null>;
+  scrollWidth?: number;
   headerClassName?: string;
   headerStyle?: React.CSSProperties;
 }
@@ -63,6 +64,7 @@ export default function useStickyGroupHeader<
     groupKeyToItems,
     prefixCls,
     listRef,
+    scrollWidth,
     headerClassName,
     headerStyle,
   } = params;
@@ -70,7 +72,7 @@ export default function useStickyGroupHeader<
   // ============================ Extra Render ==========================
   const extraRender = React.useCallback(
     (info: ExtraRenderInfo) => {
-      const { getSize, scrollTop, virtual } = info;
+      const { getSize, scrollTop, virtual, offsetX, rtl } = info;
 
       if (!enabled || !group || !groupKeys.length || !virtual) {
         return null;
@@ -106,6 +108,15 @@ export default function useStickyGroupHeader<
             )
           : 0;
 
+      const horizontalStyle: React.CSSProperties | undefined = scrollWidth
+        ? {
+            width: scrollWidth,
+            left: rtl ? 'auto' : 0,
+            right: rtl ? 0 : 'auto',
+            transform: `translateX(${rtl ? offsetX : -offsetX}px)`,
+          }
+        : undefined;
+
       // Render a cloned header pinned over the virtual list.
       return (
         <Portal open getContainer={() => container}>
@@ -119,7 +130,7 @@ export default function useStickyGroupHeader<
               className={headerClassName}
               // `top` is the computed sticky-push offset and must win over any
               // user-supplied top in headerStyle, or the sticky behavior breaks.
-              style={{ ...headerStyle, top }}
+              style={{ ...headerStyle, ...horizontalStyle, top }}
             />
           </div>
         </Portal>
@@ -132,6 +143,7 @@ export default function useStickyGroupHeader<
       groupKeyToItems,
       prefixCls,
       listRef,
+      scrollWidth,
       headerClassName,
       headerStyle,
     ],
