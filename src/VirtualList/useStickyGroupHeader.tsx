@@ -111,8 +111,6 @@ export default function useStickyGroupHeader<
       const horizontalStyle: React.CSSProperties | undefined = scrollWidth
         ? {
             width: scrollWidth,
-            left: rtl ? 'auto' : 0,
-            right: rtl ? 0 : 'auto',
             transform: `translateX(${rtl ? offsetX : -offsetX}px)`,
           }
         : undefined;

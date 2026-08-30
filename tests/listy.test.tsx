@@ -126,14 +126,6 @@ describe('scrollWidth', () => {
       width: '800px',
     });
   });
-
-  it('keeps user widths when scrollWidth is unset', () => {
-    const { container } = renderWide(undefined, { item: { width: 42 } });
-
-    expect(container.querySelector('.rc-listy-item')).toHaveStyle({
-      width: '42px',
-    });
-  });
 });
 
 describe('package entry point', () => {

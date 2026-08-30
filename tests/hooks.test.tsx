@@ -526,8 +526,6 @@ describe('useStickyGroupHeader', () => {
 
     expect(stickyHeader).toHaveStyle({
       width: '800px',
-      left: '0px',
-      right: 'auto',
       transform: 'translateX(-120px)',
     });
   });
@@ -554,11 +552,7 @@ describe('useStickyGroupHeader', () => {
     const stickyHeader = container.querySelector(
       `.${PREFIX_CLS}-group-header-fixed`,
     ) as HTMLElement;
-    expect(stickyHeader).toHaveStyle({
-      left: 'auto',
-      right: '0px',
-      transform: 'translateX(120px)',
-    });
+    expect(stickyHeader).toHaveStyle({ transform: 'translateX(120px)' });
   });
 
   it('leaves header positioning untouched without scrollWidth', () => {
