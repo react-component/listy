@@ -80,6 +80,54 @@ describe('Listy', () => {
   });
 });
 
+describe('scrollWidth', () => {
+  const renderWide = (
+    scrollWidth?: number,
+    styles?: React.ComponentProps<typeof Listy>['styles'],
+  ) =>
+    render(
+      <Listy
+        items={[
+          { id: 1, group: 'A' },
+          { id: 2, group: 'A' },
+        ]}
+        rowKey="id"
+        height={100}
+        itemHeight={20}
+        scrollWidth={scrollWidth}
+        styles={styles}
+        group={{
+          key: (item) => item.group,
+          title: (key) => <span>{key}</span>,
+        }}
+        itemRender={(item) => <div>{item.id}</div>}
+      />,
+    );
+
+  it('shows a horizontal scrollbar only when scrollWidth is set', () => {
+    const { container, unmount } = renderWide(800);
+    expect(
+      container.querySelector('.rc-listy-scrollbar-horizontal'),
+    ).toBeInTheDocument();
+    unmount();
+
+    expect(
+      renderWide().container.querySelector('.rc-listy-scrollbar-horizontal'),
+    ).not.toBeInTheDocument();
+  });
+
+  it('widens both row kinds to the content width', () => {
+    const { container } = renderWide(800);
+
+    expect(container.querySelector('.rc-listy-item')).toHaveStyle({
+      width: '800px',
+    });
+    expect(container.querySelector('.rc-listy-group-header')).toHaveStyle({
+      width: '800px',
+    });
+  });
+});
+
 describe('package entry point', () => {
   it('re-exports the Listy implementation', () => {
     expect(ListyEntry).toBe(Listy);

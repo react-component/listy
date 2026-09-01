@@ -36,6 +36,7 @@ function VirtualList<T, K extends React.Key = React.Key>(
     prefixCls,
     rowKey,
     sticky,
+    scrollWidth,
     direction,
     classNames,
     styles,
@@ -137,6 +138,12 @@ function VirtualList<T, K extends React.Key = React.Key>(
     [scrollTo],
   );
 
+  // ============================== Width ===============================
+  const rowStyle = React.useMemo<React.CSSProperties | undefined>(
+    () => (scrollWidth ? { width: scrollWidth } : undefined),
+    [scrollWidth],
+  );
+
   // ============================== Sticky ==============================
   const extraRender = useStickyGroupHeader<T, K>({
     enabled: !!(sticky && group),
@@ -145,6 +152,7 @@ function VirtualList<T, K extends React.Key = React.Key>(
     groupKeyToItems,
     prefixCls,
     listRef,
+    scrollWidth,
     headerClassName: classNames?.groupHeader,
     headerStyle: styles?.groupHeader,
   });
@@ -161,7 +169,7 @@ function VirtualList<T, K extends React.Key = React.Key>(
           groupItems={groupItems}
           prefixCls={prefixCls}
           className={classNames?.groupHeader}
-          style={styles?.groupHeader}
+          style={{ ...styles?.groupHeader, ...rowStyle }}
         />
       );
     },
@@ -170,6 +178,7 @@ function VirtualList<T, K extends React.Key = React.Key>(
       group,
       groupKeyToItems,
       prefixCls,
+      rowStyle,
       styles?.groupHeader,
     ],
   );
@@ -185,6 +194,7 @@ function VirtualList<T, K extends React.Key = React.Key>(
       itemHeight={itemHeight}
       itemKey="taggedKey"
       onScroll={onScroll}
+      scrollWidth={scrollWidth}
       prefixCls={prefixCls}
       virtual
       extraRender={extraRender}
@@ -197,7 +207,7 @@ function VirtualList<T, K extends React.Key = React.Key>(
         ) : (
           <div
             className={clsx(`${prefixCls}-item`, classNames?.item)}
-            style={styles?.item}
+            style={{ ...styles?.item, ...rowStyle }}
           >
             {itemRender(row.item, row.index)}
           </div>
