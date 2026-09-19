@@ -53,7 +53,7 @@ export default () => (
 | 名称 | 说明 | 类型 | 默认值 |
 | --- | --- | --- | --- |
 | `items` | 列表数据源。 | `T[]` | `[]` |
-| `rowKey` | 解析列表项唯一标识。 | `keyof T \| (item: T) => React.Key` | 必填 |
+| `rowKey` | 解析列表项唯一标识。 | `keyof T \| (item: T, index: number) => React.Key` | 必填 |
 | `itemRender` | 渲染每一项。 | `(item: T, index: number) => React.ReactNode` | 必填 |
 | `height` | 可视区域高度。 | `number` | - |
 | `itemHeight` | 预估项高度。 | `number` | - |

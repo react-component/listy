@@ -38,8 +38,8 @@ describe('Listy', () => {
 
     expect(screen.getByText('foo')).toBeInTheDocument();
     expect(screen.getByText('bar')).toBeInTheDocument();
-    expect(rowKey).toHaveBeenCalledWith(items[0]);
-    expect(rowKey).toHaveBeenCalledWith(items[1]);
+    expect(rowKey).toHaveBeenCalledWith(items[0], 0);
+    expect(rowKey).toHaveBeenCalledWith(items[1], 1);
   });
 
   it('renders group headers with title callback', () => {
