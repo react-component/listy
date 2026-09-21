@@ -53,7 +53,7 @@ export default () => (
 | Prop | Description | Type | Default |
 | --- | --- | --- | --- |
 | `items` | List data source. | `T[]` | `[]` |
-| `rowKey` | Resolve item identity. | `keyof T \| (item: T) => React.Key` | required |
+| `rowKey` | Resolve item identity. | `keyof T \| (item: T, index: number) => React.Key` | required |
 | `itemRender` | Render each item. | `(item: T, index: number) => React.ReactNode` | required |
 | `height` | Viewport height. | `number` | - |
 | `itemHeight` | Estimated item height. | `number` | - |

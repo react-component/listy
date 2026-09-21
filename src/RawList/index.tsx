@@ -51,7 +51,7 @@ function RawList<T, K extends React.Key = React.Key>(
   // ============================ Render Item ===========================
   const renderItem = React.useCallback(
     (item: T, index: number) => {
-      const key = getItemKey(item);
+      const key = getItemKey(item, index);
       const scrollTargetProps = getScrollTargetProps(key, 'item');
 
       return (

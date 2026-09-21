@@ -23,7 +23,7 @@ export interface FlattenRowsResult<T, K extends React.Key = React.Key> {
 export default function useFlattenRows<T, K extends React.Key = React.Key>(
   data: T[],
   groupData: Map<K, GroupSegmentItem<T>[]>,
-  getItemKey: (item: T) => React.Key,
+  getItemKey: (item: T, index: number) => React.Key,
   group?: Group<T, K>,
 ): FlattenRowsResult<T, K> {
   return React.useMemo(() => {
@@ -36,7 +36,7 @@ export default function useFlattenRows<T, K extends React.Key = React.Key>(
       type: 'item',
       item,
       index,
-      taggedKey: toTaggedKey(getItemKey(item), 'item'),
+      taggedKey: toTaggedKey(getItemKey(item, index), 'item'),
     });
 
     // ============================ No Group ==============================
