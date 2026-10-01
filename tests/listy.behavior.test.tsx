@@ -131,6 +131,36 @@ describe('Listy behaviors', () => {
     expect(lastProps.data).toEqual([]);
   });
 
+  it('updates virtual row keys when rowKey changes', () => {
+    const items = [{ id: 1, slug: 'first' }];
+    const itemRender = (item: (typeof items)[number]) => <div>{item.id}</div>;
+    const { rerender } = render(
+      <Listy
+        items={items}
+        rowKey="id"
+        itemHeight={20}
+        height={100}
+        itemRender={itemRender}
+      />,
+    );
+
+    expect(MockedVirtualList.__getLastProps().data[0].taggedKey).toBe('item:1');
+
+    rerender(
+      <Listy
+        items={items}
+        rowKey="slug"
+        itemHeight={20}
+        height={100}
+        itemRender={itemRender}
+      />,
+    );
+
+    expect(MockedVirtualList.__getLastProps().data[0].taggedKey).toBe(
+      'item:first',
+    );
+  });
+
   it('wraps virtual items with item class', () => {
     const { container } = renderList();
 
